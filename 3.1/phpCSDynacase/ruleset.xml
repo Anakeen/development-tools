@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<ruleset name="PEAR">
+    <description>The Dynacase coding standard.</description>
+
+    <!-- 1 : indentation en espace-->
+    <rule ref="Generic.WhiteSpace.DisallowTabIndent" />
+
+    <!-- 2 : taille maximum des lignes à 85-->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="250" />
+            <property name="absoluteLineLimit" value="0" />
+        </properties>
+    </rule>
+
+    <!-- 3 : pas de short open tag-->
+    <rule ref="Generic.PHP.DisallowShortOpenTag" />
+
+    
+    
+    <!-- <rule ref="Generic.NamingConventions.UpperCaseConstantName" /> -->
+    
+    <rule ref="PEAR.ControlStructures.ControlSignature"/>
+    
+    <!-- <rule ref="Squiz.Functions.FunctionDeclarationArgumentSpacing"/> -->
+    
+    <rule ref="PEAR.Classes.ClassDeclaration"/>
+    
+    <rule ref="PEAR.Functions.ValidDefaultValue"/>
+    
+    <rule ref="PEAR.Functions.FunctionDeclaration"/>
+
+</ruleset>
