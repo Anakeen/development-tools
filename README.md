@@ -1,7 +1,7 @@
 Dynacase Developement tools
 ==========================
 
-_ About _  
+_About_  
 
 This repository provide config file for use php_beautifier and php_codesniffer for dynacase development
 
