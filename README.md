@@ -1,4 +1,4 @@
-Dynacase Developement tools
+Dynacase Development tools
 ==========================
 
 _About_  
@@ -26,7 +26,7 @@ Install phpcs program from pear project (version 1.3.0 needed).
 
 To control a PHP file use this command
 
-    phpcs --standard=<install-devtools>/developement-tools/3.1/phpCSDynacase/ Class/Fdl/Class.DocWait.php  
+    phpcs --standard=<install-devtools>/development-tools/3.1/phpCSDynacase/ Class/Fdl/Class.DocWait.php  
      
     FILE: Class/Fdl/Class.DocWait.php
     --------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ Install php_beautifier program from pear project (version 0.1.15 needed).
 Set a symbolic link to Dynacase.filter.php file from install directory of PHP_Beautifier.
 
     root@luke:/usr/share/php/PHP/Beautifier/Filter# 
-       ln -s <install_devtools>/developement-tools/3.1/phpBeautifier/Dynacase.filter.php .
+       ln -s <install_devtools>/development-tools/3.1/phpBeautifier/Dynacase.filter.php .
 
 Use phpbo programs to beautify the code.
 
