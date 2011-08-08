@@ -37,8 +37,8 @@ class phpCSDynacase_Sniffs_Class_FunctionVisibilitySniff implements PHP_CodeSnif
         $constName = $tokens[$stackPtr]['content'];
 
         $functionProperties = $phpcsFile->getMethodProperties($stackPtr);
-
-        if (!$functionProperties['is_closure'] && !$functionProperties['scope_specified']) {
+	// verify for function in a class : level > 0
+        if (!$functionProperties['is_closure'] && (!$functionProperties['scope_specified'] && $tokens[$stackPtr]['level']>0)) {
 
             $error = 'You have to specify a scope to your function %s, or to embed it in a class';
             $data = array(

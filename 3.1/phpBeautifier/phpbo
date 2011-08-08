@@ -6,7 +6,7 @@ set -e
 
 dir=`dirname -- "$0"`
 TMP_OUT=`mktemp -- "$1.XXXXXX.bo"`
-
+echo $dir
 #filter="Pear(add_header=$dir/header.txt) ArrayNested()"
 #filter="Default(), ArrayNested()"
 filter="Dynacase(add_header=$dir/header.txt,newline_class=true,newline_function=true), ArrayNested()"
