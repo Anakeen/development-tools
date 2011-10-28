@@ -5,7 +5,7 @@
 set -e
 
 dir=`dirname -- "$0"`
-TMP_OUT=`mktemp -- "$1.XXXXXX.bo"`
+TMP_OUT=`mktemp -- "$1.bo.XXXXXX"`
 echo $dir
 #filter="Pear(add_header=$dir/header.txt) ArrayNested()"
 #filter="Default(), ArrayNested()"
