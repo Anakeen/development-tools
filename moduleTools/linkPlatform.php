@@ -15,9 +15,9 @@ function linkToSources($local, $context)
             $possibleFiles[$baselFile] = false; // no double accepted
         }
     }
-
+    $c = 0;
     foreach ($contextFiles as $cFile) {
-        if (strstr($cFile,'/.')) continue;
+        if (strstr($cFile, '/.')) continue;
         $basecFile = basename($cFile);
         if ($basecFile[0] == '.') continue;
         $orifile = $possibleFiles[$basecFile];
@@ -26,25 +26,32 @@ function linkToSources($local, $context)
             rename($cFile, "$cFile.lnkori");
             // "ln -s  $orifile $cFile\n";
             symlink($orifile, $cFile);
+            $c++;
         }
     }
+    return $c;
 }
 
-function deleteLinkToSources($context) {
-     $contextFiles = explode("\n", `find $context -type f -name "*lnkori"`);
+function deleteLinkToSources($context)
+{
+    $contextFiles = explode("\n", `find $context -type f -name "*lnkori"`);
+    $c = 0;
     foreach ($contextFiles as $cFile) {
         if ($cFile) {
-       // print $cFile." ".substr($cFile,0,-7)."\n";
+            // print $cFile." ".substr($cFile,0,-7)."\n";
 
-        rename($cFile, substr($cFile,0,-7));
+            rename($cFile, substr($cFile, 0, -7));
+            $c++;
         }
     }
+    return $c;
 }
 
-function linkUsage($text) {
+function linkUsage($text)
+{
     global $argv;
     print "$text\n";
-    print "Usage ".$argv[0]." : links to source directory\n";
+    print "Usage " . $argv[0] . " : links to source directory\n";
     print "\tcontext=<directory context>\n";
     print "\tlocal=<source context>\n";
     print "\treset (to delete links)\n";
@@ -53,10 +60,10 @@ function linkUsage($text) {
 
 $options = getopt(null, array(
 
-        'local:',
-        'context:',
-        'reset::',
-    ));
+    'local:',
+    'context:',
+    'reset::',
+));
 
 
 $local = $options["local"];
@@ -64,12 +71,12 @@ $context = $options["context"];
 if (!$local || !$context) linkUsage("need local and context directory");
 if (!is_dir($local)) linkUsage("cannot access local directory");
 if (!is_dir($context)) linkUsage("cannot access context directory");
-if (array_key_exists("reset",$options) ){
+if (array_key_exists("reset", $options)) {
     print "restore original files...";
-    deleteLinkToSources($context);
+    $c = deleteLinkToSources($context);
 } else {
     print "link to source...";
-    linkToSources($local, $context);
+    $c = linkToSources($local, $context);
 }
-print "done\n";
+print "$c files processeed done\n";
 //
