@@ -53,30 +53,32 @@ function linkUsage($text)
     print "$text\n";
     print "Usage " . $argv[0] . " : links to source directory\n";
     print "\tcontext=<directory context>\n";
-    print "\tlocal=<source context>\n";
+    print "\tsource=<source context>\n";
     print "\treset (to delete links)\n";
     exit(1);
 }
 
 $options = getopt(null, array(
 
-    'local:',
+    'source:',
     'context:',
     'reset::',
 ));
 
 
-$local = $options["local"];
+$local = $options["source"];
 $context = $options["context"];
-if (!$local || !$context) linkUsage("need local and context directory");
-if (!is_dir($local)) linkUsage("cannot access local directory");
+if (!$context) linkUsage("need context directory");
 if (!is_dir($context)) linkUsage("cannot access context directory");
 if (array_key_exists("reset", $options)) {
     print "restore original files...";
     $c = deleteLinkToSources($context);
 } else {
+
+    if (!$local) linkUsage("need source directory");
+    if (!is_dir($local)) linkUsage("cannot access source directory");
     print "link to source...";
     $c = linkToSources($local, $context);
 }
-print "$c files processeed done\n";
+print "$c files processed done\n";
 //
