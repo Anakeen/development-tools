@@ -3,8 +3,13 @@
 
 function linkToSources($local, $context)
 {
+    $appNames = array("ACCESS", "API", "APPMNG", "AUTHENT",
+            "CORE", "DATA", "DAV", "DCPTEST", "Docs",
+            "EXTERNALS", "FDC", "FDL", "FGSEARCH", "FREEDOM", "FUSERS", "GENERIC", "ONEFAM ", "STYLE ",
+            "TOOLBOX", "USERCARD", "USERS", "VAULT ", "WHAT");
+    $apps = "$context/".implode(" $context/", $appNames);
 
-    $contextFiles = explode("\n", `find $context -type f`);
+    $contextFiles = explode("\n", `find $apps -type f`);
     $localFiles = explode("\n", `find $local -type f`);
     $possibleFiles = array();
     foreach ($localFiles as $lFile) {
@@ -38,7 +43,7 @@ function deleteLinkToSources($context)
     $c = 0;
     foreach ($contextFiles as $cFile) {
         if ($cFile) {
-            // print $cFile." ".substr($cFile,0,-7)."\n";
+            // print $cFile."".substr($cFile,0,-7)."\n";
 
             rename($cFile, substr($cFile, 0, -7));
             $c++;
@@ -51,7 +56,7 @@ function linkUsage($text)
 {
     global $argv;
     print "$text\n";
-    print "Usage " . $argv[0] . " : links to source directory\n";
+    print "Usage ". $argv[0] . ": links to source directory\n";
     print "\tcontext=<directory context>\n";
     print "\tsource=<source context>\n";
     print "\treset (to delete links)\n";
