@@ -9,7 +9,7 @@ TMP_OUT=`mktemp -- "$1.bo.XXXXXX"`
 #filter="Pear(add_header=$dir/header.txt) ArrayNested()"
 #filter="Default(), ArrayNested()"
 filter="Dynacase(add_header=$dir/header.txt,newline_class=true,newline_function=true), ArrayNested()"
-php_beautifier -l "$filter" -- "$1" > "$TMP_OUT"
+php_beautifier -l "$filter" -- "$1" | sed -e "s/static ::/static::/g" > "$TMP_OUT"
 if [ -s "$TMP_OUT" ]; then
    cp -- "$TMP_OUT" "$1"
    rm -- "$TMP_OUT"
