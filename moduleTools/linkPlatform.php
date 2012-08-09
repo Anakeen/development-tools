@@ -6,12 +6,13 @@ function linkToSources($local, $context)
     $appNames = array("ACCESS", "API", "APPMNG", "AUTHENT",
             "CORE", "DATA", "DAV", "DCPTEST", "Docs",
             "EXTERNALS", "FDC", "FDL", "FGSEARCH", "FREEDOM", "FUSERS", "GENERIC", "ONEFAM ", "STYLE ",
-            "TOOLBOX", "USERCARD", "USERS", "VAULT ", "WHAT");
+		      "TOOLBOX", "USERCARD", "USERS", "VAULT ", "WHAT","admin");
     $apps = "$context/".implode(" $context/", $appNames);
 
     $contextFiles = explode("\n", `find $apps -type f`);
     $localFiles = explode("\n", `find $local -type f`);
     $possibleFiles = array();
+    $contextFiles=array_merge($contextFiles,explode("\n", `find $context -maxdepth 1  -type f -name "*php"`));
     foreach ($localFiles as $lFile) {
         $baselFile = basename($lFile);
         if (!isset($possibleFiles[$baselFile])) {
