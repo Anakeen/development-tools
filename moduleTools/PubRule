@@ -157,6 +157,7 @@ pi : $(PIFILES) $(pidir)
           done; 
 
 TRANSODS =
+TRANSCSV =
 
 DISTFILES = $(wildcard *.php) $(wildcard *.gif) $(wildcard *.pdf) \
             $(wildcard *.png) $(wildcard *.ico)  $(wildcard *.css) \
@@ -261,23 +262,36 @@ rpm-fedora : $(PACKAGE)-Fedora.spec dist
 	@echo "RPM done."
 #-------------------------- gettext translation -------------
 
-po:	
+po:
+	echo "<?php\n" > generated_catalog.php
+
+	#echo "//--[TEXT:...] from xml--\n" >> generated_catalog.php
 	find . \( -name "*.xml" -o -name "*.js" \) -exec \
 	perl -ne 'print "N_(\"$$1\")\n" while(m/\[TEXT:([^]]+)]/g)' {} \; \
-	> textxml.php
+	>> generated_catalog.php
 
-	find . -type f -name "*.php" -print0 | xargs -0 php -r 'array_walk(array_slice($$argv,1),function($$f){array_walk(preg_filter("/.*@(searchLabel)\\s+([^\\n]+)\\n.*/s","\\2",array_map(function($$t){return$$t[1];},array_filter(token_get_all(file_get_contents($$f)),function($$t){return($$t[0]==T_DOC_COMMENT);}))),function($$t){printf("N_(\"%s\")\n",preg_replace("/\"/","\\\"",$$t));});});' >> textxml.php
+	#echo "//--# N_(...) from php--\n" >> generated_catalog.php
+	find . \( -name "*.app" -o -name "*.php" \) -exec \
+	perl -ne 'print "$$2\n" while(m/(\#|\/\/)\s*(.*_\(.*\))/g)' {} \; \
+	>> generated_catalog.php
+
+	#echo "//--# @searchLabel from php--\n" >> generated_catalog.php
+	find . -type f -name "*.php" -print0 | xargs -0 \
+	php -r 'array_walk(array_slice($$argv,1),function($$f){array_walk(preg_filter("/.*@(searchLabel)\\s+([^\\n]+)\\n.*/s","\\2",array_map(function($$t){return$$t[1];},array_filter(token_get_all(file_get_contents($$f)),function($$t){return($$t[0]==T_DOC_COMMENT);}))),function($$t){printf("N_(\"%s\")\n",preg_replace("/\"/","\\\"",$$t));});});' \
+	>> generated_catalog.php
 
 	find . \( -name "*.app" -o -name "*.php" \) -print \
-	| xgettext  -f- --no-location --keyword='_' --keyword='N_' --keyword='text' --keyword='Text' --language=c --from-code=iso8859-1 -o$(appname).pot
+	| xgettext  -f- --language=php --no-location --keyword='_' --keyword='N_' --keyword='text' --keyword='Text' -c_ --from-code=iso8859-1 -o $(appname).pot
 
 	find . \( -name "*.js" -o -name "*.html" \) -print \
 	| xgettext  -f- --no-location --keyword='_'  --language=c -o $(appname)_js.pot
+
 	rm -f $(appname)_ODS.pot;
 	if [ ! -e $(appname)_ODS.pot ]; then \
-			LC_ALL=fr_FR.UTF-8 msginit --no-translator -i $(appname).pot -o $(appname)_ODS.pot; \
-		fi; \
+		LC_ALL=fr_FR.UTF-8 msginit --no-translator -i $(appname).pot -o $(appname)_ODS.pot; \
+	fi; \
 	php -q $(utildir)/fam2po.php $(TRANSODS)  >> $(appname)_ODS.pot;
+	php -q $(utildir)/csvfam2po.php $(TRANSCSV)  >> $(appname)_ODS.pot;
 
 	echo "LANGS = '$(LANGS)'";
 
@@ -300,7 +314,7 @@ po:
 		fi; \
         done \
 
-	@rm -f textxml.php
+	@rm -f generated_catalog.php
 	@rm -f $(appname)*.pot
 
 localedir=$(pubdir)/locale
