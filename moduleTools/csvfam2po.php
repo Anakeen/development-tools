@@ -156,8 +156,6 @@ function ods2csv($odsfile, $csvfile)
         if ($err == "") {
             if ($csvfile) {
                 $n = file_put_contents($csvfile, $csv);
-                //if ($n > 0) print sprintf(_("csv file <%s> wroted")."\n",$csvfile);
-                //else $err=sprintf(_("cannot write  %s"),$csvfile);
             } else print $csv;
         }
     }
@@ -233,6 +231,9 @@ function makePo($fi)
     $famname = "*******";
     $famtitle = "";
 
+
+    echo("#DEBUG");
+
     while (!feof($fdoc)) {
 
         $nline++;
@@ -253,7 +254,9 @@ function makePo($fi)
                 $famname = $data[5];
                 $famtitle = $data[2];
 
-                echo "#, fuzzy, ($fi::$nline)\n";
+                echo "#. $famtitle \n";
+                echo "#: $fi:$nline\n";
+                echo "#, fuzzy\n";
                 echo "msgid \"" . $famname . "#title\"\n";
                 echo "msgstr \"" . $famtitle . "\"\n\n";
                 break;
@@ -269,7 +272,8 @@ function makePo($fi)
             case "OPTION":
 
                 echo "#. " . $data[3] . "\n";
-                echo "#, fuzzy, ($fi::$nline)\n";
+                echo "#: $fi:$nline\n";
+                echo "#, fuzzy\n";
                 echo "msgid \"" . $famname . "#" . strtolower($data[1]) . "\"\n";
                 echo "msgstr \"" . $data[3] . "\"\n\n";
 
@@ -281,7 +285,8 @@ function makePo($fi)
                         $d = str_replace('\#', ',', $ve);
                         $ee = explode("|", $d);
                         echo "#. " . $ee[1] . "\n";
-                        echo "#, fuzzy, ($fi::$nline)\n";
+                        echo "#: $fi:$nline\n";
+                        echo "#, fuzzy\n";
                         echo "msgid \"" . $famname . "#" . strtolower($data[1]) . "#" . (str_replace('\\', '', $ee[0])) . "\"\n";
                         echo "msgstr \"" . (str_replace('\\', '', $ee[1])) . "\"\n\n";
                     }
@@ -301,7 +306,8 @@ function makePo($fi)
                         case "elsymbol" :
                         case "showempty" :
                             echo "#. " . $oo[1] . "\n";
-                            echo "#, fuzzy, ($fi::$nline)\n";
+                            echo "#: $fi:$nline\n";
+                            echo "#, fuzzy\n";
                             echo "msgid \"" . $famname . "#" . strtolower($data[1]) . "#" . strtolower($oo[0]) . "\"\n";
                             echo "msgstr \"" . $oo[1] . "\"\n\n";
                             break;
