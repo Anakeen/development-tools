@@ -12,6 +12,7 @@ pages_doc = $(patsubst %.doc,$(pubdir)/$(style)/$(appname)/doc/%.doc,$(filter-ou
 pages_jpg = $(patsubst %.jpg,$(pubdir)/$(style)/$(appname)/Images/%.jpg,$(filter-out $(pages_not_jpg),$(wildcard *.jpg)))
 pages_app = $(patsubst %.app,$(pubdir)/$(style)/$(appname)/%.app,$(filter-out $(pages_not_app),$(wildcard *.app)))
 pages_xml = $(patsubst %.xml,$(pubdir)/$(style)/$(appname)/Layout/%.xml,$(filter-out $(pages_not_xml),$(wildcard *.xml)))
+pages_html = $(patsubst %.html,$(pubdir)/$(style)/$(appname)/Layout/%.html,$(filter-out $(pages_not_html),$(wildcard *.html)))
 pages_odt = $(patsubst %.odt,$(pubdir)/$(style)/$(appname)/Layout/%.odt,$(filter-out $(pages_not_odt),$(wildcard *.odt)))
 pages_ods = $(patsubst %.ods,$(pubdir)/$(style)/$(appname)/%.ods,$(filter-out $(pages_not_ods),$(wildcard *.ods)))
 pages_csv = $(patsubst %.csv,$(pubdir)/$(style)/$(appname)/%.csv,$(filter-out $(pages_not_csv),$(wildcard *.csv)))
@@ -30,7 +31,7 @@ pages_top = $(addprefix $(pubdir)/,$(TOP_MODULES))
 pages = $(pages_php) $(pages_gif) $(pages_png) $(pages_ico) $(pages_doc) $(pages_ods) $(pages_csv) \
         $(pages_jpg) $(pages_app) $(pages_xml) $(pages_odt) $(pages_css) \
         $(pages_js)  $(pages_top) $(pages_sty) $(pages_sql) $(pages_pdf) \
-	$(info_xml) $(pages_appxml)
+        $(info_xml) $(pages_appxml) $(pages_html)
 
 #installcp = install  -m 0644  -C --backup=never
 installcp = cp -f
@@ -69,6 +70,9 @@ $(pubdir)/$(style)/$(appname)/%.sql : %.sql $(pubdir)/$(style)/$(appname)
 	$(installcp) $< $@
 
 $(pubdir)/$(style)/$(appname)/Layout/%.xml : %.xml $(pubdir)/$(style)/$(appname)/Layout
+	$(installcp) $< $@
+
+$(pubdir)/$(style)/$(appname)/Layout/%.html : %.html $(pubdir)/$(style)/$(appname)/Layout
 	$(installcp) $< $@
 
 $(pubdir)/$(style)/$(appname)/Layout/%.odt : %.odt $(pubdir)/$(style)/$(appname)/Layout
