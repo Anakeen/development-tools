@@ -41,12 +41,14 @@ function startElement($parser, $name, $attrs) {
   if ($name ==  "TABLE:TABLE-CELL") {
     $incell=true;
     $celldata = "";
-    if ($attrs["TABLE:NUMBER-COLUMNS-REPEATED"]) {
+    if (!empty($attrs["TABLE:NUMBER-COLUMNS-REPEATED"])) {
       $colrepeat=intval($attrs["TABLE:NUMBER-COLUMNS-REPEATED"]);      
      }
   }
   if ($name ==  "TEXT:P") {
+    if (isset($rows[$nrow][$ncol])) {
     if (strlen($rows[$nrow][$ncol]) > 0) $rows[$nrow][$ncol].='\n';
+    }
   }
 }
 
@@ -160,7 +162,7 @@ if ($err != "") print "ERROR:$err\n";
 
 }
 
-$dbg=true;
+$dbg=false;
 
 
 for ($i=1; $i<count($argv); $i++) {
@@ -199,6 +201,7 @@ function ods2cvs_old($file)
 
 
 function lolo($msg) {
+  global $dbg;
   if ($dbg) echo "fam2po: ".$msg."\n";
 }
 
@@ -280,6 +283,7 @@ function makePo($fi) {
 	}
 	
 	// Options ----------------------------------------------
+	if (!isset($data[15])) $data[15]='';
 	$topt = explode("|", $data[15]);
 	foreach ($topt as $ko=>$vo) {
 	  $oo = explode("=", $vo);
