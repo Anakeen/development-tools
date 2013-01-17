@@ -9,13 +9,16 @@ Getting Help
 ------------
 
 ### PHP code sniffer
-[Beautifier for PHP](http://pear.php.net/package/PHP_Beautifier) . 
-
-
-### PHP beautifier
 
 [PHP_CodeSniffer tokenises PHP, JavaScript and CSS files and detects violations of a defined set of coding standards](http://pear.php.net/package/PHP_CodeSniffer) .  
 
+### PHP beautifier
+
+[Beautifier for PHP](http://pear.php.net/package/PHP_Beautifier) . 
+
+### JS minifier
+
+[Minfier for JS](https://github.com/rgrove/jsmin-php)
 
 Control the PHP code
 ------------
@@ -71,3 +74,24 @@ Use phpbo programs to beautify the code.
     $ <install_devtools>/developement-tools/3.1/phpBeautifier/phpbo Action/Fdl/editicon.php 
 
 The rules used are based on PEAR standard and conserve blank lines.
+
+Minify a JS Code
+------------
+
+If you have a JS code and you want to minify it, you may use jsmin.php
+
+Usage:
+
+    php jsmin.php file_to_minfy.js file_to_output.js
+    
+    or
+
+    php jsmin.php <file_to_minify.js >file_to_output.js
+
+Jsmin will take the JS code from file_to_minify.js and create a file_to_output.js to put the minfiy code in.
+
+If file_to_output.js already exists, it will be overwritten.
+
+If no file_to_output.js is given, the minify code will be outuput on stdout
+
+if no file_to_minify is given, stdin will be read and minify
