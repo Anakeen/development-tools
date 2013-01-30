@@ -31,7 +31,7 @@ pages_top = $(addprefix $(pubdir)/,$(TOP_MODULES))
 pages = $(pages_php) $(pages_gif) $(pages_png) $(pages_ico) $(pages_doc) $(pages_ods) $(pages_csv) \
         $(pages_jpg) $(pages_app) $(pages_xml) $(pages_odt) $(pages_css) \
         $(pages_js)  $(pages_top) $(pages_sty) $(pages_sql) $(pages_pdf) \
-	$(info_xml) $(pages_appxml)
+	$(pages_appxml)
 
 #installcp = install  -m 0644  -C --backup=never
 installcp = cp -f
@@ -106,9 +106,6 @@ $(pubdir)/$(style)/$(appname)/%.sty : %.sty $(pubdir)/$(style)/$(appname)
 	$(installcp) $< $@
 
 $(pubdir)/$(style)/$(appname)/Docs/%.pdf : %.pdf $(pubdir)/$(style)/$(appname)/Docs
-	$(installcp) $< $@
-
-$(pubdir)/$(style)/$(appname)/info.xml : info.xml $(pubdir)/$(style)/$(appname)
 	$(installcp) $< $@
 
 $(pubdir)/$(appname)/application.xml: application.xml
