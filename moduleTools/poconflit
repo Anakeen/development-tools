@@ -1,0 +1,20 @@
+#!/bin/bash
+
+contextDir=$1
+if [ -z "$contextDir" ]; then
+  echo "Usage $0 <context directory>"
+  exit 1;
+fi
+
+po=`ls *fr.po`
+msgfmt $po  -o - | msgunfmt | grep "^msgid" | cut -f2- -d" " | grep -v '""'> po.ref
+
+mofile=`echo $po | sed -e 's/_..\.po\$//'`".mo"
+
+
+for mofile in `find $contextDir/locale/fr -type f \( -name '*.mo' -a -not -name "*catalog*" -a -not -name "$mofile"  \)`; do
+  #echo $mofile
+  msgunfmt $mofile  | grep "^msgid" | cut -f2- -d" " | grep -v '""'> po.server
+  cat po.ref po.server | perl -ne 'chomp;$c{$_}++;END{foreach(keys%c){print"'$mofile' $_\n"if($c{$_}>1)}}'
+done
+
