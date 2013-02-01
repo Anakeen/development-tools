@@ -21,8 +21,7 @@ pages_pdf = $(patsubst %.pdf,$(pubdir)/$(style)/$(appname)/Docs/%.pdf,$(filter-o
 
 pages_appxml = $(patsubst application.xml,$(pubdir)/$(appname)/application.xml,$(wildcard application.xml))
 
-info_xml = $(patsubst info.xml,$(pubdir)/$(style)/$(appname)/info.xml,$(wildcard info.xml))
-pages_not_xml = $(info_xml)
+pages_not_xml = info.xml
 
 pages_top = $(addprefix $(pubdir)/,$(TOP_MODULES))
 
