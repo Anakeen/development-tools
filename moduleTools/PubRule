@@ -1,8 +1,6 @@
-# $Id: PubRule,v 1.58 2011-06-23 15:59:54 jerome Exp $
+# Dynacase Makefile Rules : Rules to make translation and webinst files
 # -----------------------------------------------------------------------------
 
-# -----------------------------------------------------------------------------
-# pages = $(patsubst %.sgml,$(pubdir)/%.php3,$(wildcard *.sgml))
 pages_php = $(patsubst %.php,$(pubdir)/$(style)/$(appname)/%.php,$(filter-out $(pages_not_php),$(wildcard *.php)))
 pages_pub = $(patsubst %.pub,$(pubdir)/$(style)/$(appname)/%.pub,$(filter-out $(pages_not_pub),$(wildcard *.pub)))
 pages_gif = $(patsubst %.gif,$(pubdir)/$(style)/$(appname)/Images/%.gif,$(filter-out $(pages_not_gif),$(wildcard *.gif)))
@@ -24,15 +22,15 @@ pages_pdf = $(patsubst %.pdf,$(pubdir)/$(style)/$(appname)/Docs/%.pdf,$(filter-o
 pages_appxml = $(patsubst application.xml,$(pubdir)/$(appname)/application.xml,$(wildcard application.xml))
 
 info_xml = $(patsubst info.xml,$(pubdir)/$(style)/$(appname)/info.xml,$(wildcard info.xml))
+pages_not_xml = $(info_xml)
 
-pages_top = $(addprefix $(pubdir)/,$(TOP_MODULES)) 
+pages_top = $(addprefix $(pubdir)/,$(TOP_MODULES))
 
 pages = $(pages_php) $(pages_gif) $(pages_png) $(pages_ico) $(pages_doc) $(pages_ods) $(pages_csv) \
         $(pages_jpg) $(pages_app) $(pages_xml) $(pages_odt) $(pages_css) \
         $(pages_js)  $(pages_top) $(pages_sty) $(pages_sql) $(pages_pdf) \
 	$(info_xml) $(pages_appxml)
 
-#installcp = install  -m 0644  -C --backup=never
 installcp = cp -f
 
 ifndef LANGS
@@ -113,12 +111,6 @@ $(pubdir)/$(style)/$(appname)/info.xml : info.xml $(pubdir)/$(style)/$(appname)
 $(pubdir)/$(appname)/application.xml: application.xml
 	$(installcp) $< $@
 
-
-
-
-
-
-
 $(pubdir) :
 	mkdir -p $@
 
@@ -137,7 +129,7 @@ $(pubdir)/$(style)/$(appname)/Docs :
 $(pubdir)/$(style)/$(appname)/Layout :
 	mkdir -p $@
 
-publish : $(pages)  mo	
+publish : $(pages)  mo
 	  @for x in ouille $(SUBDIR);  \
 	   do \
 		if [ $$x != "ouille" ]; then \
@@ -154,16 +146,17 @@ pi : $(PIFILES) $(pidir)
 		if [ $$file != "ouille" ]; then \
 		   cp $$file $(pidir); \
 		fi \
-          done; 
+          done;
 
 TRANSODS =
+TRANSCSV =
 
 DISTFILES = $(wildcard *.php) $(wildcard *.gif) $(wildcard *.pdf) \
             $(wildcard *.png) $(wildcard *.ico)  $(wildcard *.css) \
             $(wildcard *.js)  $(wildcard *.xml)  $(wildcard *.odt)\
             $(wildcard *.jpg) $(wildcard *.po)  $(wildcard *.sql) Makefile
 
-TRANSJS = 
+TRANSJS =
 
 distdir = $(PACKAGE)-$(VERSION)-$(RELEASE)
 
@@ -173,7 +166,7 @@ dist: distdir
 	GZIP=$(GZIP_ENV) $(TAR) czf $(distdir).tar.gz $(distdir)
 	-rm -rf $(distdir)
 
-webinst: 
+webinst:
 	-rm -fr $(shell pwd)/localpub
 	make publish pubdir=$(shell pwd)/localpub
 	cd localpub ;	GZIP=$(GZIP_ENV) $(TAR)  czf ../content.tar.gz .
@@ -196,88 +189,28 @@ distdir: $(DISTFILES) $(PIFILES)
 	  fi; \
 	done
 
-sources: $(PACKAGE).spec dist
-	@if [ -f ~/.rpmmacros ]; then \
-	  rpmdir=`cat ~/.rpmmacros | grep "%_topdir" | awk '{print $$2}'` ; \
-	else \
-	  echo "%_topdir $$HOME/rpmbuild" > ~/.rpmmacros ; \
-	  rpmdir=$$HOME/rpmbuild ; \
-	fi ; \
-	thetgz=$(distdir).tar.gz;\
-	thespec=$(PACKAGE).spec;\
-	[ ! -d $$rpmdir/SOURCES ] && mkdir $$rpmdir/SOURCES ; \
-	[ ! -d $$rpmdir/SPECS ] && mkdir $$rpmdir/SPECS ; \
-	echo $$rpmbuild/SPECS/$$thespec; \
-	if [ -f $$rpmdir/SPECS/$$thespec ]; then \
-	  rm -f $$rpmdir/SPECS/$$thespec; \
-	fi; \
-	cd $$rpmdir/SPECS;\
-	cvs update $$thespec;\
-	cd -; \
-	if [ -f $$rpmdir/SOURCES/$$thetgz ]; then \
-	  rm -f $$rpmdir/SOURCES/$$thetgz; \
-	fi; \
-	cd $$rpmdir/SOURCES;\
-	cvs update $$thetgz;\
-	cd -; \
-	echo "Copying $(distdir).tar.gz in $$rpmdir/SOURCES" ; \
-	cp -f $$thetgz $$rpmdir/SOURCES ; \
-	echo "Copying $(PACKAGE).spec in $$rpmdir/SPECS" ; \
-	cp -f $$thespec $$rpmdir/SPECS ; \
-	echo "Source done."
+##----------------------------------------------------
+## -- gettext translation
+##----------------------------------------------------
 
-rpm : $(PACKAGE).spec dist
-	@if [ -f ~/.rpmmacros ]; then \
-	  rpmdir=`cat ~/.rpmmacros | grep "%_topdir" | awk '{print $$2}'` ; \
-	else \
-	  echo "%_topdir $$HOME/rpmbuild" > ~/.rpmmacros ; \
-	  rpmdir=$$HOME/rpmbuild ; \
-	fi ; \
-	[ ! -d $$rpmdir/SOURCES ] && mkdir $$rpmdir/SOURCES ; \
-	[ ! -d $$rpmdir/SPECS ] && mkdir $$rpmdir/SPECS ; \
-	echo "Copying $(distdir).tar.gz in $$rpmdir/SOURCES" ; \
-	cp -f $(distdir).tar.gz $$rpmdir/SOURCES ; \
-	echo "Copying $(PACKAGE).spec in $$rpmdir/SPECS" ; \
-	cp -f $(PACKAGE).spec $$rpmdir/SPECS ; \
-	cd $$rpmdir/SPECS ; \
-	rpmbuild -ba $(PACKAGE).spec
-	@echo "RPM done."
-
-rpm-fedora : $(PACKAGE)-Fedora.spec dist
-	@if [ -f ~/.rpmmacros ]; then \
-	  rpmdir=`cat ~/.rpmmacros | grep "%_topdir" | awk '{print $$2}'` ; \
-	else \
-	  echo "%_topdir $$HOME/rpmbuild" > ~/.rpmmacros ; \
-	  rpmdir=$$HOME/rpmbuild ; \
-	fi ; \
-	[ ! -d $$rpmdir/SOURCES ] && mkdir $$rpmdir/SOURCES ; \
-	[ ! -d $$rpmdir/SPECS ] && mkdir $$rpmdir/SPECS ; \
-	echo "Copying $(distdir).tar.gz in $$rpmdir/SOURCES" ; \
-	cp -f $(distdir).tar.gz $$rpmdir/SOURCES ; \
-	echo "Copying $(PACKAGE)-Fedora.spec in $$rpmdir/SPECS" ; \
-	cp -f $(PACKAGE)-Fedora.spec $$rpmdir/SPECS ; \
-	cd $$rpmdir/SPECS ; \
-	rpmbuild -ba $(PACKAGE)-Fedora.spec
-	@echo "RPM done."
-#-------------------------- gettext translation -------------
-
-po:	
-	find . \( -name "*.xml" -o -name "*.js" \) -exec \
+po:
+	find . \( -name "*.xml" -o -name "*.js" -o -name "*.html" \) -exec \
 	perl -ne 'print "N_(\"$$1\")\n" while(m/\[TEXT:([^]]+)]/g)' {} \; \
 	> textxml.php
 
 	find . -type f -name "*.php" -print0 | xargs -0 php -r 'array_walk(array_slice($$argv,1),function($$f){array_walk(preg_filter("/.*@(searchLabel)\\s+([^\\n]+)\\n.*/s","\\2",array_map(function($$t){return$$t[1];},array_filter(token_get_all(file_get_contents($$f)),function($$t){return($$t[0]==T_DOC_COMMENT);}))),function($$t){printf("N_(\"%s\")\n",preg_replace("/\"/","\\\"",$$t));});});' >> textxml.php
 
 	find . \( -name "*.app" -o -name "*.php" \) -print \
-	| xgettext  -f- --no-location --keyword='_' --keyword='N_' --keyword='text' --keyword='Text' --language=c --from-code=iso8859-1 -o$(appname).pot
+	| xgettext  -f- --keyword='_' --keyword='N_' --keyword='text' --keyword='Text' --language=c --from-code=iso8859-1 -o$(appname).pot
 
 	find . \( -name "*.js" -o -name "*.html" \) -print \
-	| xgettext  -f- --no-location --keyword='_'  --language=c -o $(appname)_js.pot
+	| xgettext  -f- --keyword='_'  --language=c -o $(appname)_js.pot
 	rm -f $(appname)_ODS.pot;
 	if [ ! -e $(appname)_ODS.pot ]; then \
 			LC_ALL=fr_FR.UTF-8 msginit --no-translator -i $(appname).pot -o $(appname)_ODS.pot; \
 		fi; \
 	php -q $(utildir)/fam2po.php $(TRANSODS)  >> $(appname)_ODS.pot;
+	php -q $(utildir)/csvfam2po.php $(TRANSCSV)  >> $(appname)_ODS.pot;
 
 	echo "LANGS = '$(LANGS)'";
 
@@ -332,16 +265,16 @@ $(localedir)/%/lang.php: lang_%.php $(localedir)/%/LC_MESSAGES
 
 mo: $(pages_mo) $(pages_jsmo) $(pages_lang)
 
-
-
-
-#-------------------------- end gettext translation -------------
+##----------------------------------------------------
+## -- end gettext translation
+##----------------------------------------------------
 
 ##----------------------------------------------------
 ## -- add post install file and migration file
+##----------------------------------------------------
 
-DISTFILES += $(wildcard $(appname)_post) $(wildcard $(appname)_*migr_*) 
-#add configuration file (.in) 
+DISTFILES += $(wildcard $(appname)_post) $(wildcard $(appname)_*migr_*)
+#add configuration file (.in)
 DISTFILES += $(wildcard *.in) $(wildcard $(appname).app) $(wildcard $(appname)_*.po)
 
 pages_migr = $(patsubst $(appname)_migr_%,$(pubdir)/$(appname)/$(appname)_migr_%,$(wildcard $(appname)_migr_*))
