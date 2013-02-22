@@ -206,7 +206,7 @@ po:
 			LC_ALL=fr_FR.UTF-8 msginit --no-translator -i $(appname).pot -o $(appname)_ODS.pot; \
 		fi; \
 	php -q $(utildir)/fam2po.php $(TRANSODS)  >> $(appname)_ODS.pot;
-	php -q $(utildir)/csvfam2po.php $(TRANSCSV)  >> $(appname)_ODS.pot;
+#	php -q $(utildir)/csvfam2po.php $(TRANSCSV)  >> $(appname)_ODS.pot;
 
 	echo "LANGS = '$(LANGS)'";
 
