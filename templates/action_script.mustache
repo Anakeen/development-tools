@@ -1,0 +1,10 @@
+<?php
+
+function {{{script_name}}}(Action &$action) {
+
+    $usage = new ActionUsage($action);
+
+    $usage->setStrictMode(false);
+    $usage->verify(true);
+
+}

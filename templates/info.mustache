@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+<module disabled="no" name="{{name}}" release="@RELEASE@" version="@VERSION@">
+    <description>{{description}}</description>
+
+    <requires>
+        <module comp="ge" name="dynacase-core" version="3.2"/>
+    </requires>
+
+    <post-install>
+        {{# application}}
+        <process command="programs/record_application {{application}}"/>
+        {{/application}}
+        <process command="programs/update_catalog"/>
+    </post-install>
+    <post-upgrade>
+        {{# application}}
+        <process command="programs/pre_migration {{application}}"/>
+        <process command="programs/record_application {{application}}"/>
+        <process command="programs/post_migration {{application}}"/>
+        {{/application}}
+        <process command="programs/update_catalog"/>
+    </post-upgrade>
+</module>
