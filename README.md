@@ -17,3 +17,27 @@ Il contient, les fonctionnalités suivantes :
     * po : extraction initialisation/mise à jour des po
 * package :
     * production du paquet
+* stubs :
+    * Génération des stubs
+
+
+L'ensemble des commandes sont mises à disposition par le phar `devtool.phar`
+
+L'ensemble des commandes est :
+
+```
+DevTools for Dynacase 3.2
+You can access to the sub command :
+	createAction
+	createApplication
+	createFamily
+	createInfoXml
+	createModule
+	createWorkflow
+	extractPo
+	generateStub
+	generateWebinst
+```
+
+Les commandes en create permette d'initialiser les fichiers d'un paquet, la commande extract po extrait les po d'un paquet,
+la commande generateWebinst produit le webinst et generateStub produit les stubs pour aider au développement.

@@ -1,7 +1,6 @@
 <?php
 
-namespace dcp\DevTools\Template;
-
+namespace Dcp\DevTools\Template;
 
 class FamilyParam extends Template
 {

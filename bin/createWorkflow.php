@@ -5,9 +5,9 @@ require_once "initializeAutoloader.php";
 use Ulrichsg\Getopt\Getopt;
 use Ulrichsg\Getopt\Option;
 
-use dcp\DevTools\Template\WorkflowStructure;
-use dcp\DevTools\Template\WorkflowClass;
-use dcp\DevTools\Template\WorkflowInfo;
+use Dcp\DevTools\Template\WorkflowStructure;
+use Dcp\DevTools\Template\WorkflowClass;
+use Dcp\DevTools\Template\WorkflowInfo;
 
 $getopt = new Getopt(array(
     (new Option('f', 'force', Getopt::NO_ARGUMENT))->setDescription('force the write if the file exist'),

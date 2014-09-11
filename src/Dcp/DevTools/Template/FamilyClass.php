@@ -1,13 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: charles
- * Date: 09/09/14
- * Time: 09:45
- */
 
-namespace dcp\DevTools\Template;
-
+namespace Dcp\DevTools\Template;
 
 class FamilyClass extends Template{
 

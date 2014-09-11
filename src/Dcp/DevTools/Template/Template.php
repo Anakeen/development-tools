@@ -1,19 +1,17 @@
 <?php
-namespace dcp\DevTools\Template;
 
-class Template {
+namespace Dcp\DevTools\Template;
+
+class Template
+{
 
     protected $templateBaseDir;
     protected $templates = array();
     protected $logicalNameRegExp = "/^[A-Za-z]+[A-Za-z_]*$/";
 
-    public function __construct() {
-        $templateBaseDir = dirname(__FILE__)
-            . DIRECTORY_SEPARATOR . '..'
-            . DIRECTORY_SEPARATOR . '..'
-            . DIRECTORY_SEPARATOR . '..'
-            . DIRECTORY_SEPARATOR . '..'
-            . DIRECTORY_SEPARATOR . 'templates';
+    public function __construct()
+    {
+        $templateBaseDir = 'templates';
 
         $realDir = realpath($templateBaseDir);
         if (is_dir($realDir)) {
@@ -24,20 +22,22 @@ class Template {
         return $this;
     }
 
-    public function getTemplate($templateName) {
+    public function getTemplate($templateName)
+    {
         if (isset($this->templates[$templateName])) {
             return $this->templates[$templateName];
         }
         $fileTemplate = $this->templateBaseDir . DIRECTORY_SEPARATOR . $templateName . ".mustache";
 
         if (!is_file($fileTemplate)) {
-            throw new Exception("Unable to find $templateName");
+            throw new Exception("Unable to find $templateName $fileTemplate");
         }
         $this->templates[$templateName] = $fileTemplate;
         return $this->templates[$templateName];
     }
 
-    public function render($templateName, $arguments, $outputPath = false, $force = false) {
+    public function render($templateName, $arguments, $outputPath = false, $force = false)
+    {
         $mustacheEngine = new \Mustache_Engine;
         $templatePath = $this->getTemplate($templateName);
 
@@ -48,13 +48,14 @@ class Template {
         if ($outputPath) {
             $return = file_put_contents($outputPath, $render);
             if ($return === false) {
-                throw new Exception("Unable to write in ".$outputPath);
+                throw new Exception("Unable to write in " . $outputPath);
             }
         }
         return $render;
     }
 
-    public function checkLogicalName($name) {
+    public function checkLogicalName($name)
+    {
         return preg_match($this->logicalNameRegExp, $name) === 1;
     }
 

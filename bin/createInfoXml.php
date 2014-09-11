@@ -5,7 +5,7 @@ require_once "initializeAutoloader.php";
 use Ulrichsg\Getopt\Getopt;
 use Ulrichsg\Getopt\Option;
 
-use dcp\DevTools\Template\InfoXml;
+use Dcp\DevTools\Template\InfoXml;
 
 $getopt = new Getopt(array(
     (new Option('f', 'force', Getopt::NO_ARGUMENT))->setDescription('force the write if the file exist (needed)'),

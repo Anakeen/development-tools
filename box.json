@@ -1,0 +1,6 @@
+{
+    "directories" :  ["src", "bin", "vendor", "templates"],
+    "main" :   "bin/devTool.php",
+    "output" : "devtool.phar",
+    "stub" :   true
+}

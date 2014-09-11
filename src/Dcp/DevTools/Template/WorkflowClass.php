@@ -1,9 +1,9 @@
 <?php
 
-namespace dcp\DevTools\Template;
+namespace Dcp\DevTools\Template;
 
-
-class WorkflowStructure extends Template {
+class WorkflowClass extends Template
+{
     public function render($arguments, $outputPath, $force = false)
     {
         if (!empty($outputPath) && !is_dir($outputPath)) {
@@ -18,12 +18,9 @@ class WorkflowStructure extends Template {
         if (isset($arguments["parent"]) && !$this->checkLogicalName($arguments["parent"])) {
             throw new Exception("You need to set the parent of the workflow with a valid name " . $this->logicalNameRegExp);
         }
-        if (!isset($arguments["title"])) {
-            $arguments["title"] = "WFL_".$arguments["name"];
-        }
         if (!empty($outputPath)) {
-            $outputPath .= DIRECTORY_SEPARATOR . $arguments["name"] . "__WFL.csv";
+            $outputPath .= DIRECTORY_SEPARATOR . $arguments["name"] . "__WFL.php";
         }
-        return parent::render("workflow_struct", $arguments, $outputPath, $force);
+        return parent::render("workflow_class", $arguments, $outputPath, $force);
     }
 } 

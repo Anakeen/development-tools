@@ -17,7 +17,7 @@
     ],
     "autoload" :    {
         "psr-0" : {
-            "dcp\\" : "src/"
+            "Dcp\\" : "src/"
         }
     }
 }

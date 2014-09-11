@@ -1,13 +1,6 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: charles
- * Date: 09/09/14
- * Time: 12:14
- */
 
-namespace dcp\DevTools\Template;
-
+namespace Dcp\DevTools\Template;
 
 class InfoXml extends Template {
 
@@ -20,7 +13,13 @@ class InfoXml extends Template {
             throw new Exception("You need to set the name of the module with a valid name " . $this->logicalNameRegExp);
         }
         if (isset($arguments["application"]) && !$this->checkLogicalName($arguments["application"])) {
-            throw new Exception("You need to set the name of the application with a valid name " . $this->logicalNameRegExp);
+            $application = explode(",", $arguments["application"]);
+            foreach ($application as $currentApplication) {
+                if (isset($currentApplication) && !$this->checkLogicalName($currentApplication)) {
+                    throw new Exception("You need to set the name of the application with a valid name $currentApplication : " . $this->logicalNameRegExp);
+                }
+            }
+            $arguments["list_application"] = $application;
         }
         if (!isset($arguments["description"])) {
             $arguments["description"] = $arguments["name"];

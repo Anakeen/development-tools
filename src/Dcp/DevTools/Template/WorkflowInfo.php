@@ -1,8 +1,9 @@
 <?php
 
-namespace dcp\DevTools\Template;
+namespace Dcp\DevTools\Template;
 
-class WorkflowInfo extends Template{
+class WorkflowInfo extends Template
+{
     public function render($arguments)
     {
         if (!isset($arguments["name"]) || !$this->checkLogicalName($arguments["name"])) {

@@ -1,9 +1,8 @@
 <?php
 
-namespace dcp\DevTools\Template;
+namespace Dcp\DevTools\Template;
 
 class FamilyStructure extends Template{
-
 
     public function render($arguments, $outputPath, $force = false)
     {

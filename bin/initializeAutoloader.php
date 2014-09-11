@@ -2,7 +2,6 @@
 
 $baseDir = realpath(dirname(__FILE__) . '/..');
 
-require $baseDir
-    . DIRECTORY_SEPARATOR . 'vendor'
+require 'vendor'
     . DIRECTORY_SEPARATOR . 'autoload.php';
 

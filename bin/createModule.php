@@ -5,19 +5,29 @@ require_once "initializeAutoloader.php";
 use Ulrichsg\Getopt\Getopt;
 use Ulrichsg\Getopt\Option;
 
-use dcp\DevTools\Template\InfoXml;
-use dcp\DevTools\Template\Module;
-use dcp\DevTools\Template\Application;
-use dcp\DevTools\Template\ApplicationParameter;
+use Dcp\DevTools\Template\InfoXml;
+use Dcp\DevTools\Template\Module;
+use Dcp\DevTools\Template\Application;
+use Dcp\DevTools\Template\ApplicationParameter;
+use Dcp\DevTools\ExtractPo\ApplicationPo;
+use Dcp\DevTools\ExtractPo\JavascriptPo;
+use Dcp\DevTools\ExtractPo\FamilyPo;
+use Dcp\DevTools\ExtractPo\ModulePo;
+use Dcp\DevTools\Template\BuildConf;
 
 $getopt = new Getopt(array(
-    (new Option('f', 'force', Getopt::NO_ARGUMENT))->setDescription('force the write if the file exist (needed)'),
-    (new Option('o', 'output', Getopt::REQUIRED_ARGUMENT))->setDescription('output Path')->setValidation(function ($path) {
-        return is_dir($path);
+    (new Option('f', 'force', Getopt::NO_ARGUMENT))->setDescription('force the write if the file exist'),
+    (new Option('o', 'output', Getopt::REQUIRED_ARGUMENT))->setDescription('output Path (needed)')->setValidation(function ($path) {
+        if (!is_dir($path)) {
+            print "The output dir must be a valid dir ($path)";
+            return false;
+        }
+        return true;
     }),
     (new Option('n', 'name', Getopt::REQUIRED_ARGUMENT))->setDescription('name of the module (needed)'),
     (new Option('d', 'description', Getopt::REQUIRED_ARGUMENT))->setDescription('description of the module'),
-    (new Option('a', 'application', Getopt::REQUIRED_ARGUMENT))->setDescription('associated application'),
+    (new Option('a', 'application', Getopt::REQUIRED_ARGUMENT))->setDescription('associated application (list of app name separeted by ,)'),
+    (new Option('l', 'lang', Getopt::REQUIRED_ARGUMENT))->setDescription('list of locale (list of locale separeted by ,) default (fr,en)'),
     (new Option('e', 'external', Getopt::NO_ARGUMENT))->setDescription('with external file'),
     (new Option('s', 'style', Getopt::REQUIRED_ARGUMENT))->setDescription('with style directory'),
     (new Option('p', 'po', Getopt::NO_ARGUMENT))->setDescription('with po directory'),
@@ -53,25 +63,49 @@ try {
 
     $renderOptions = $getopt->getOptions();
 
+    if (!isset($renderOptions["lang"])) {
+        $renderOptions["lang"] = "fr,en";
+    }
+
+    $renderOptions["lang"] = explode(",", $renderOptions["lang"]);
+
     $template = new Module();
     $template->render($renderOptions, $outputPath, $force);
 
     $outputPath = $outputPath.DIRECTORY_SEPARATOR.$renderOptions["name"];
 
     if (isset($renderOptions["application"])) {
-        $applicationPath = $outputPath.DIRECTORY_SEPARATOR. $renderOptions["application"];
-        $applicationRenderOptions = array(
-            "name" => $renderOptions["application"],
-            "i18n" => $renderOptions["application"]
-        );
-        $applicationTemplate = new Application();
-        $applicationTemplate->render($applicationRenderOptions, $applicationPath, $force);
-        $applicationParamTemplate = new ApplicationParameter();
-        $applicationParamTemplate->render($applicationRenderOptions, $applicationPath, $force);
+        $applications = explode(",", $renderOptions["application"]);
+        foreach($applications as $currentApplication) {
+            $applicationPath = $outputPath . DIRECTORY_SEPARATOR . $currentApplication;
+            $applicationRenderOptions = array(
+                "name" => $currentApplication,
+                "i18n" => $currentApplication
+            );
+            $applicationTemplate = new Application();
+            $applicationTemplate->render($applicationRenderOptions, $applicationPath, $force);
+            $applicationParamTemplate = new ApplicationParameter();
+            $applicationParamTemplate->render($applicationRenderOptions, $applicationPath, $force);
+        }
     }
 
     $template = new InfoXml();
     $template->render($renderOptions, $outputPath, $force);
+
+    $template = new BuildConf();
+    $template->render($renderOptions, $outputPath, $force);
+
+    $extractor = new ModulePo($outputPath);
+    $extractor->extractPo();
+
+    $extractor = new ApplicationPo($outputPath);
+    $extractor->extractPo();
+
+    $extractor = new JavascriptPo($outputPath);
+    $extractor->extractPo();
+
+    $extractor = new FamilyPo($outputPath);
+    $extractor->extractPo();
 
 } catch (UnexpectedValueException $e) {
     echo "Error: " . $e->getMessage() . "\n";

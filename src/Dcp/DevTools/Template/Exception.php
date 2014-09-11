@@ -1,6 +1,6 @@
 <?php
-namespace dcp\DevTools\Template;
 
+namespace Dcp\DevTools\Template;
 
 class Exception extends \Exception{
 
