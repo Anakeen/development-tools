@@ -27,6 +27,6 @@ class InfoXml extends Template {
         if (!empty($outputPath)) {
             $outputPath .= DIRECTORY_SEPARATOR . "info.xml";
         }
-        return parent::render("info", $arguments, $outputPath, $force);
+        return parent::main_render("info", $arguments, $outputPath, $force);
     }
 } 

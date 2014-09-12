@@ -36,7 +36,7 @@ class Template
         return $this->templates[$templateName];
     }
 
-    public function render($templateName, $arguments, $outputPath = false, $force = false)
+    public function main_render($templateName, $arguments, $outputPath = false, $force = false)
     {
         $mustacheEngine = new \Mustache_Engine;
         $templatePath = $this->getTemplate($templateName);

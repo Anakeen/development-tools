@@ -13,7 +13,7 @@ class Application extends Template {
         if (!empty($outputPath)) {
             $outputPath .= DIRECTORY_SEPARATOR.$arguments["name"].".php";
         }
-        return parent::render("application", $arguments, $outputPath, $force);
+        return parent::main_render("application", $arguments, $outputPath, $force);
     }
 
 } 

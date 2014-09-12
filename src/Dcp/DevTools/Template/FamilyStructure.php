@@ -21,7 +21,7 @@ class FamilyStructure extends Template{
         if (!empty($outputPath)) {
             $outputPath .= DIRECTORY_SEPARATOR . $arguments["name"] . "__STRUCT.csv";
         }
-        return parent::render("family_struct", $arguments, $outputPath, $force);
+        return parent::main_render("family_struct", $arguments, $outputPath, $force);
     }
 
 } 

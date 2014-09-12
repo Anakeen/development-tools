@@ -21,6 +21,6 @@ class FamilyClass extends Template{
         if (!empty($outputPath)) {
             $outputPath .= DIRECTORY_SEPARATOR . $arguments["name"] . "__CLASS.php";
         }
-        return parent::render("family_class", $arguments, $outputPath, $force);
+        return parent::main_render("family_class", $arguments, $outputPath, $force);
     }
 } 

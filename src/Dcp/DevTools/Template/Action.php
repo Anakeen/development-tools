@@ -14,22 +14,21 @@ class Action extends Template
         }
         if (isset($arguments["layout"])) {
             $layoutPath = $outputPath . DIRECTORY_SEPARATOR . "Layout". DIRECTORY_SEPARATOR;
-            if (!is_dir($outputPath)) {
-                mkdir($outputPath);
+            if (!is_dir($layoutPath)) {
+                mkdir($layoutPath);
             }
             $arguments["layoutFileName"] = strtolower($arguments["name"]) . ".html";
             $layoutPath .= $arguments["layoutFileName"];
-            parent::render("action_layout", $arguments, $layoutPath, $force);
+            parent::main_render("action_layout", $arguments, $layoutPath, $force);
         }
 
         if (isset($arguments["script"])) {
             $scriptPath = $outputPath . strtolower("action." . $arguments["name"]) . ".php";
             $arguments["script_name"] = strtolower($arguments["name"]);
-            var_export($scriptPath);
-            parent::render("action_script", $arguments, $scriptPath, $force);
+            parent::main_render("action_script", $arguments, $scriptPath, $force);
         }
 
-        return parent::render("action", $arguments, false);
+        return parent::main_render("action", $arguments, false);
     }
 
 } 

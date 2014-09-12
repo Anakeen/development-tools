@@ -15,7 +15,7 @@ class ApplicationParameter extends Template
         if (!empty($outputPath)) {
             $outputPath .= DIRECTORY_SEPARATOR . $arguments["name"] . "_init.php";
         }
-        return parent::render("application_param", $arguments, $outputPath, $force);
+        return parent::main_render("application_param", $arguments, $outputPath, $force);
     }
 
 } 

@@ -24,6 +24,6 @@ class WorkflowStructure extends Template
         if (!empty($outputPath)) {
             $outputPath .= DIRECTORY_SEPARATOR . $arguments["name"] . "__WFL.csv";
         }
-        return parent::render("workflow_struct", $arguments, $outputPath, $force);
+        return parent::main_render("workflow_struct", $arguments, $outputPath, $force);
     }
 } 

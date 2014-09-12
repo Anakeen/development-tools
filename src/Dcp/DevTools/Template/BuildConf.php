@@ -38,6 +38,6 @@ class BuildConf extends Template
         if (!empty($outputPath)) {
             $outputPath .= DIRECTORY_SEPARATOR . "build.json";
         }
-        return parent::render("build", $arguments, $outputPath, $force);
+        return parent::main_render("build", $arguments, $outputPath, $force);
     }
 }
