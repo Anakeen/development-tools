@@ -1,10 +1,6 @@
 <?php
 
-$baseDir = realpath(dirname(__FILE__) . '/..');
-
-require $baseDir
-    . DIRECTORY_SEPARATOR . 'vendor'
-    . DIRECTORY_SEPARATOR . 'autoload.php';
+require_once 'initializeAutoloader.php';
 
 use Ulrichsg\Getopt\Getopt;
 use Ulrichsg\Getopt\Option;

@@ -47,7 +47,8 @@ class PoGenerator
         }
         $poPath = $langPath.DIRECTORY_SEPARATOR.$name.".po";
         if (!is_file($poPath)) {
-            $this->xgettextWrapper->msginit(sprintf(" --locale=%s --no-translator --input=%s --output=%s", $lang, $potFile, $poPath));
+            $this->xgettextWrapper->msginit(array("lang" => $lang, "potFile" => $potFile, "poTarget" => $poPath));
+                //sprintf(" --locale=%s --no-translator --input=%s --output=%s", $lang, $potFile, $poPath));
         } else {
             $this->xgettextWrapper->msgmerge(sprintf(" --sort-output --no-fuzzy-matching -o %s %s %s", $poPath.'.new', $poPath, $potFile));
             rename($poPath.'.new', $poPath);

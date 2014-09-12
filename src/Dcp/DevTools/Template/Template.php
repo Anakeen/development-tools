@@ -11,7 +11,7 @@ class Template
 
     public function __construct()
     {
-        $templateBaseDir = 'templates';
+        $templateBaseDir = __DIR__.'/../../../../templates';
 
         $realDir = realpath($templateBaseDir);
         if (is_dir($realDir)) {
