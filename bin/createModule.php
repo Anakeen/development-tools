@@ -16,7 +16,6 @@ use Dcp\DevTools\ExtractPo\ModulePo;
 use Dcp\DevTools\Template\BuildConf;
 
 $getopt = new Getopt(array(
-    (new Option('f', 'force', Getopt::NO_ARGUMENT))->setDescription('force the write if the file exist'),
     (new Option('o', 'output', Getopt::REQUIRED_ARGUMENT))->setDescription('output Path (needed)')->setValidation(function ($path) {
         if (!is_dir($path)) {
             print "The output dir must be a valid dir ($path)";
@@ -29,7 +28,7 @@ $getopt = new Getopt(array(
     (new Option('a', 'application', Getopt::REQUIRED_ARGUMENT))->setDescription('associated application (list of app name separeted by ,)'),
     (new Option('l', 'lang', Getopt::REQUIRED_ARGUMENT))->setDescription('list of locale (list of locale separeted by ,) default (fr,en)'),
     (new Option('e', 'external', Getopt::NO_ARGUMENT))->setDescription('with external file'),
-    (new Option('s', 'style', Getopt::REQUIRED_ARGUMENT))->setDescription('with style directory'),
+    (new Option('s', 'style', Getopt::NO_ARGUMENT))->setDescription('with style directory'),
     (new Option('p', 'po', Getopt::NO_ARGUMENT))->setDescription('with po directory'),
     (new Option('h', 'help', Getopt::NO_ARGUMENT))->setDescription('show the usage message'),
 ));
