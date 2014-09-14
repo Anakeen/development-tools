@@ -7,7 +7,7 @@ class Template
 
     protected $templateBaseDir;
     protected $templates = array();
-    protected $logicalNameRegExp = "/^[A-Za-z]+[A-Za-z_]*$/";
+    protected $logicalNameRegExp = "/^[A-Za-z]+[A-Za-z_-]*$/";
 
     public function __construct()
     {
