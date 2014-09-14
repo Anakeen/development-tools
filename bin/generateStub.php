@@ -72,15 +72,17 @@ try {
     $delimiter = !isset($getopt["delimiter"]) ? ';' : $getopt["delimiter"];
     $enclosure = $enclosure === 1 ? "" : $enclosure;
 
-    $stub = new Stub($enclosure, $delimiter);
+
 
     $files = $globRecursive("$inputDir/*__STRUCT.csv");
     foreach($files as $currentFile) {
+        $stub = new Stub($enclosure, $delimiter);
         $stub->generate($currentFile, $getopt['output']);
     }
 
     $files = $globRecursive("$inputDir/*__WFL.csv");
     foreach ($files as $currentFile) {
+        $stub = new Stub($enclosure, $delimiter);
         $stub->generate($currentFile, $getopt['output']);
     }
 
