@@ -23,7 +23,7 @@ class Action extends Template
         }
 
         if (isset($arguments["script"])) {
-            $scriptPath = $outputPath . strtolower("action." . $arguments["name"]) . ".php";
+            $scriptPath = $outputPath . DIRECTORY_SEPARATOR . strtolower("action." . $arguments["name"]) . ".php";
             $arguments["script_name"] = strtolower($arguments["name"]);
             parent::main_render("action_script", $arguments, $scriptPath, $force);
         }
