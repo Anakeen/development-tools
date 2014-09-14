@@ -61,11 +61,13 @@ class Webinst {
         $template = new \Mustache_Engine();
         $infoXML = $template->render('{{=@ @=}}'.file_get_contents($this->inputPath.DIRECTORY_SEPARATOR."info.xml"), $this->conf);
         $webinstName = $template->render("{{moduleName}}-{{version}}-{{release}}", $this->conf);
-        $pharTar = new \PharData($this->inputPath . DIRECTORY_SEPARATOR . $webinstName.".tar");
+        $pharTar = new \PharData($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"].".tar");
         $pharTar->addFromString("info.xml", $infoXML);
         $pharTar->addFile($contentTar.".tar.gz", "content.tar.gz");
-        rename($this->inputPath . DIRECTORY_SEPARATOR . $webinstName.".tar", $this->inputPath . DIRECTORY_SEPARATOR . $webinstName . ".webinst");
+        $pharTar->compress(\Phar::GZ);
+        rename($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"].".tar.gz", $this->inputPath . DIRECTORY_SEPARATOR . $webinstName . ".webinst");
         unlink($contentTar . ".tar.gz");
+        unlink($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"] . ".tar");
     }
 
 
