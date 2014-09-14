@@ -11,7 +11,7 @@ class Application extends Template {
             throw new Exception("You need to set the name of the application with a valid name " . $this->logicalNameRegExp);
         }
         if (!empty($outputPath)) {
-            $outputPath .= DIRECTORY_SEPARATOR.$arguments["name"].".php";
+            $outputPath .= DIRECTORY_SEPARATOR.$arguments["name"].".app";
         }
         return parent::main_render("application", $arguments, $outputPath, $force);
     }
