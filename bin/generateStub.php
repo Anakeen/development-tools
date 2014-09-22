@@ -7,13 +7,7 @@ use Ulrichsg\Getopt\Option;
 use Dcp\BuildTools\Stub\Stub;
 
 $getopt = new Getopt(array(
-    (new Option('o', 'output', Getopt::REQUIRED_ARGUMENT))->setDescription('output dir (nedded)')->setValidation(function ($dir) {
-        if (!is_dir($dir)) {
-            print "The output dir must be a valid dir ($dir)";
-            return false;
-        }
-        return true;
-    }),
+    (new Option('o', 'output', Getopt::REQUIRED_ARGUMENT))->setDescription('output dir (nedded)'),
     (new Option('i', 'input', Getopt::REQUIRED_ARGUMENT))->setDescription('input path of the php files (nedded)')
         ->setValidation(function ($inputDir) {
             if (!is_dir($inputDir)) {
@@ -22,8 +16,6 @@ $getopt = new Getopt(array(
             }
             return true;
         }),
-    (new Option('e', 'enclosure', Getopt::OPTIONAL_ARGUMENT))->setDescription('enclosure of the CSV file (default : ")'),
-    (new Option('d', 'delimiter', Getopt::REQUIRED_ARGUMENT))->setDescription('delimiter of the CSV file (default : ;)'),
     (new Option('h', 'help', Getopt::NO_ARGUMENT))->setDescription('show the usage message'),
 ));
 
@@ -50,6 +42,10 @@ try {
         exit(42);
     }
 
+    if (!is_dir($getopt['output'])) {
+        mkdir($getopt['output'], 0777,true);
+    }
+
     $inputDir = $getopt['input'];
 
     $realDir = realpath($inputDir);
@@ -68,14 +64,31 @@ try {
         return $files;
     };
 
-    $enclosure = !isset($getopt["enclosure"]) ? '"' : $getopt["enclosure"];
-    $delimiter = !isset($getopt["delimiter"]) ? ';' : $getopt["delimiter"];
-    $enclosure = $enclosure === 1 ? "" : $enclosure;
+    if (!is_file($inputDir . DIRECTORY_SEPARATOR . 'build.json')) {
+        throw new Exception("The build.json doesn't exist ($inputDir)");
+    }
+    $conf = json_decode(file_get_contents($inputDir . DIRECTORY_SEPARATOR . 'build.json'), true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        throw new Exception("The build.json is not a valid JSON file ($inputDir)");
+    }
+    if (!isset($conf["moduleName"])) {
+        throw new Exception("The build.json doesn't not contain the module name ($inputDir)");
+    }
+    if (!isset($conf["csvParam"])) {
+        $conf["csvParam"] = array();
+    }
+    if (!isset($conf["csvParam"]["enclosure"])) {
+        $conf["csvParam"]["enclosure"] = '"';
+    }
+    if (!isset($conf["csvParam"]["delimiter"])) {
+        $conf["csvParam"]["delimiter"] = ';';
+    }
 
-
+    $enclosure = $conf["csvParam"]["enclosure"];
+    $delimiter = $conf["csvParam"]["delimiter"];
 
     $files = $globRecursive("$inputDir/*__STRUCT.csv");
-    foreach($files as $currentFile) {
+    foreach ($files as $currentFile) {
         $stub = new Stub($enclosure, $delimiter);
         $stub->generate($currentFile, $getopt['output']);
     }

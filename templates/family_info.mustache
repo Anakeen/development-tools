@@ -1,2 +1,2 @@
-<process command='./wsh.php --api=importDocuments --file=./{{{output}}}/{{{name}}}__STRUCT.csv --csv-separator=&apos;;&apos; --csv-enclosure=&apos;"&apos;'/>
-<process command='./wsh.php --api=importDocuments --file=./{{{output}}}/{{{name}}}__PARAM.csv --csv-separator=&apos;;&apos; --csv-enclosure=&apos;"&apos;'/>
+<process command='./wsh.php --api=importDocuments --file={{{output}}}/{{{name}}}__STRUCT.csv --csv-separator=&apos;{{delimiter}}&apos; {{#enclosure}}--csv-enclosure=&apos;{{enclosure}}&apos;{{/enclosure}}'/>
+<process command='./wsh.php --api=importDocuments --file={{{output}}}/{{{name}}}__PARAM.csv --csv-separator=&apos;{{delimiter}}&apos; {{#enclosure}}--csv-enclosure=&apos;{{enclosure}}&apos;{{/enclosure}}'/>

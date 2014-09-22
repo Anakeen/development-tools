@@ -14,8 +14,7 @@ use Dcp\DevTools\Template\WorkflowClass;
 use Dcp\DevTools\Template\WorkflowInfo;
 
 $getopt = new Getopt(array(
-    (new Option('f', 'force', Getopt::NO_ARGUMENT))->setDescription('force the write if the file exist'),
-    (new Option('o', 'output', Getopt::REQUIRED_ARGUMENT))->setDescription('output Path (needed)')->setValidation(function ($path) {
+    (new Option('s', 'sourcePath', Getopt::REQUIRED_ARGUMENT))->setDescription('source Path (needed)')->setValidation(function ($path) {
         if (!is_dir($path)) {
             print "$path is not a valid directory";
             return false;
@@ -24,10 +23,12 @@ $getopt = new Getopt(array(
     }),
     (new Option('n', 'name', Getopt::REQUIRED_ARGUMENT))->setDescription('name of family (needed)'),
     (new Option('m', 'namespace', Getopt::REQUIRED_ARGUMENT))->setDescription('namespace of family (needed)'),
+    (new Option('a', 'application', Getopt::REQUIRED_ARGUMENT))->setDescription('associated application (needed)'),
     (new Option('p', 'parent', Getopt::REQUIRED_ARGUMENT))->setDescription('name of the parent'),
     (new Option('t', 'title', Getopt::REQUIRED_ARGUMENT))->setDescription('title of the family'),
     (new Option('i', 'icon', Getopt::REQUIRED_ARGUMENT))->setDescription('icon of the family'),
     (new Option('w', 'workflow', Getopt::NO_ARGUMENT))->setDescription('create a workflow (same name than the current family)'),
+    (new Option('f', 'force', Getopt::NO_ARGUMENT))->setDescription('force the write if the file exist'),
     (new Option('h', 'help', Getopt::NO_ARGUMENT))->setDescription('show the usage message'),
 ));
 
@@ -45,11 +46,21 @@ try {
     }
 
     if (!isset($getopt['namespace'])) {
-        $error[] = "You need to set the name of the application -m or --namespace";
+        $error[] = "You need to set the namespace -m or --namespace";
     }
 
-    if (!isset($getopt['output'])) {
-        $error[] = "You need to set the output path for the file -o or --output";
+    if (!isset($getopt['application'])) {
+        $error[] = "You need to set the name of the application of the family -a or --application";
+    }
+
+    if (!isset($getopt['sourcePath'])) {
+        $error[] = "You need to set the sourcepath of the application -s or --sourcePath";
+    }
+
+    $outputPath = $getopt['sourcePath'] . DIRECTORY_SEPARATOR . $getopt["application"];
+
+    if (!is_dir($outputPath)) {
+        $error[] = "The path of the application doesn't exist. Have you initialized it ?";
     }
 
     if (!empty($error)) {
@@ -58,10 +69,35 @@ try {
         exit(42);
     }
 
-    $outputPath = $getopt->getOption("output");
+    $inputDir = $getopt["sourcePath"];
+
     $force = $getopt->getOption("force") ? true : false;
 
     $renderOptions = $getopt->getOptions();
+
+    if (!is_file($inputDir . DIRECTORY_SEPARATOR . 'build.json')) {
+        throw new Exception("The build.json doesn't exist ($inputDir)");
+    }
+    $conf = json_decode(file_get_contents($inputDir . DIRECTORY_SEPARATOR . 'build.json'), true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        throw new Exception("The build.json is not a valid JSON file ($inputDir)");
+    }
+    if (!isset($conf["moduleName"])) {
+        throw new Exception("The build.json doesn't not contain the module name ($inputDir)");
+    }
+    if (!isset($conf["csvParam"])) {
+        $conf["csvParam"] = array();
+    }
+    if (!isset($conf["csvParam"]["enclosure"])) {
+        $conf["csvParam"]["enclosure"] = '"';
+    }
+    if (!isset($conf["csvParam"]["delimiter"])) {
+        $conf["csvParam"]["delimiter"] = ';';
+    }
+
+    $renderOptions["enclosure"] = $conf["csvParam"]["enclosure"];
+    $renderOptions["delimiter"] = $conf["csvParam"]["delimiter"];
+    $renderOptions["output"] = $outputPath;
 
     $template = new FamilyStructure();
     $template->render($renderOptions, $outputPath, $force);

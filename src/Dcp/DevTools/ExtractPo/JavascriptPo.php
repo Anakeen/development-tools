@@ -21,7 +21,9 @@ class JavascriptPo extends PoGenerator {
                 if (empty($filesList)) {
                     continue;
                 }
-                $tempName = tempnam(sys_get_temp_dir(), 'tmp_app_layout_' . $currentApp);
+                $tempName = tempnam(sys_get_temp_dir(), 'tmp_js_layout_' . $currentApp);
+                unlink($tempName);
+                $tempName = $tempName.".pot";
                 $extractor = new AnalyzeJavascript($tempName, $this->gettextpath);
                 $extractor->extract($filesList);
                 if (filesize($tempName) === 0) {
@@ -29,6 +31,9 @@ class JavascriptPo extends PoGenerator {
                 }
                 foreach ($this->conf["lang"] as $currentLang) {
                     $this->updatePo($tempName, "js_".$currentApp . "_" . $currentLang, $currentLang);
+                }
+                if (is_file($tempName)) {
+                    unlink($tempName);
                 }
             }
         }

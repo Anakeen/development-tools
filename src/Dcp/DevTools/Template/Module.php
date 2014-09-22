@@ -22,7 +22,6 @@ class Module extends Template
                     throw new Exception("You need to set the name of the application with a valid name $currentApplication : " . $this->logicalNameRegExp);
                 }
                 $this->createDir($outputPath . DIRECTORY_SEPARATOR . $currentApplication)
-                    ->createDir($outputPath . DIRECTORY_SEPARATOR . $currentApplication . DIRECTORY_SEPARATOR . "Familles")
                     ->createDir($outputPath . DIRECTORY_SEPARATOR . $currentApplication . DIRECTORY_SEPARATOR . "Images")
                     ->createDir($outputPath . DIRECTORY_SEPARATOR . $currentApplication . DIRECTORY_SEPARATOR . "Layout");
             }
@@ -32,6 +31,9 @@ class Module extends Template
         }
         if (isset($arguments["style"])) {
             mkdir($outputPath . DIRECTORY_SEPARATOR . "STYLE");
+        }
+        if (isset($arguments["api"])) {
+            mkdir($outputPath . DIRECTORY_SEPARATOR . "API");
         }
         mkdir($outputPath . DIRECTORY_SEPARATOR . "locale");
         if (isset($arguments["lang"]) && is_array($arguments["lang"])) {

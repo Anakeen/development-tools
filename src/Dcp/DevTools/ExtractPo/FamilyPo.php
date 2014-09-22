@@ -19,12 +19,12 @@ class FamilyPo extends PoGenerator {
                 $currentAppPath = $this->inputPath . DIRECTORY_SEPARATOR . $currentApp;
                 $filesList = $this->globRecursive($currentAppPath . DIRECTORY_SEPARATOR . '*__STRUCT.csv');
                 $tempStruct = $this->tempdir('tmp_family_struct_' . $currentApp);
-                $extractor = new AnalyzeFamily($tempStruct);
+                $extractor = new AnalyzeFamily($tempStruct, $this->conf["csvParam"]["enclosure"], $this->conf["csvParam"]["delimiter"]);
                 $extractor->extract($filesList);
                 $potList = $this->globRecursive($tempStruct.DIRECTORY_SEPARATOR."*.pot");
                 $filesList = $this->globRecursive($currentAppPath . DIRECTORY_SEPARATOR .'*__PARAM.csv');
                 $tempParam = $this->tempdir('tmp_family_param_' . $currentApp);
-                $extractor = new AnalyzeFamily($tempParam);
+                $extractor = new AnalyzeFamily($tempParam, $this->conf["csvParam"]["enclosure"], $this->conf["csvParam"]["delimiter"]);
                 $extractor->extract($filesList);
                 $potList = array_merge($potList, $this->globRecursive($tempParam . DIRECTORY_SEPARATOR . "*.pot"));
                 $tempFusion = $this->tempdir('tmp_fusion_' . $currentApp);

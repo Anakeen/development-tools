@@ -32,26 +32,36 @@ class PoGenerator
         if (isset($this->conf["toolsPath"]) && isset($this->conf["toolsPath"]["getttext"])) {
             $getTextPath = $this->conf["toolsPath"]["getttext"];
         }
+        if (!isset($this->conf["csvParam"])){
+            $this->conf["csvParam"] = array();
+        }
+        if (!isset($this->conf["csvParam"]["enclosure"])) {
+            $this->conf["csvParam"]["enclosure"]= '"';
+        }
+        if (!isset($this->conf["csvParam"]["delimiter"])) {
+            $this->conf["csvParam"]["delimiter"] = ';';
+        }
         $this->gettextpath = $getTextPath;
         $this->xgettextWrapper = new XgettextWrapper($getTextPath);
     }
 
-    public function updatePo($potFile, $name, $lang) {
+    public function updatePo($potFile, $name, $lang)
+    {
         $localePath = $this->inputPath . DIRECTORY_SEPARATOR . "locale";
         if (!is_dir($localePath)) {
             mkdir($this->inputPath . DIRECTORY_SEPARATOR . "locale");
         }
-        $langPath = $localePath . DIRECTORY_SEPARATOR . $lang;
+        $langPath = $localePath . DIRECTORY_SEPARATOR . $lang . DIRECTORY_SEPARATOR . "LC_MESSAGES" . DIRECTORY_SEPARATOR . "src";
         if (!is_dir($langPath)) {
-            mkdir($langPath);
+            mkdir($langPath, 0777, true);
         }
-        $poPath = $langPath.DIRECTORY_SEPARATOR.$name.".po";
+        $poPath = $langPath . DIRECTORY_SEPARATOR . $name . ".po";
         if (!is_file($poPath)) {
             $this->xgettextWrapper->msginit(array("lang" => $lang, "potFile" => $potFile, "poTarget" => $poPath));
-                //sprintf(" --locale=%s --no-translator --input=%s --output=%s", $lang, $potFile, $poPath));
+            //sprintf(" --locale=%s --no-translator --input=%s --output=%s", $lang, $potFile, $poPath));
         } else {
-            $this->xgettextWrapper->msgmerge(sprintf(" --sort-output --no-fuzzy-matching -o %s %s %s", $poPath.'.new', $poPath, $potFile));
-            rename($poPath.'.new', $poPath);
+            $this->xgettextWrapper->msgmerge(sprintf(" --sort-output --no-fuzzy-matching -o %s %s %s", $poPath . '.new', $poPath, $potFile));
+            rename($poPath . '.new', $poPath);
         }
     }
 
@@ -80,8 +90,9 @@ class PoGenerator
         return false;
     }
 
-    protected function unlinkDir($dirPath) {
-        array_map('unlink', glob($dirPath.DIRECTORY_SEPARATOR."*"));
+    protected function unlinkDir($dirPath)
+    {
+        array_map('unlink', glob($dirPath . DIRECTORY_SEPARATOR . "*"));
         rmdir($dirPath);
     }
 

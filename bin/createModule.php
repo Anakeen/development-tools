@@ -24,12 +24,13 @@ $getopt = new Getopt(array(
         return true;
     }),
     (new Option('n', 'name', Getopt::REQUIRED_ARGUMENT))->setDescription('name of the module (needed)'),
-    (new Option('d', 'description', Getopt::REQUIRED_ARGUMENT))->setDescription('description of the module'),
     (new Option('a', 'application', Getopt::REQUIRED_ARGUMENT))->setDescription('associated application (list of app name separeted by ,)'),
     (new Option('l', 'lang', Getopt::REQUIRED_ARGUMENT))->setDescription('list of locale (list of locale separeted by ,) default (fr,en)'),
-    (new Option('e', 'external', Getopt::NO_ARGUMENT))->setDescription('with external file'),
+    (new Option('x', 'external', Getopt::NO_ARGUMENT))->setDescription('with external file'),
     (new Option('s', 'style', Getopt::NO_ARGUMENT))->setDescription('with style directory'),
-    (new Option('p', 'po', Getopt::NO_ARGUMENT))->setDescription('with po directory'),
+    (new Option('p', 'api', Getopt::NO_ARGUMENT))->setDescription('with api directory'),
+    (new Option('e', 'enclosure', Getopt::OPTIONAL_ARGUMENT))->setDescription('enclosure of the CSV generated (default : " )'),
+    (new Option('d', 'delimiter', Getopt::REQUIRED_ARGUMENT))->setDescription('delimiter of the CSV generated (default : ; )'),
     (new Option('h', 'help', Getopt::NO_ARGUMENT))->setDescription('show the usage message'),
 ));
 
@@ -66,6 +67,18 @@ try {
         $renderOptions["lang"] = "fr,en";
     }
 
+    if (!isset($renderOptions["enclosure"])) {
+        $renderOptions["enclosure"] = '"';
+    }
+
+    if (!isset($renderOptions["delimiter"])) {
+        $renderOptions["delimiter"] = ';';
+    }
+
+    if($renderOptions["enclosure"] === 1) {
+        $renderOptions["enclosure"] = "";
+    }
+
     $renderOptions["lang"] = explode(",", $renderOptions["lang"]);
 
     $template = new Module();
@@ -88,10 +101,10 @@ try {
         }
     }
 
-    $template = new InfoXml();
+    $template = new BuildConf();
     $template->render($renderOptions, $outputPath, $force);
 
-    $template = new BuildConf();
+    $template = new InfoXml();
     $template->render($renderOptions, $outputPath, $force);
 
     $extractor = new ModulePo($outputPath);

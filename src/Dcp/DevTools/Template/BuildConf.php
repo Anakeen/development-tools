@@ -34,6 +34,9 @@ class BuildConf extends Template
         if (isset($arguments["lang"]) && is_array($arguments["lang"])) {
             $arguments["buildLang"] = json_encode($arguments["lang"]);
         }
+        if ($arguments["enclosure"] === '"') {
+            $arguments["enclosure"] = '\"';
+        }
         $arguments["includedPath"] = json_encode($arguments["includedPath"]);
         if (!empty($outputPath)) {
             $outputPath .= DIRECTORY_SEPARATOR . "build.json";

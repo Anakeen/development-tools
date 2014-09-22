@@ -12,23 +12,57 @@ class ApplicationPo extends PoGenerator
         if (isset($this->conf["application"])) {
             foreach ($this->conf["application"] as $currentApp) {
                 $currentAppPath = $this->inputPath . DIRECTORY_SEPARATOR . $currentApp;
-                $filesList = $this->globRecursive($currentAppPath . DIRECTORY_SEPARATOR . '*.php');
+                $filesList = $this->globRecursive($currentAppPath . DIRECTORY_SEPARATOR . '*.app');
                 $tempApp = tempnam(sys_get_temp_dir(), 'tmp_app_po_' . $currentApp);
-                $extractor = new AnalyzePhp($tempApp, $this->gettextpath);
+                unlink($tempApp);
+                $extractor = new AnalyzePhp($tempApp . ".pot", $this->gettextpath);
+                $extractor->extract($filesList);
+                $filesList = $this->globRecursive($currentAppPath . DIRECTORY_SEPARATOR . '*.php');
+                $tempPhp = tempnam(sys_get_temp_dir(), 'tmp_php_po_' . $currentApp);
+                unlink($tempPhp);
+                $extractor = new AnalyzePhp($tempPhp.".pot", $this->gettextpath);
                 $extractor->extract($filesList);
                 $filesList = $this->globRecursive($currentAppPath . DIRECTORY_SEPARATOR . 'Layout' . DIRECTORY_SEPARATOR . '*');
                 $tempLayout = tempnam(sys_get_temp_dir(), 'tmp_layout_' . $currentApp);
-                $extractor = new AnalyzeLayout($tempLayout, $this->gettextpath);
-                $extractor->extract($filesList);
-                $tempFusion = tempnam(sys_get_temp_dir(), 'tmp_fusion_' . $currentApp);
-                $this->xgettextWrapper->msgcat("-o $tempFusion $tempApp $tempLayout");
-
-                foreach ($this->conf["lang"] as $currentLang) {
-                    $this->updatePo($tempFusion, $currentApp."_".$currentLang, $currentLang);
-                }
-                unlink($tempApp);
                 unlink($tempLayout);
-                unlink($tempFusion);
+                $extractor = new AnalyzeLayout($tempLayout . ".pot", $this->gettextpath);
+                $extractor->extract($filesList);
+
+                $filesToBeGenerated = array();
+
+                if (is_file($tempApp . ".pot")) {
+                    $filesToBeGenerated[] = $tempApp . ".pot";
+                }
+
+                if (is_file($tempPhp . ".pot")) {
+                    $filesToBeGenerated[] = $tempPhp . ".pot";
+                }
+
+                if (is_file($tempLayout . ".pot")) {
+                    $filesToBeGenerated[] = $tempLayout . ".pot";
+                }
+
+                if (!empty($filesToBeGenerated)) {
+                    $firstFile = array_shift($filesToBeGenerated);
+                    foreach ($this->conf["lang"] as $currentLang) {
+                        $tempFusion = tempnam(sys_get_temp_dir(), 'tmp_fusion_' . $currentApp);
+                        unlink($tempFusion);
+                        $tempFusion = $tempFusion.".po";
+                        $this->xgettextWrapper->msginit(array("lang" => $currentLang, "potFile" => $firstFile, "poTarget" => $tempFusion));
+                        foreach($filesToBeGenerated as $currentFile)  {
+                            $this->xgettextWrapper->msgcat("-o $tempFusion --use-first $tempFusion $currentFile");
+                        }
+                        $this->updatePo($tempFusion, $currentApp . "_" . $currentLang, $currentLang);
+                        unlink($tempFusion);
+                    }
+                    if (is_file($firstFile)) {
+                        unlink($firstFile);
+                    }
+                }
+
+                foreach($filesToBeGenerated as $currentFile) {
+                    unlink($currentFile);
+                }
             }
         }
     }
