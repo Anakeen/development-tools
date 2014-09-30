@@ -19,7 +19,7 @@ class WorkflowStructure extends Template
             throw new Exception("You need to set the parent of the workflow with a valid name " . $this->logicalNameRegExp);
         }
         if (!isset($arguments["title"])) {
-            $arguments["title"] = "WFL_" . $arguments["name"];
+            $arguments["title"] = $arguments["name"]."__WFL";
         }
         if (!empty($outputPath)) {
             $outputPath .= DIRECTORY_SEPARATOR . $arguments["name"] . "__WFL.csv";
