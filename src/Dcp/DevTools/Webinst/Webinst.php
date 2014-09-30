@@ -59,6 +59,7 @@ class Webinst {
         }
         $pharTar->stopBuffering();
         $pharTar->compress(\Phar::GZ);
+        unset($pharTar);
         unlink($contentTar.".tar");
         $template = new \Mustache_Engine();
         $infoXML = $template->render('{{=@ @=}}'.file_get_contents($this->inputPath.DIRECTORY_SEPARATOR."info.xml"), $this->conf);
@@ -71,6 +72,7 @@ class Webinst {
         $pharTar->compress(\Phar::GZ);
         rename($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"].".tar.gz", $this->inputPath . DIRECTORY_SEPARATOR . $webinstName . ".webinst");
         unlink($contentTar . ".tar.gz");
+        unset($pharTar);
         unlink($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"] . ".tar");
     }
 

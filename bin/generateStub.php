@@ -57,8 +57,8 @@ try {
 
         $files = glob($pattern, $flags);
 
-        foreach (glob(dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
-            $files = array_merge($files, $globRecursive($dir . '/' . basename($pattern), $flags));
+        foreach (glob(dirname($pattern) . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
+            $files = array_merge($files, $globRecursive($dir . DIRECTORY_SEPARATOR . basename($pattern), $flags));
         }
 
         return $files;
@@ -87,13 +87,13 @@ try {
     $enclosure = $conf["csvParam"]["enclosure"];
     $delimiter = $conf["csvParam"]["delimiter"];
 
-    $files = $globRecursive("$inputDir/*__STRUCT.csv");
+    $files = $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__STRUCT.csv");
     foreach ($files as $currentFile) {
         $stub = new Stub($enclosure, $delimiter);
         $stub->generate($currentFile, $getopt['output']);
     }
 
-    $files = $globRecursive("$inputDir/*__WFL.csv");
+    $files = $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__WFL.csv");
     foreach ($files as $currentFile) {
         $stub = new Stub($enclosure, $delimiter);
         $stub->generate($currentFile, $getopt['output']);
