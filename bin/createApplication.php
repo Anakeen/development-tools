@@ -10,7 +10,7 @@ use Dcp\DevTools\Template\ApplicationParameter;
 
 $getopt = new Getopt(array(
     (new Option('f', 'force', Getopt::NO_ARGUMENT))->setDescription('force the write if the file exist (needed)'),
-    (new Option('o', 'output', Getopt::REQUIRED_ARGUMENT))->setDescription('output Path')->setValidation(function($path) {
+    (new Option('s', 'sourcePath', Getopt::REQUIRED_ARGUMENT))->setDescription('path of the module source')->setValidation(function($path) {
         return is_dir($path);
     }),
     (new Option('n', 'name', Getopt::REQUIRED_ARGUMENT))->setDescription('name of the application (needed)'),
@@ -31,8 +31,8 @@ try {
         $error[] = "You need to set the name of the application -n or --name";
     }
 
-    if (!isset($getopt['output'])) {
-        $error[] = "You need to set the output path for the file -o or --output";
+    if (!isset($getopt['s'])) {
+        $error[] = "You need to set the path of the source of the application -s or --sourcePath";
     }
 
     if (!empty($error)) {
@@ -41,7 +41,7 @@ try {
         exit(42);
     }
 
-    $outputPath = $getopt->getOption("output");
+    $outputPath = $getopt->getOption("s").DIRECTORY_SEPARATOR. $getopt->getOption("n");
     $force = $getopt->getOption("force") ? true : false;
 
     $renderOptions = $getopt->getOptions();

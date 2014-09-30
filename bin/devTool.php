@@ -9,7 +9,31 @@ $getopt = new Getopt(array(
     (new Option('h', 'help', Getopt::NO_ARGUMENT))->setDescription('help message')
 ));
 
+//Bootstrap loader for devtools
+/**
+ * Check the extensions
+ * Call the next script
+ */
+
 try {
+
+    // Test extension
+    $requiredExtension = array("mbstring", "zlib", "zip", "Phar", "bz2");
+    $requiredError = "";
+    foreach($requiredExtension as $currentRequired) {
+        if (!extension_loaded($currentRequired)) {
+            $requiredError .= "\t * $currentRequired \n";
+        }
+    }
+
+    if ($requiredError !== "") {
+        echo "DevTools for Dynacase 3.2\n";
+        echo "You need the following extensions to run the devtools : \n";
+        echo $requiredError;
+        echo "You should activate it from php.ini \n";
+        exit(42);
+    }
+
     $getopt->parse();
 
     $currentDirName = dirname(__FILE__);

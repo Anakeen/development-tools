@@ -13,7 +13,7 @@ class Module extends Template
         if (!isset($arguments["name"]) || !$this->checkLogicalName($arguments["name"])) {
             throw new Exception("You need to set the name of the module with a valid name " . $this->logicalNameRegExp);
         }
-        $outputPath = $outputPath . DIRECTORY_SEPARATOR . $arguments['name'];
+        //$outputPath = $outputPath . DIRECTORY_SEPARATOR . $arguments['name'];
         $this->createDir($outputPath);
         if (isset($arguments["application"])) {
             $application = explode(",", $arguments["application"]);
@@ -32,6 +32,9 @@ class Module extends Template
         if (isset($arguments["style"])) {
             mkdir($outputPath . DIRECTORY_SEPARATOR . "STYLE");
         }
+        if (isset($arguments["images"])) {
+            mkdir($outputPath . DIRECTORY_SEPARATOR . "Images");
+        }
         if (isset($arguments["api"])) {
             mkdir($outputPath . DIRECTORY_SEPARATOR . "API");
         }
@@ -45,10 +48,10 @@ class Module extends Template
 
     public function createDir($path)
     {
-        if (is_dir($path)) {
-            throw new Exception("The dir $path already exist.");
+        if (!is_dir($path)) {
+            mkdir($path);
+            //throw new Exception("The dir $path already exist.");
         }
-        mkdir($path);
         return $this;
     }
 } 

@@ -31,6 +31,9 @@ class BuildConf extends Template
         if (isset($arguments["style"])) {
             $arguments["includedPath"][] = "STYLE";
         }
+        if (isset($arguments["images"])) {
+            $arguments["includedPath"][] = "Images";
+        }
         if (isset($arguments["lang"]) && is_array($arguments["lang"])) {
             $arguments["buildLang"] = json_encode($arguments["lang"]);
         }

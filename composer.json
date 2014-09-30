@@ -5,16 +5,8 @@
     "require" :     {
         "php" :                 ">=5.4.0",
         "mustache/mustache" :   "2.*",
-        "ulrichsg/getopt-php" : "2.*",
-        "dcp/build-tools" : "*"
+        "ulrichsg/getopt-php" : "2.*"
     },
-    "minimum-stability" : "dev",
-    "repositories" : [
-        {
-            "type" : "vcs",
-            "url" :  "git@github.com:cbonnissent/dynacase-buildtools.git"
-        }
-    ],
     "autoload" :    {
         "psr-0" : {
             "Dcp\\" : "src/"

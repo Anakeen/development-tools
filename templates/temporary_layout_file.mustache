@@ -1,0 +1,19 @@
+<?php
+
+{{# odtLayoutKeys}}
+    {{# getText}}
+    $i18nODTLayoutKeys = _("{{{key}}}");
+    {{/ getText}}
+    {{# contextGetText}}
+    $i18nODTLayoutKeys = pgettext("{{{context}}}","{{{key}}}");
+    {{/ contextGetText}}
+{{/ odtLayoutKeys}}
+
+{{# layoutKeys}}
+    {{# getText}}
+    $i18nLayoutLeys = _("{{{key}}}");
+    {{/ getText}}
+    {{# contextGetText}}
+    $i18nLayoutLeys = pgettext("{{{context}}}","{{{key}}}");
+    {{/ contextGetText}}
+{{/ layoutKeys}}

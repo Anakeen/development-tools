@@ -1,8 +1,8 @@
 <?php
 namespace Dcp\DevTools\ExtractPo;
 
-use Dcp\BuildTools\Po\AnalyzePhp;
-use Dcp\BuildTools\Po\AnalyzeLayout;
+use Dcp\DevTools\Po\AnalyzePhp;
+use Dcp\DevTools\Po\AnalyzeLayout;
 
 class ApplicationPo extends PoGenerator
 {
@@ -20,7 +20,7 @@ class ApplicationPo extends PoGenerator
                 $filesList = $this->globRecursive($currentAppPath . DIRECTORY_SEPARATOR . '*.php');
                 $tempPhp = tempnam(sys_get_temp_dir(), 'tmp_php_po_' . $currentApp);
                 unlink($tempPhp);
-                $extractor = new AnalyzePhp($tempPhp.".pot", $this->gettextpath);
+                $extractor = new AnalyzePhp($tempPhp . ".pot", $this->gettextpath);
                 $extractor->extract($filesList);
                 $filesList = $this->globRecursive($currentAppPath . DIRECTORY_SEPARATOR . 'Layout' . DIRECTORY_SEPARATOR . '*');
                 $tempLayout = tempnam(sys_get_temp_dir(), 'tmp_layout_' . $currentApp);
@@ -47,9 +47,9 @@ class ApplicationPo extends PoGenerator
                     foreach ($this->conf["lang"] as $currentLang) {
                         $tempFusion = tempnam(sys_get_temp_dir(), 'tmp_fusion_' . $currentApp);
                         unlink($tempFusion);
-                        $tempFusion = $tempFusion.".po";
-                        $this->xgettextWrapper->msginit(array("lang" => $currentLang, "potFile" => $firstFile, "poTarget" => $tempFusion));
-                        foreach($filesToBeGenerated as $currentFile)  {
+                        $tempFusion = $tempFusion . ".po";
+                        $this->xgettextWrapper->msginit(array("lang" => $currentLang, "potFile" => $firstFile, "poTarget" => $tempFusion, "name" => $currentApp));
+                        foreach ($filesToBeGenerated as $currentFile) {
                             $this->xgettextWrapper->msgcat("-o $tempFusion --use-first $tempFusion $currentFile");
                         }
                         $this->updatePo($tempFusion, $currentApp . "_" . $currentLang, $currentLang);
@@ -60,7 +60,7 @@ class ApplicationPo extends PoGenerator
                     }
                 }
 
-                foreach($filesToBeGenerated as $currentFile) {
+                foreach ($filesToBeGenerated as $currentFile) {
                     unlink($currentFile);
                 }
             }

@@ -4,11 +4,11 @@ require_once 'initializeAutoloader.php';
 
 use Ulrichsg\Getopt\Getopt;
 use Ulrichsg\Getopt\Option;
-use Dcp\BuildTools\Stub\Stub;
+use Dcp\DevTools\Stub\Stub;
 
 $getopt = new Getopt(array(
     (new Option('o', 'output', Getopt::REQUIRED_ARGUMENT))->setDescription('output dir (nedded)'),
-    (new Option('i', 'input', Getopt::REQUIRED_ARGUMENT))->setDescription('input path of the php files (nedded)')
+    (new Option('s', 'sourcePath', Getopt::REQUIRED_ARGUMENT))->setDescription('path of the source of the module (nedded)')
         ->setValidation(function ($inputDir) {
             if (!is_dir($inputDir)) {
                 print "The input dir must be a valid dir ($inputDir)";
@@ -28,12 +28,12 @@ try {
     }
 
     $error = array();
-    if (!isset($getopt['input'])) {
-        $error[] = "You need to set the input dir of the application -i or --input";
+    if (!isset($getopt['output'])) {
+        $error[] = "You need to set the output path -o or --output";
     }
 
-    if (!isset($getopt['output'])) {
-        $error[] = "You need to set the output path for the file -o or --output";
+    if (!isset($getopt['s'])) {
+        $error[] = "You need to set the output path for the file -s or --sourcePath";
     }
 
     if (!empty($error)) {
@@ -46,7 +46,7 @@ try {
         mkdir($getopt['output'], 0777,true);
     }
 
-    $inputDir = $getopt['input'];
+    $inputDir = $getopt['sourcePath'];
 
     $realDir = realpath($inputDir);
     if (is_dir($realDir)) {

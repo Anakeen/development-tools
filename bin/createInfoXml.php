@@ -8,13 +8,13 @@ use Ulrichsg\Getopt\Option;
 use Dcp\DevTools\Template\InfoXml;
 
 $getopt = new Getopt(array(
-    (new Option('f', 'force', Getopt::NO_ARGUMENT))->setDescription('force the write if the file exist (needed)'),
-    (new Option('o', 'output', Getopt::REQUIRED_ARGUMENT))->setDescription('output Path')->setValidation(function ($path) {
+    (new Option('s', 'sourcePath', Getopt::REQUIRED_ARGUMENT))->setDescription('path of the module source')->setValidation(function ($path) {
         return is_dir($path);
     }),
     (new Option('n', 'name', Getopt::REQUIRED_ARGUMENT))->setDescription('name of the module (needed)'),
     (new Option('d', 'description', Getopt::REQUIRED_ARGUMENT))->setDescription('description of the module'),
     (new Option('a', 'application', Getopt::REQUIRED_ARGUMENT))->setDescription('associated application'),
+    (new Option('f', 'force', Getopt::NO_ARGUMENT))->setDescription('force the write if the file exist (needed)'),
     (new Option('h', 'help', Getopt::NO_ARGUMENT))->setDescription('show the usage message'),
 ));
 
@@ -31,8 +31,8 @@ try {
         $error[] = "You need to set the name of the application -n or --name";
     }
 
-    if (!isset($getopt['output'])) {
-        $error[] = "You need to set the output path for the file -o or --output";
+    if (!isset($getopt['s'])) {
+        $error[] = "You need to set the path of the source of the module -s or --sourcePath";
     }
 
     if (!empty($error)) {
@@ -41,7 +41,7 @@ try {
         exit(42);
     }
 
-    $outputPath = $getopt->getOption("output");
+    $outputPath = $getopt->getOption("source");
     $force = $getopt->getOption("force") ? true : false;
 
     $renderOptions = $getopt->getOptions();

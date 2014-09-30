@@ -47,6 +47,7 @@ class Webinst {
         }
         $contentTar = $this->inputPath.DIRECTORY_SEPARATOR."temp_tar";
         $pharTar = new \PharData($contentTar.".tar");
+        $pharTar->startBuffering();
         $firstLevelIterator = new \DirectoryIterator($this->inputPath);
         foreach ($firstLevelIterator as $fileInfo) {
             /* @var \SplFileInfo $fileInfo */
@@ -56,14 +57,17 @@ class Webinst {
                 $pharTar->buildFromIterator(new \RecursiveIteratorIterator($recursiveDirectoryIterator), $this->inputPath);
             }
         }
+        $pharTar->stopBuffering();
         $pharTar->compress(\Phar::GZ);
         unlink($contentTar.".tar");
         $template = new \Mustache_Engine();
         $infoXML = $template->render('{{=@ @=}}'.file_get_contents($this->inputPath.DIRECTORY_SEPARATOR."info.xml"), $this->conf);
         $webinstName = $template->render("{{moduleName}}-{{version}}-{{release}}", $this->conf);
         $pharTar = new \PharData($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"].".tar");
+        $pharTar->startBuffering();
         $pharTar->addFromString("info.xml", $infoXML);
         $pharTar->addFile($contentTar.".tar.gz", "content.tar.gz");
+        $pharTar->stopBuffering();
         $pharTar->compress(\Phar::GZ);
         rename($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"].".tar.gz", $this->inputPath . DIRECTORY_SEPARATOR . $webinstName . ".webinst");
         unlink($contentTar . ".tar.gz");

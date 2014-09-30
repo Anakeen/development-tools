@@ -8,7 +8,7 @@
 
 namespace Dcp\DevTools\ExtractPo;
 
-use Dcp\BuildTools\Po\AnalyzeJavascript;
+use Dcp\DevTools\Po\AnalyzeJavascript;
 
 class JavascriptPo extends PoGenerator {
 

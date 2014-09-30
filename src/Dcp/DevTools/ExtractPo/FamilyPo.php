@@ -8,7 +8,7 @@
 
 namespace Dcp\DevTools\ExtractPo;
 
-use Dcp\BuildTools\Po\AnalyzeFamily;
+use Dcp\DevTools\Po\AnalyzeFamily;
 
 class FamilyPo extends PoGenerator {
 

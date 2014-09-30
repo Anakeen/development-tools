@@ -7,7 +7,7 @@ use Ulrichsg\Getopt\Option;
 use Dcp\DevTools\Webinst\Webinst;
 
 $getopt = new Getopt(array(
-    (new Option('i', 'input', Getopt::REQUIRED_ARGUMENT))->setDescription('input path of the php files (nedded)')
+    (new Option('s', 'sourcePath', Getopt::REQUIRED_ARGUMENT))->setDescription('path to the source of the module (nedded)')
         ->setValidation(function ($inputDir) {
             if (!is_dir($inputDir)) {
                 print "The input dir must be a valid dir ($inputDir)";
@@ -27,8 +27,8 @@ try {
     }
 
     $error = array();
-    if (!isset($getopt['input'])) {
-        $error[] = "You need to set the input dir of the application -i or --input";
+    if (!isset($getopt['sourcePath'])) {
+        $error[] = "You need to set the path to the source of the module -s or --sourcePath";
     }
 
     if (!empty($error)) {
@@ -37,7 +37,7 @@ try {
         exit(42);
     }
 
-    $webinst = new Webinst($getopt['input']);
+    $webinst = new Webinst($getopt['sourcePath']);
     $webinst->makeWebinst();
 
 

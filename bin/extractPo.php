@@ -11,7 +11,7 @@ use Dcp\DevTools\ExtractPo\JavascriptPo;
 use Dcp\DevTools\ExtractPo\FamilyPo;
 
 $getopt = new Getopt(array(
-    (new Option('i', 'input', Getopt::REQUIRED_ARGUMENT))->setDescription('path of the module (needed)')->setValidation(function ($path) {
+    (new Option('s', 'sourcePath', Getopt::REQUIRED_ARGUMENT))->setDescription('path of the module (needed)')->setValidation(function ($path) {
         if (!is_dir($path)) {
             print "The path of the module ($path)";
             return false;
@@ -26,8 +26,8 @@ try {
 
     $error = array();
 
-    if (!isset($getopt['input'])) {
-        $error[] = "You need to set the input path of the project -i or --input";
+    if (!isset($getopt['sourcePath'])) {
+        $error[] = "You need to set the path of the module -s or --sourcePath";
     }
 
     if (!empty($error)) {
@@ -36,16 +36,16 @@ try {
         exit(42);
     }
 
-    $extractor = new ModulePo($getopt['input']);
+    $extractor = new ModulePo($getopt['sourcePath']);
     $extractor->extractPo();
 
-    $extractor = new ApplicationPo($getopt['input']);
+    $extractor = new ApplicationPo($getopt['sourcePath']);
     $extractor->extractPo();
 
-    $extractor = new JavascriptPo($getopt['input']);
+    $extractor = new JavascriptPo($getopt['sourcePath']);
     $extractor->extractPo();
 
-    $extractor = new FamilyPo($getopt['input']);
+    $extractor = new FamilyPo($getopt['sourcePath']);
     $extractor->extractPo();
 
 

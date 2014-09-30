@@ -29,6 +29,7 @@ $getopt = new Getopt(array(
     (new Option('x', 'external', Getopt::NO_ARGUMENT))->setDescription('with external file'),
     (new Option('s', 'style', Getopt::NO_ARGUMENT))->setDescription('with style directory'),
     (new Option('p', 'api', Getopt::NO_ARGUMENT))->setDescription('with api directory'),
+    (new Option('i', 'images', Getopt::NO_ARGUMENT))->setDescription('with images directory'),
     (new Option('e', 'enclosure', Getopt::OPTIONAL_ARGUMENT))->setDescription('enclosure of the CSV generated (default : " )'),
     (new Option('d', 'delimiter', Getopt::REQUIRED_ARGUMENT))->setDescription('delimiter of the CSV generated (default : ; )'),
     (new Option('h', 'help', Getopt::NO_ARGUMENT))->setDescription('show the usage message'),
@@ -84,7 +85,7 @@ try {
     $template = new Module();
     $template->render($renderOptions, $outputPath, $force);
 
-    $outputPath = $outputPath.DIRECTORY_SEPARATOR.$renderOptions["name"];
+    //$outputPath = $outputPath.DIRECTORY_SEPARATOR.$renderOptions["name"];
 
     if (isset($renderOptions["application"])) {
         $applications = explode(",", $renderOptions["application"]);
