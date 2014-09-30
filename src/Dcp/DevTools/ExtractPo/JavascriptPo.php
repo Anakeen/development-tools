@@ -26,7 +26,7 @@ class JavascriptPo extends PoGenerator {
                 $tempName = $tempName.".pot";
                 $extractor = new AnalyzeJavascript($tempName, $this->gettextpath);
                 $extractor->extract($filesList);
-                if (filesize($tempName) === 0) {
+                if (!is_file($tempName) || filesize($tempName) === 0) {
                     continue;
                 }
                 foreach ($this->conf["lang"] as $currentLang) {
