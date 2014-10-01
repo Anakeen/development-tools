@@ -1,6 +1,6 @@
 {
     "directories" :  ["src", "bin", "vendor", "templates"],
     "main" :   "bin/devTool.php",
-    "output" : "devtool.phar",
+    "output" : "dynacase-devtool.phar",
     "stub" :   true
 }
