@@ -50,9 +50,9 @@ gcc-c++-4.8.1-4-mingw32-dll.tar.lzma:
 libiconv-1.14-3-mingw32-dll.tar.lzma:
 	wget -O $@ http://downloads.sourceforge.net/project/mingw/MinGW/Base/libiconv/libiconv-1.14-3/$@
 
-win32: devtool-win32.zip
+win32: dynacase-devtool-win32.zip
 
-devtool-win32.zip: php-5.4.33-nts-Win32-VC9-x86.zip gettext-0.18.3.2-1-mingw32-dev.tar.xz libgettextpo-0.18.3.2-1-mingw32-dll-0.tar.xz devtool.phar libintl-0.18.3.2-1-mingw32-dll-8.tar.xz gcc-core-4.8.1-4-mingw32-dll.tar.lzma libiconv-1.14-3-mingw32-dll.tar.lzma gcc-c++-4.8.1-4-mingw32-dll.tar.lzma devtool.bat
+dynacase-devtool-win32.zip: php-5.4.33-nts-Win32-VC9-x86.zip gettext-0.18.3.2-1-mingw32-dev.tar.xz libgettextpo-0.18.3.2-1-mingw32-dll-0.tar.xz devtool.phar libintl-0.18.3.2-1-mingw32-dll-8.tar.xz gcc-core-4.8.1-4-mingw32-dll.tar.lzma libiconv-1.14-3-mingw32-dll.tar.lzma gcc-c++-4.8.1-4-mingw32-dll.tar.lzma devtool.bat
 	mkdir -p "tmp/${BUNDLE_DIR}"
 	
 	cd "tmp/${BUNDLE_DIR}" && yes | unzip ../../php-5.4.33-nts-Win32-VC9-x86.zip
@@ -73,7 +73,7 @@ devtool-win32.zip: php-5.4.33-nts-Win32-VC9-x86.zip gettext-0.18.3.2-1-mingw32-d
 	cp devtool.phar "tmp/${BUNDLE_DIR}"
 	cp devtool.bat tmp
 	
-	cd tmp && zip -r ../devtool-win32.zip "${BUNDLE_DIR}" devtool.bat
+	cd tmp && zip -r ../dynacase-devtool-win32.zip "${BUNDLE_DIR}" devtool.bat
 
 realclean: clean
 	rm -f composer.phar
@@ -83,4 +83,4 @@ realclean: clean
 clean:
 	rm -Rf tmp
 	rm -f devtool.phar
-	rm -f devtool-win32.zip
+	rm -f dynacase-devtool-win32.zip
