@@ -2,6 +2,8 @@
 
 BUNDLE_DIR=devtool-bundle
 
+SHELL=/bin/bash
+
 usage:
 	@echo "Usage:"
 	@echo ""
@@ -55,11 +57,11 @@ devtool-win32.zip: php-5.4.33-nts-Win32-VC9-x86.zip gettext-0.18.3.2-1-mingw32-d
 	
 	cd "tmp/${BUNDLE_DIR}" && yes | unzip ../../php-5.4.33-nts-Win32-VC9-x86.zip
 	cp "tmp/${BUNDLE_DIR}/php.ini-production" "tmp/${BUNDLE_DIR}/php.ini"
-	echo "\r" >> "tmp/${BUNDLE_DIR}/php.ini"
-	echo "date.timezone=Europe/Paris\r" >> "tmp/${BUNDLE_DIR}/php.ini"
-	echo "extension_dir = 'ext'\r" >> "tmp/${BUNDLE_DIR}/php.ini"
-	echo "extension=php_bz2.dll\r" >> "tmp/${BUNDLE_DIR}/php.ini"
-	echo "extension=php_mbstring.dll\r" >> "tmp/${BUNDLE_DIR}/php.ini"
+	echo -e "\r" >> "tmp/${BUNDLE_DIR}/php.ini"
+	echo -e "date.timezone=Europe/Paris\r" >> "tmp/${BUNDLE_DIR}/php.ini"
+	echo -e "extension_dir = 'ext'\r" >> "tmp/${BUNDLE_DIR}/php.ini"
+	echo -e "extension=php_bz2.dll\r" >> "tmp/${BUNDLE_DIR}/php.ini"
+	echo -e "extension=php_mbstring.dll\r" >> "tmp/${BUNDLE_DIR}/php.ini"
 	
 	tar -C "tmp/${BUNDLE_DIR}" -Jxf gettext-0.18.3.2-1-mingw32-dev.tar.xz
 	tar -C "tmp/${BUNDLE_DIR}" -Jxf libgettextpo-0.18.3.2-1-mingw32-dll-0.tar.xz
