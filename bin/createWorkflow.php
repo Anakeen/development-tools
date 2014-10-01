@@ -69,6 +69,14 @@ try {
 
     $renderOptions = $getopt->getOptions();
 
+    if (isset($renderOptions["title"]) && !mb_detect_encoding($renderOptions["title"], 'UTF-8', true)) {
+        $encoding = mb_detect_encoding($renderOptions["title"], "CP1252,CP1251,UTF-8");
+        if (!$encoding) {
+            throw new Exception("Unable to detect the encoding of the title args, try to change the encoding of your shell");
+        }
+        $renderOptions["title"] = mb_convert_encoding($renderOptions["title"], "UTF-8", $encoding);
+    }
+
     if (!is_file($inputDir . DIRECTORY_SEPARATOR . 'build.json')) {
         throw new Exception("The build.json doesn't exist ($inputDir)");
     }
