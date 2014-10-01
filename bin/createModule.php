@@ -85,7 +85,6 @@ try {
     $template = new Module();
     $template->render($renderOptions, $outputPath, $force);
 
-    //$outputPath = $outputPath.DIRECTORY_SEPARATOR.$renderOptions["name"];
 
     if (isset($renderOptions["application"])) {
         $applications = explode(",", $renderOptions["application"]);
