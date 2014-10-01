@@ -65,3 +65,16 @@ faire :
 `./box.phar build`
 
 NB : il faut au préalable avoir installer les dépendances.
+
+## Window packaging
+
+Il est possible de générer un zip pour une exécution autonome sous window en utilisant la commande 
+
+`make devtool-win32.zip`
+
+L'ensemble des dépendances (composer et autres) est alors téléchargé et un fichier `devtool-win32.zip` est produit
+celui-ci contient alors le nécessaire pour lancer les devtools sous window (testé sous window 7 32 et 64 bit).
+
+Vous pouvez ensuite nettoyer avec la commande :
+
+`make clean`
