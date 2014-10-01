@@ -65,7 +65,7 @@ class AnalyzeFamily
                     $famname = trim($this->getArrayIndexValue($data, 5));
                     $famtitle = trim($this->getArrayIndexValue($data, 2));
                     if ($famname) {
-                        $oFileName = $outputDir . "/" . $famname . ".pot";
+                        $oFileName = $outputDir . DIRECTORY_SEPARATOR . $famname . ".pot";
                         $this->outputFiles[] = $oFileName;
                         $podoc = fopen($oFileName, "w+");
                     } else {
@@ -90,7 +90,7 @@ class AnalyzeFamily
 
                 case "END":
                     if (!$podoc) {
-                        throw new Exception("Can't create temporary family po file [$outputDir/$famname.pot]");
+                        throw new Exception("Can't create temporary family po file [$outputDir" . DIRECTORY_SEPARATOR . "$famname.pot]");
                     } else {
                         fwrite($podoc, $contentToWrite);
                         fclose($podoc);
@@ -118,12 +118,12 @@ class AnalyzeFamily
                     if ($type === "CVDOC") {
                         $cvName = $this->getArrayIndexValue($data, 2);
                         if ($cvName && !is_numeric($cvName) && $cv_idview_index) {
-                            $oFileName = $outputDir . "/" . $cvName . ".pot";
+                            $oFileName = $outputDir . DIRECTORY_SEPARATOR . $cvName . ".pot";
                             $cvdoc = fopen($oFileName, "w+");
 
                             $this->outputFiles[] = $oFileName;
                             if (!$cvdoc) {
-                                throw new Exception("fam2po: Can't create tempory CV po file [$outputDir/$cvName.pot]");
+                                throw new Exception("fam2po: Can't create tempory CV po file [$outputDir" . DIRECTORY_SEPARATOR . "$cvName.pot]");
                             }
                             $cvContentToWrite = "msgid \"\"\n";
                             $cvContentToWrite .= "msgstr \"\"\n";

@@ -7,11 +7,11 @@ class Template
 
     protected $templateBaseDir;
     protected $templates = array();
-    protected $logicalNameRegExp = "/^[A-Za-z]+[A-Za-z_\-0-9]*$/";
+    protected $logicalNameRegExp = '/^[A-Za-z][A-Za-z0-9_-]*$/';
 
     public function __construct()
     {
-        $templateBaseDir = __DIR__.'/../../../../templates';
+        $templateBaseDir = join(DIRECTORY_SEPARATOR, array(__DIR__, '..', '..', '..', '..', 'templates'));
 
         $realDir = realpath($templateBaseDir);
         if (is_dir($realDir)) {

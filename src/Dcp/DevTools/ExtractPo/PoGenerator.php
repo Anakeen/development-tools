@@ -59,7 +59,7 @@ class PoGenerator
         if (!is_file($poPath)) {
             $this->xgettextWrapper->msginit(array("lang" => $lang, "potFile" => $potFile, "poTarget" => $poPath, "name" => $name));
         } else {
-            $this->xgettextWrapper->msgmerge(sprintf(" --sort-output --no-fuzzy-matching -o %s %s %s", $poPath . '.new', $poPath, $potFile));
+            $this->xgettextWrapper->msgmerge(sprintf(" --sort-output --no-fuzzy-matching -o %s %s %s", escapeshellarg($poPath . '.new'), escapeshellarg($poPath), escapeshellarg($potFile)));
             rename($poPath . '.new', $poPath);
         }
     }
@@ -69,8 +69,8 @@ class PoGenerator
 
         $files = glob($pattern, $flags);
 
-        foreach (glob(dirname($pattern) . '/*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
-            $files = array_merge($files, $this->globRecursive($dir . '/' . basename($pattern), $flags));
+        foreach (glob(dirname($pattern) . DIRECTORY_SEPARATOR .'*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
+            $files = array_merge($files, $this->globRecursive($dir . DIRECTORY_SEPARATOR . basename($pattern), $flags));
         }
 
         return $files;
