@@ -1,13 +1,13 @@
 .PHONY: usage win32 clean fullclean
 
-BUNDLE_DIR=devtool-bundle
+BUNDLE_DIR=dynacase-devtool-bundle
 
 SHELL=/bin/bash
 
 usage:
 	@echo "Usage:"
 	@echo ""
-	@echo "    make devtool.phar"
+	@echo "    make dynacase-devtool.phar"
 	@echo ""
 	@echo "    -or-"
 	@echo ""
@@ -17,7 +17,7 @@ usage:
 composer.phar:
 	wget -O $@ https://getcomposer.org/download/1.0.0-alpha8/$@
 
-devtool.phar: composer.phar
+dynacase-devtool.phar: composer.phar
 	php composer.phar install
 	./box.phar build
 
@@ -52,7 +52,7 @@ libiconv-1.14-3-mingw32-dll.tar.lzma:
 
 win32: dynacase-devtool-win32.zip
 
-dynacase-devtool-win32.zip: php-5.4.33-nts-Win32-VC9-x86.zip gettext-0.18.3.2-1-mingw32-dev.tar.xz libgettextpo-0.18.3.2-1-mingw32-dll-0.tar.xz devtool.phar libintl-0.18.3.2-1-mingw32-dll-8.tar.xz gcc-core-4.8.1-4-mingw32-dll.tar.lzma libiconv-1.14-3-mingw32-dll.tar.lzma gcc-c++-4.8.1-4-mingw32-dll.tar.lzma dynacase-devtool.bat
+dynacase-devtool-win32.zip: php-5.4.33-nts-Win32-VC9-x86.zip gettext-0.18.3.2-1-mingw32-dev.tar.xz libgettextpo-0.18.3.2-1-mingw32-dll-0.tar.xz dynacase-devtool.phar libintl-0.18.3.2-1-mingw32-dll-8.tar.xz gcc-core-4.8.1-4-mingw32-dll.tar.lzma libiconv-1.14-3-mingw32-dll.tar.lzma gcc-c++-4.8.1-4-mingw32-dll.tar.lzma dynacase-devtool.bat
 	mkdir -p "tmp/${BUNDLE_DIR}"
 	
 	cd "tmp/${BUNDLE_DIR}" && yes | unzip ../../php-5.4.33-nts-Win32-VC9-x86.zip
@@ -82,5 +82,5 @@ realclean: clean
 
 clean:
 	rm -Rf tmp
-	rm -f devtool.phar
+	rm -f dynacase-devtool.phar
 	rm -f dynacase-devtool-win32.zip
