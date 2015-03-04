@@ -67,6 +67,9 @@ class Webinst {
         $pharTar = new \PharData($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"].".tar");
         $pharTar->startBuffering();
         $pharTar->addFromString("info.xml", $infoXML);
+        if (file_exists($this->inputPath.DIRECTORY_SEPARATOR."LICENSE")) {
+            $pharTar->addFile($this->inputPath.DIRECTORY_SEPARATOR."LICENSE", "LICENSE");
+        }
         $pharTar->addFile($contentTar.".tar.gz", "content.tar.gz");
         $pharTar->stopBuffering();
         $pharTar->compress(\Phar::GZ);
