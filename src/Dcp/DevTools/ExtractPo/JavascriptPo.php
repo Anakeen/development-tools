@@ -30,7 +30,7 @@ class JavascriptPo extends PoGenerator {
                     continue;
                 }
                 foreach ($this->conf["lang"] as $currentLang) {
-                    $this->updatePo($tempName, "js_".$currentApp . "_" . $currentLang, $currentLang);
+                    $this->updatePo($tempName, "js_".$currentApp . "_" . $currentLang, $currentLang, true);
                 }
                 if (is_file($tempName)) {
                     unlink($tempName);

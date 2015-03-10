@@ -45,13 +45,18 @@ class PoGenerator
         $this->xgettextWrapper = new XgettextWrapper($getTextPath);
     }
 
-    public function updatePo($potFile, $name, $lang)
+    public function updatePo($potFile, $name, $lang, $jsPo = false)
     {
         $localePath = $this->inputPath . DIRECTORY_SEPARATOR . "locale";
         if (!is_dir($localePath)) {
             mkdir($this->inputPath . DIRECTORY_SEPARATOR . "locale");
         }
-        $langPath = $localePath . DIRECTORY_SEPARATOR . $lang . DIRECTORY_SEPARATOR . "LC_MESSAGES" . DIRECTORY_SEPARATOR . "src";
+        $langPath = $localePath . DIRECTORY_SEPARATOR . $lang . DIRECTORY_SEPARATOR
+            . "LC_MESSAGES" . DIRECTORY_SEPARATOR . "src";
+        if ($jsPo) {
+            $langPath =  $localePath . DIRECTORY_SEPARATOR . $lang . DIRECTORY_SEPARATOR
+                . "js" . DIRECTORY_SEPARATOR . "src";
+        }
         if (!is_dir($langPath)) {
             mkdir($langPath, 0777, true);
         }
