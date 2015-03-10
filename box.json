@@ -1,4 +1,5 @@
 {
+    "files" : ["version.json"],
     "directories" :  ["src", "bin", "vendor", "templates"],
     "main" :   "bin/devTool.php",
     "output" : "dynacase-devtool.phar",

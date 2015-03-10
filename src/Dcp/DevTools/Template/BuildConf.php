@@ -44,6 +44,12 @@ class BuildConf extends Template
         if (!empty($outputPath)) {
             $outputPath .= DIRECTORY_SEPARATOR . "build.json";
         }
+        $devtool = join(
+            DIRECTORY_SEPARATOR,
+            array(__DIR__, '..', '..', '..', '..', 'version.json')
+        );
+        $devtool = json_decode(file_get_contents($devtool), true);
+        $arguments["devtool"] = $devtool;
         return parent::main_render("build", $arguments, $outputPath, $force);
     }
 }
