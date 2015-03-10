@@ -6,7 +6,10 @@ use Ulrichsg\Getopt\Getopt;
 use Ulrichsg\Getopt\Option;
 
 $getopt = new Getopt(array(
-    (new Option('h', 'help', Getopt::NO_ARGUMENT))->setDescription('help message')
+    (new Option('h', 'help', Getopt::NO_ARGUMENT))->setDescription('help message'),
+    (new Option('v', 'version', Getopt::NO_ARGUMENT))->setDescription(
+        'version'
+    )
 ));
 
 //Bootstrap loader for devtools
@@ -27,7 +30,6 @@ try {
     }
 
     if ($requiredError !== "") {
-        echo "DevTools for Dynacase 3.2\n";
         echo "You need the following extensions to run the devtools : \n";
         echo $requiredError;
         echo "You should activate it from php.ini \n";
@@ -38,8 +40,20 @@ try {
 
     $currentDirName = dirname(__FILE__);
 
+    $version = join(
+        DIRECTORY_SEPARATOR,
+        array(__DIR__, '..', 'version.json')
+    );
+    $version = json_decode(file_get_contents($version), true);
+
+    if ($getopt["version"]) {
+        echo sprintf("Devtool version : %s", $version["tag"]) . "\n";
+        exit(0);
+    }
+
     if ($getopt['help'] || !isset($getopt->getOperands()[0])) {
         echo "DevTools for Dynacase 3.2\n";
+        echo sprintf("Devtool version : %s", $version["tag"])."\n";
         echo "You can access to the sub command : \n";
         listOfSubCommand($currentDirName);
         exit(0);
