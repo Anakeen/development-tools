@@ -3,5 +3,6 @@
     "directories" :  ["src", "bin", "vendor", "templates"],
     "main" :   "bin/devTool.php",
     "output" : "dynacase-devtool.phar",
-    "stub" :   true
+    "stub" :   true,
+    "chmod" : "0755"
 }
