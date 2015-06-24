@@ -16,7 +16,8 @@ $getopt = new Getopt(array(
             }
             return true;
         }),
-    (new Option('h', 'help', Getopt::NO_ARGUMENT))->setDescription('show the usage message'),
+    (new Option('f', 'file', Getopt::REQUIRED_ARGUMENT)),
+    (new Option('h', 'help', Getopt::NO_ARGUMENT))->setDescription('show the usage message')
 ));
 
 try {
@@ -87,13 +88,14 @@ try {
     $enclosure = $conf["csvParam"]["enclosure"];
     $delimiter = $conf["csvParam"]["delimiter"];
 
-    $files = $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__STRUCT.csv");
-    foreach ($files as $currentFile) {
-        $stub = new Stub($enclosure, $delimiter);
-        $stub->generate($currentFile, $getopt['output']);
+    if (isset($getopt['file']))
+    {
+        $files = [$getopt['file']];
     }
-
-    $files = $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__WFL.csv");
+    else
+    {
+        $files = array_merge($globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__STRUCT.csv"), $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__WFL.csv"));
+    }
     foreach ($files as $currentFile) {
         $stub = new Stub($enclosure, $delimiter);
         $stub->generate($currentFile, $getopt['output']);
