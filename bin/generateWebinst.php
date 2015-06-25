@@ -15,6 +15,20 @@ $getopt = new Getopt(array(
             }
             return true;
         }),
+    (new Option('o', 'output', Getopt::REQUIRED_ARGUMENT))->setDescription(
+        'output Path (needed)'
+    )->setValidation(
+        function ($path) {
+            if (!$path) {
+                return true;
+            }
+            if (!is_dir($path)) {
+                print "The output dir must be a valid dir ($path)";
+                return false;
+            }
+            return true;
+        }
+    ),
     (new Option('h', 'help', Getopt::NO_ARGUMENT))->setDescription('show the usage message'),
 ));
 
@@ -31,6 +45,12 @@ try {
         $error[] = "You need to set the path to the source of the module -s or --sourcePath";
     }
 
+    $outputPath = isset($getopt['output']) ? $getopt['output'] : false;
+
+    if ($outputPath) {
+        $outputPath = realpath($outputPath);
+    }
+
     if (!empty($error)) {
         echo join("\n", $error);
         echo "\n" . $getopt->getHelpText();
@@ -38,7 +58,7 @@ try {
     }
 
     $webinst = new Webinst($getopt['sourcePath']);
-    $webinst->makeWebinst();
+    $webinst->makeWebinst($outputPath);
 
 
 } catch (UnexpectedValueException $e) {
