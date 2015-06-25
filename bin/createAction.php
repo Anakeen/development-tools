@@ -50,7 +50,7 @@ try {
     $renderOptions = $getopt->getOptions();
 
     if (!isset($renderOptions["i18n"])) {
-        $renderOptions["i18n"] = $renderOptions["name"];
+        $renderOptions["i18n"] = false;
     }
 
     $actionTemplate = new Action();

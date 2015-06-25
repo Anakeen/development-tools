@@ -37,7 +37,7 @@ class Webinst {
         }
     }
 
-    public function makeWebinst() {
+    public function makeWebinst($outputPath) {
         $allowedDirectory = array();
         if (isset($this->conf["application"]) && is_array($this->conf["application"])) {
             $allowedDirectory = array_merge($allowedDirectory, $this->conf["application"]);
@@ -73,7 +73,11 @@ class Webinst {
         $pharTar->addFile($contentTar.".tar.gz", "content.tar.gz");
         $pharTar->stopBuffering();
         $pharTar->compress(\Phar::GZ);
-        rename($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"].".tar.gz", $this->inputPath . DIRECTORY_SEPARATOR . $webinstName . ".webinst");
+        if (!$outputPath) {
+            $outputPath = $this->inputPath;
+        }
+        rename($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"].".tar.gz",
+            $outputPath . DIRECTORY_SEPARATOR . $webinstName . ".webinst");
         unlink($contentTar . ".tar.gz");
         unset($pharTar);
         unlink($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"] . ".tar");

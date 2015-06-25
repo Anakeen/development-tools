@@ -2,8 +2,8 @@
 
 $app_desc = array(
     "name" => "{{{name}}}",
-    "short_name" => N_("{{{i18n}}}:{{{name}}}"),
-    "description" => N_("{{{i18n}}}:{{{name}}}"),
+    "short_name" => N_("{{# i18n}}{{{i18n}}}:{{/ i18n}}{{{name}}}"),
+    "description" => N_("{{# i18n}}{{{i18n}}}:{{/ i18n}}{{{name}}}"),
     "icon" => "{{{name}}}.png",
     "displayable" => "N",
     "childof" => ""
@@ -14,14 +14,14 @@ $app_desc = array(
 $app_acl = array(
     array(
         "name" => "BASIC",
-        "description" => N_("{{{i18n}}}:Basic ACL")
+        "description" => N_("{{# i18n}}{{{i18n}}}:{{/ i18n}}Basic ACL")
     )
 );
 // Actions for this application
 $action_desc = array(
     array(
         "name" => "ACTION_NAME",
-        "short_name" => N_("{{{i18n}}}:ACTION_NAME"),
+        "short_name" => N_("{{# i18n}}{{{i18n}}}:{{/ i18n}}ACTION_NAME"),
         "script" => "action.action_name.php",
         "layout" => "action.html",
         "function" => "action_name",

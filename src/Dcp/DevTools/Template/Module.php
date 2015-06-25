@@ -38,6 +38,11 @@ class Module extends Template
         if (isset($arguments["api"])) {
             mkdir($outputPath . DIRECTORY_SEPARATOR . "API");
         }
+        if (isset($arguments["rest"])) {
+            mkdir($outputPath . DIRECTORY_SEPARATOR . "HTTPAPI_V1");
+            mkdir($outputPath . DIRECTORY_SEPARATOR . "HTTPAPI_V1"
+                    . DIRECTORY_SEPARATOR . "rules.d");
+        }
         mkdir($outputPath . DIRECTORY_SEPARATOR . "locale");
         if (isset($arguments["lang"]) && is_array($arguments["lang"])) {
             foreach ($arguments["lang"] as $currentLang) {
