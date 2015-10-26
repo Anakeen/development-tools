@@ -170,14 +170,17 @@ class AnalyzeFamily
                     // Enum ----------------------------------------------
                     $type = $this->getArrayIndexValue($data, 6);
                     if ($type == "enum" || $type == "enumlist") {
-                        $d = str_replace('\,', '\#', $this->getArrayIndexValue($data, 12));
-                        $tenum = explode(",", $d);
-                        foreach ($tenum as $ve) {
-                            $d = str_replace('\#', ',', $ve);
-                            $enumValues = explode("|", $d);
-                            $contentToWrite .= "#, fuzzy, ($inputFile)\n";
-                            $contentToWrite .= "msgid \"" . $famname . "#" . strtolower($this->getArrayIndexValue($data, 1)) . "#" . (str_replace('\\', '', $this->getArrayIndexValue($enumValues, 0))) . "\"\n";
-                            $contentToWrite .= "msgstr \"" . $this->escapeTranslation((str_replace('\\', '', $this->getArrayIndexValue($enumValues, 1)))) . "\"\n\n";
+                        $phpFile = str_replace('\,', '\#', $this->getArrayIndexValue($data, 11));
+                        if (!$phpFile) {
+                            $enumDefinition = str_replace('\,', '\#', $this->getArrayIndexValue($data, 12));
+                            $tenum = explode(",", $enumDefinition);
+                            foreach ($tenum as $ve) {
+                                $enumDefinition = str_replace('\#', ',', $ve);
+                                $enumValues = explode("|", $enumDefinition);
+                                $contentToWrite .= "#, fuzzy, ($inputFile)\n";
+                                $contentToWrite .= "msgid \"" . $famname . "#" . strtolower($this->getArrayIndexValue($data, 1)) . "#" . (str_replace('\\', '', $this->getArrayIndexValue($enumValues, 0))) . "\"\n";
+                                $contentToWrite .= "msgstr \"" . $this->escapeTranslation((str_replace('\\', '', $this->getArrayIndexValue($enumValues, 1)))) . "\"\n\n";
+                            }
                         }
                     }
                     // Options ----------------------------------------------
