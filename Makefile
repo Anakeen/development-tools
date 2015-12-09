@@ -4,6 +4,14 @@ BUNDLE_DIR=dynacase-devtool-bundle
 
 SHELL=/bin/bash
 
+php-path = http://windows.php.net/downloads/releases/php-5.6.16-Win32-VC11-x86.zip
+getText-path = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gettext/gettext-0.18.3.2-1/gettext-0.18.3.2-1-mingw32-dev.tar.xz
+libGetText-path = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gettext/gettext-0.18.3.2-1/libgettextpo-0.18.3.2-1-mingw32-dll-0.tar.xz
+libintl-path = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gettext/gettext-0.18.3.2-1/libintl-0.18.3.2-1-mingw32-dll-8.tar.xz
+gcc-core-path = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gcc/Version4/gcc-4.8.1-4/gcc-core-4.8.1-4-mingw32-dll.tar.lzma
+gcc-c++-path = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gcc/Version4/gcc-4.8.1-4/gcc-c++-4.8.1-4-mingw32-dll.tar.lzma
+libconv-path = http://downloads.sourceforge.net/project/mingw/MinGW/Base/libiconv/libiconv-1.14-3/libiconv-1.14-3-mingw32-dll.tar.lzma
+
 usage:
 	@echo "Usage:"
 	@echo ""
@@ -25,37 +33,37 @@ dynacase-devtool.phar: composer.phar
 # PHP from PHP.net
 #
 
-php-5.4.33-nts-Win32-VC9-x86.zip:
-	wget -O $@ http://windows.php.net/downloads/releases/$@
+php-get:
+	wget -O php.zip $(php-path)
 
 #
 # Gettext from MinGW
 #
 
-gettext-0.18.3.2-1-mingw32-dev.tar.xz:
-	wget -O $@ http://downloads.sourceforge.net/project/mingw/MinGW/Base/gettext/gettext-0.18.3.2-1/$@
+gettext-get:
+	wget -O gettext.tar.xz $(getText-path)
 
-libgettextpo-0.18.3.2-1-mingw32-dll-0.tar.xz:
-	wget -O $@ http://downloads.sourceforge.net/project/mingw/MinGW/Base/gettext/gettext-0.18.3.2-1/$@
+libgettextpo-get:
+	wget -O libgettextpo.tar.xz $(libGetText-path)
 
-libintl-0.18.3.2-1-mingw32-dll-8.tar.xz:
-	wget -O $@ http://downloads.sourceforge.net/project/mingw/MinGW/Base/gettext/gettext-0.18.3.2-1/$@
+libintl-get:
+	wget -O libintl.tar.xz $(libintl-path)
 
-gcc-core-4.8.1-4-mingw32-dll.tar.lzma:
-	wget -O $@ http://downloads.sourceforge.net/project/mingw/MinGW/Base/gcc/Version4/gcc-4.8.1-4/$@
+gcc-core-get:
+	wget -O gcc-core.tar.lzma $(gcc-core-path)
 
-gcc-c++-4.8.1-4-mingw32-dll.tar.lzma:
-	wget -O $@ http://downloads.sourceforge.net/project/mingw/MinGW/Base/gcc/Version4/gcc-4.8.1-4/$@
+gcc-c++-get:
+	wget -O gcc-c++.tar.lzma $(gcc-c++-path)
 
-libiconv-1.14-3-mingw32-dll.tar.lzma:
-	wget -O $@ http://downloads.sourceforge.net/project/mingw/MinGW/Base/libiconv/libiconv-1.14-3/$@
+libiconv-get:
+	wget -O libiconv.tar.lzma $(libconv-path)
 
 win32: dynacase-devtool-win32.zip
 
-dynacase-devtool-win32.zip: php-5.4.33-nts-Win32-VC9-x86.zip gettext-0.18.3.2-1-mingw32-dev.tar.xz libgettextpo-0.18.3.2-1-mingw32-dll-0.tar.xz dynacase-devtool.phar libintl-0.18.3.2-1-mingw32-dll-8.tar.xz gcc-core-4.8.1-4-mingw32-dll.tar.lzma libiconv-1.14-3-mingw32-dll.tar.lzma gcc-c++-4.8.1-4-mingw32-dll.tar.lzma dynacase-devtool.bat
+dynacase-devtool-win32.zip: php-get gettext-get libgettextpo-get libintl-get gcc-core-get gcc-c++-get libiconv-get dynacase-devtool.phar dynacase-devtool.bat
 	mkdir -p "tmp/${BUNDLE_DIR}"
 	
-	cd "tmp/${BUNDLE_DIR}" && yes | unzip ../../php-5.4.33-nts-Win32-VC9-x86.zip
+	cd "tmp/${BUNDLE_DIR}" && yes | unzip ../../php.zip
 	cp "tmp/${BUNDLE_DIR}/php.ini-production" "tmp/${BUNDLE_DIR}/php.ini"
 	echo -e "\r" >> "tmp/${BUNDLE_DIR}/php.ini"
 	echo -e "date.timezone=Europe/Paris\r" >> "tmp/${BUNDLE_DIR}/php.ini"
@@ -63,12 +71,12 @@ dynacase-devtool-win32.zip: php-5.4.33-nts-Win32-VC9-x86.zip gettext-0.18.3.2-1-
 	echo -e "extension=php_bz2.dll\r" >> "tmp/${BUNDLE_DIR}/php.ini"
 	echo -e "extension=php_mbstring.dll\r" >> "tmp/${BUNDLE_DIR}/php.ini"
 	
-	tar -C "tmp/${BUNDLE_DIR}" -Jxf gettext-0.18.3.2-1-mingw32-dev.tar.xz
-	tar -C "tmp/${BUNDLE_DIR}" -Jxf libgettextpo-0.18.3.2-1-mingw32-dll-0.tar.xz
-	tar -C "tmp/${BUNDLE_DIR}" -Jxf libintl-0.18.3.2-1-mingw32-dll-8.tar.xz
-	tar -C "tmp/${BUNDLE_DIR}" --lzma -xf gcc-core-4.8.1-4-mingw32-dll.tar.lzma
-	tar -C "tmp/${BUNDLE_DIR}" --lzma -xf libiconv-1.14-3-mingw32-dll.tar.lzma
-	tar -C "tmp/${BUNDLE_DIR}" --lzma -xf gcc-c++-4.8.1-4-mingw32-dll.tar.lzma
+	tar -C "tmp/${BUNDLE_DIR}" -Jxf gettext.tar.xz
+	tar -C "tmp/${BUNDLE_DIR}" -Jxf libgettextpo.tar.xz
+	tar -C "tmp/${BUNDLE_DIR}" -Jxf libintl.tar.xz
+	tar -C "tmp/${BUNDLE_DIR}" --lzma -xf gcc-core.tar.lzma
+	tar -C "tmp/${BUNDLE_DIR}" --lzma -xf gcc-c++.tar.lzma
+	tar -C "tmp/${BUNDLE_DIR}" --lzma -xf libiconv.tar.lzma
 	
 	cp dynacase-devtool.phar "tmp/${BUNDLE_DIR}"
 	cp dynacase-devtool.bat tmp
@@ -77,8 +85,8 @@ dynacase-devtool-win32.zip: php-5.4.33-nts-Win32-VC9-x86.zip gettext-0.18.3.2-1-
 
 realclean: clean
 	rm -f composer.phar
-	rm -f php-5.4.33-nts-Win32-VC9-x86.zip
-	rm -f gettext-0.18.3.2-1-mingw32-dev.tar.xz libgettextpo-0.18.3.2-1-mingw32-dll-0.tar.xz libintl-0.18.3.2-1-mingw32-dll-8.tar.xz gcc-core-4.8.1-4-mingw32-dll.tar.lzma libiconv-1.14-3-mingw32-dll.tar.lzma gcc-c++-4.8.1-4-mingw32-dll.tar.lzma
+	rm -f php.zip
+	rm -f gettext.tar.xz libgettextpo.tar.xz libintl.tar.xz gcc-core.tar.lzma gcc-c++.tar.lzma libiconv.tar.lzma
 
 clean:
 	rm -Rf tmp
