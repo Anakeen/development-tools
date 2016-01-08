@@ -12,6 +12,7 @@ use Dcp\DevTools\Template\FamilyInfo;
 use Dcp\DevTools\Template\WorkflowStructure;
 use Dcp\DevTools\Template\WorkflowClass;
 use Dcp\DevTools\Template\WorkflowInfo;
+use Dcp\DevTools\Utils\ConfigFile;
 
 $getopt = new Getopt(array(
     (new Option('s', 'sourcePath', Getopt::REQUIRED_ARGUMENT))->setDescription('source Path (needed)')->setValidation(function ($path) {
@@ -91,28 +92,24 @@ try {
         $renderOptions["title"] = mb_convert_encoding($renderOptions["title"], "UTF-8", $encoding);
     }
 
-    if (!is_file($inputDir . DIRECTORY_SEPARATOR . 'build.json')) {
-        throw new Exception("The build.json doesn't exist ($inputDir)");
-    }
-    $conf = json_decode(file_get_contents($inputDir . DIRECTORY_SEPARATOR . 'build.json'), true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        throw new Exception("The build.json is not a valid JSON file ($inputDir)");
-    }
-    if (!isset($conf["moduleName"])) {
-        throw new Exception("The build.json doesn't not contain the module name ($inputDir)");
-    }
-    if (!isset($conf["csvParam"])) {
-        $conf["csvParam"] = array();
-    }
-    if (!isset($conf["csvParam"]["enclosure"])) {
-        $conf["csvParam"]["enclosure"] = '"';
-    }
-    if (!isset($conf["csvParam"]["delimiter"])) {
-        $conf["csvParam"]["delimiter"] = ';';
+    $config = new ConfigFile($inputDir);
+
+    if (is_null($config->get('moduleName'))) {
+        throw new Exception(
+            sprintf(
+                "%s doesn't not contain the module name.",
+                $config->getConfigFilePath()
+            )
+        );
     }
 
-    $renderOptions["enclosure"] = $conf["csvParam"]["enclosure"];
-    $renderOptions["delimiter"] = $conf["csvParam"]["delimiter"];
+    $csvParam = $config->get('csvParam', [
+        "enclosure" => '"',
+        "delimiter" => ';'
+    ], ConfigFile::GET_MERGE_DEFAULTS);
+
+    $renderOptions["enclosure"] = $csvParam["enclosure"];
+    $renderOptions["delimiter"] = $csvParam["delimiter"];
     $renderOptions["output"] = $outputPath;
 
     $template = new FamilyStructure();

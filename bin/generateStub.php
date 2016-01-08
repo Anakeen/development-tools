@@ -5,6 +5,7 @@ require_once 'initializeAutoloader.php';
 use Ulrichsg\Getopt\Getopt;
 use Ulrichsg\Getopt\Option;
 use Dcp\DevTools\Stub\Stub;
+use Dcp\DevTools\Utils\ConfigFile;
 
 $getopt = new Getopt(array(
     (new Option('o', 'output', Getopt::REQUIRED_ARGUMENT))->setDescription('output dir (nedded)'),
@@ -65,28 +66,17 @@ try {
         return $files;
     };
 
-    if (!is_file($inputDir . DIRECTORY_SEPARATOR . 'build.json')) {
-        throw new Exception("The build.json doesn't exist ($inputDir)");
-    }
-    $conf = json_decode(file_get_contents($inputDir . DIRECTORY_SEPARATOR . 'build.json'), true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        throw new Exception("The build.json is not a valid JSON file ($inputDir)");
-    }
-    if (!isset($conf["moduleName"])) {
-        throw new Exception("The build.json doesn't not contain the module name ($inputDir)");
-    }
-    if (!isset($conf["csvParam"])) {
-        $conf["csvParam"] = array();
-    }
-    if (!isset($conf["csvParam"]["enclosure"])) {
-        $conf["csvParam"]["enclosure"] = '"';
-    }
-    if (!isset($conf["csvParam"]["delimiter"])) {
-        $conf["csvParam"]["delimiter"] = ';';
-    }
+    $config = new ConfigFile($inputDir);
 
-    $enclosure = $conf["csvParam"]["enclosure"];
-    $delimiter = $conf["csvParam"]["delimiter"];
+    $csvParam = $config->get(
+        'csvParam', [
+        "enclosure" => '"',
+        "delimiter" => ';'
+    ], ConfigFile::GET_MERGE_DEFAULTS
+    );
+
+    $enclosure = $csvParam["enclosure"];
+    $delimiter = $csvParam["delimiter"];
 
     if (isset($getopt['file']))
     {

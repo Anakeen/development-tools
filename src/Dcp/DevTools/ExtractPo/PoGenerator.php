@@ -3,6 +3,7 @@
 namespace Dcp\DevTools\ExtractPo;
 
 use Dcp\DevTools\Po\XgettextWrapper;
+use Dcp\DevTools\Utils\ConfigFile;
 
 class PoGenerator
 {
@@ -18,31 +19,30 @@ class PoGenerator
             throw new Exception("The input path doesn't exist ($inputPath)");
         }
         $this->inputPath = $inputPath;
-        if (!is_file($inputPath . DIRECTORY_SEPARATOR . 'build.json')) {
-            throw new Exception("The build.json doesn't exist ($inputPath)");
+
+        $config = new ConfigFile($inputPath);
+
+        if (is_null($config->get('moduleName'))) {
+            throw new Exception(
+                sprintf(
+                    "%s doesn't not contain the module name.",
+                    $config->getConfigFilePath()
+                )
+            );
         }
-        $this->conf = json_decode(file_get_contents($inputPath . DIRECTORY_SEPARATOR . 'build.json'), true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception("The build.json is not a valid JSON file ($inputPath)");
-        }
-        if (!isset($this->conf["moduleName"])) {
-            throw new Exception("The build.json doesn't not contain the module name ($inputPath)");
-        }
-        $getTextPath = "";
-        if (isset($this->conf["toolsPath"]) && isset($this->conf["toolsPath"]["getttext"])) {
-            $getTextPath = $this->conf["toolsPath"]["getttext"];
-        }
-        if (!isset($this->conf["csvParam"])){
-            $this->conf["csvParam"] = array();
-        }
-        if (!isset($this->conf["csvParam"]["enclosure"])) {
-            $this->conf["csvParam"]["enclosure"]= '"';
-        }
-        if (!isset($this->conf["csvParam"]["delimiter"])) {
-            $this->conf["csvParam"]["delimiter"] = ';';
-        }
-        $this->gettextpath = $getTextPath;
-        $this->xgettextWrapper = new XgettextWrapper($getTextPath);
+
+        $this->conf = array_replace_recursive($config->getConfig(), [
+            'toolsPath' => [
+                'getttext' => ""
+            ],
+            'csvParam' => [
+                'enclosure' => '"',
+                'delimiter' => ';'
+            ]
+        ]);
+
+        $this->gettextpath = $this->conf['toolsPath']['getttext'];
+        $this->xgettextWrapper = new XgettextWrapper($this->gettextpath);
     }
 
     public function updatePo($potFile, $name, $lang, $jsPo = false)
