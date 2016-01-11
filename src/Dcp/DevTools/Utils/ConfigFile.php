@@ -84,7 +84,7 @@ class ConfigFile
     }
 
     public function saveConfig() {
-        $jsonConfig = json_encode($this->config);
+        $jsonConfig = json_encode($this->config, JSON_PRETTY_PRINT);
         if(JSON_ERROR_NONE !== json_last_error()) {
             throw new \Exception(
                 sprintf(
