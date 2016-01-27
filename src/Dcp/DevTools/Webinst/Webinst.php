@@ -35,7 +35,7 @@ class Webinst {
         if (!isset($this->conf["version"])) {
             throw new Exception(
                 sprintf(
-                    "%s doesn't not contain the version.",
+                    "%s does not contains the version.",
                     $config->getConfigFilePath()
                 )
             );
@@ -43,7 +43,7 @@ class Webinst {
         if (!isset($this->conf["release"])) {
             throw new Exception(
                 sprintf(
-                    "%s doesn't not contain the release.",
+                    "%s does not contains the release.",
                     $config->getConfigFilePath()
                 )
             );
@@ -51,31 +51,17 @@ class Webinst {
     }
 
     public function makeWebinst($outputPath) {
-        $allowedDirectories = array();
+        $contentTar = $this->inputPath . DIRECTORY_SEPARATOR . "temp_tar";
+        $pharTar = new \PharData($contentTar . ".tar");
+        $pharTar->startBuffering();
         if (isset($this->conf["application"]) && is_array($this->conf["application"])) {
-            $allowedDirectories = array_merge($allowedDirectories, $this->conf["application"]);
+            foreach ($this->conf["application"] as $applicationName) {
+                $this->addApplication($pharTar, $applicationName);
+            }
         }
         if (isset($this->conf["includedPath"]) && is_array($this->conf["includedPath"])) {
-            $allowedDirectories = array_merge($allowedDirectories, $this->conf["includedPath"]);
-        }
-        $contentTar = $this->inputPath.DIRECTORY_SEPARATOR."temp_tar";
-        $pharTar = new \PharData($contentTar.".tar");
-        $pharTar->startBuffering();
-        foreach($allowedDirectories as $allowedDirectory) {
-            $addedFiles = $pharTar->buildFromIterator(
-                new \RecursiveIteratorIterator(
-                    new \RecursiveDirectoryIterator(
-                        $this->inputPath . DIRECTORY_SEPARATOR . $allowedDirectory,
-                        \FilesystemIterator::SKIP_DOTS
-                    )
-                ),
-                $this->inputPath
-            );
-            foreach ($addedFiles as $pharFilePath => $systemFilePath) {
-                if (!is_dir($systemFilePath) && is_executable($systemFilePath)) {
-                    echo "marking $pharFilePath as executable \n";
-                    $pharTar[$pharFilePath]->chmod($pharTar[$pharFilePath]->getPerms() | $this->WEBINST_EXEC_MASK);
-                }
+            foreach ($this->conf["includedPath"] as $includedPathDirectory) {
+                $this->addDirectory($pharTar, $this->inputPath . DIRECTORY_SEPARATOR . $includedPathDirectory);
             }
         }
         $pharTar->stopBuffering();
@@ -117,5 +103,59 @@ class Webinst {
         return $this->templateEngine->render(
             "{{moduleName}}-{{version}}-{{release}}", $this->conf
         );
+    }
+
+    /**
+     * @param \PharData $pharTar
+     * @param $directory
+     *
+     * @return array files added
+     */
+    protected function addDirectory(\PharData $pharTar, $directory)
+    {
+        $addedFiles = $pharTar->buildFromIterator(
+            new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator(
+                    $directory,
+                    \FilesystemIterator::SKIP_DOTS
+                )
+            ),
+            $this->inputPath
+        );
+        foreach ($addedFiles as $pharFilePath => $systemFilePath) {
+            if (!is_dir($systemFilePath) && is_executable($systemFilePath)) {
+                echo "marking $pharFilePath as executable \n";
+                $pharTar[$pharFilePath]->chmod(
+                    $pharTar[$pharFilePath]->getPerms()
+                    | $this->WEBINST_EXEC_MASK
+                );
+            }
+        }
+        return $addedFiles;
+    }
+
+    /**
+     * @param \PharData $pharTar
+     * @param $applicationName
+     *
+     * @return array files added
+     */
+    protected function addApplication(\PharData $pharTar, $applicationName)
+    {
+        $addedFiles = $this->addDirectory(
+            $pharTar, $this->inputPath . DIRECTORY_SEPARATOR . $applicationName
+        );
+
+        //inject variables into application_init.php file
+        $appParamFile = $applicationName . DIRECTORY_SEPARATOR
+            . $applicationName . "_init.php";
+        $appParamContent = $this->templateEngine->render(
+            '{{=@ @=}}' . file_get_contents(
+                $this->inputPath . DIRECTORY_SEPARATOR . $appParamFile
+            ), $this->conf
+        );
+        $pharTar->addFromString($appParamFile, $appParamContent);
+
+        return $addedFiles;
     }
 }
