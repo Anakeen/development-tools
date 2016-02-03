@@ -1,69 +1,79 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: charles
- * Date: 11/09/14
- * Time: 17:33
- */
 
 namespace Dcp\DevTools\Webinst;
 
+use Dcp\DevTools\Utils\ConfigFile;
 
 class Webinst {
 
     protected $inputPath;
     protected $conf;
+    protected $templateEngine;
+
+    private $WEBINST_EXEC_MASK = 0100;
 
     public function __construct($inputPath) {
         if (!is_dir($inputPath)) {
             throw new Exception("The input path doesn't exist ($inputPath)");
         }
         $this->inputPath = $inputPath;
-        if (!is_file($inputPath . DIRECTORY_SEPARATOR . 'build.json')) {
-            throw new Exception("The build.json doesn't exist ($inputPath)");
-        }
-        $this->conf = json_decode(file_get_contents($inputPath . DIRECTORY_SEPARATOR . 'build.json'), true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception("The build.json is not a valid JSON file ($inputPath)");
-        }
+
+        $this->templateEngine = new \Mustache_Engine();
+
+        $config = new ConfigFile($inputPath);
+
+        $this->conf = $config->getConfig();
+
         if (!isset($this->conf["moduleName"])) {
-            throw new Exception("The build.json doesn't not contain the module name ($inputPath)");
+            throw new Exception(
+                sprintf(
+                    "%s doesn't not contain the module name.",
+                    $config->getConfigFilePath()
+                )
+            );
         }
         if (!isset($this->conf["version"])) {
-            throw new Exception("The build.json doesn't not contain the version ($inputPath)");
+            throw new Exception(
+                sprintf(
+                    "%s does not contains the version.",
+                    $config->getConfigFilePath()
+                )
+            );
         }
-        if (!isset($this->conf["version"])) {
-            throw new Exception("The build.json doesn't not contain the release ($inputPath)");
+        if (!isset($this->conf["release"])) {
+            throw new Exception(
+                sprintf(
+                    "%s does not contains the release.",
+                    $config->getConfigFilePath()
+                )
+            );
         }
     }
 
     public function makeWebinst($outputPath) {
-        $allowedDirectory = array();
+        $contentTar = $this->inputPath . DIRECTORY_SEPARATOR . "temp_tar";
+        $pharTar = new \PharData($contentTar . ".tar");
+        $pharTar->startBuffering();
         if (isset($this->conf["application"]) && is_array($this->conf["application"])) {
-            $allowedDirectory = array_merge($allowedDirectory, $this->conf["application"]);
+            foreach ($this->conf["application"] as $applicationName) {
+                $this->addApplication($pharTar, $applicationName);
+            }
         }
         if (isset($this->conf["includedPath"]) && is_array($this->conf["includedPath"])) {
-            $allowedDirectory = array_merge($allowedDirectory, $this->conf["includedPath"]);
-        }
-        $contentTar = $this->inputPath.DIRECTORY_SEPARATOR."temp_tar";
-        $pharTar = new \PharData($contentTar.".tar");
-        $pharTar->startBuffering();
-        $firstLevelIterator = new \DirectoryIterator($this->inputPath);
-        foreach ($firstLevelIterator as $fileInfo) {
-            /* @var \SplFileInfo $fileInfo */
-            if (in_array($fileInfo->getFilename(), $allowedDirectory)) {
-                $recursiveDirectoryIterator = new \RecursiveDirectoryIterator(
-                    $this->inputPath . DIRECTORY_SEPARATOR . $fileInfo->getFilename(), \FilesystemIterator::SKIP_DOTS);
-                $pharTar->buildFromIterator(new \RecursiveIteratorIterator($recursiveDirectoryIterator), $this->inputPath);
+            foreach ($this->conf["includedPath"] as $includedPathDirectory) {
+                $this->addDirectory($pharTar, $this->inputPath . DIRECTORY_SEPARATOR . $includedPathDirectory);
             }
         }
         $pharTar->stopBuffering();
         $pharTar->compress(\Phar::GZ);
         unset($pharTar);
         unlink($contentTar.".tar");
-        $template = new \Mustache_Engine();
-        $infoXML = $template->render('{{=@ @=}}'.file_get_contents($this->inputPath.DIRECTORY_SEPARATOR."info.xml"), $this->conf);
-        $webinstName = $template->render("{{moduleName}}-{{version}}-{{release}}", $this->conf);
+        $infoXML = $this->templateEngine->render(
+            '{{=@ @=}}' . file_get_contents(
+                $this->inputPath . DIRECTORY_SEPARATOR . "info.xml"
+            ), $this->conf
+        );
+        $webinstName = $this->getWebinstName();
         $pharTar = new \PharData($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"].".tar");
         $pharTar->startBuffering();
         $pharTar->addFromString("info.xml", $infoXML);
@@ -81,7 +91,71 @@ class Webinst {
         unlink($contentTar . ".tar.gz");
         unset($pharTar);
         unlink($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"] . ".tar");
+
+        return $outputPath . DIRECTORY_SEPARATOR . $webinstName . ".webinst";
     }
 
+    /**
+     * @return string
+     */
+    public function getWebinstName()
+    {
+        return $this->templateEngine->render(
+            "{{moduleName}}-{{version}}-{{release}}", $this->conf
+        );
+    }
 
-} 
+    /**
+     * @param \PharData $pharTar
+     * @param $directory
+     *
+     * @return array files added
+     */
+    protected function addDirectory(\PharData $pharTar, $directory)
+    {
+        $addedFiles = $pharTar->buildFromIterator(
+            new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator(
+                    $directory,
+                    \FilesystemIterator::SKIP_DOTS
+                )
+            ),
+            $this->inputPath
+        );
+        foreach ($addedFiles as $pharFilePath => $systemFilePath) {
+            if (!is_dir($systemFilePath) && is_executable($systemFilePath)) {
+                echo "marking $pharFilePath as executable \n";
+                $pharTar[$pharFilePath]->chmod(
+                    $pharTar[$pharFilePath]->getPerms()
+                    | $this->WEBINST_EXEC_MASK
+                );
+            }
+        }
+        return $addedFiles;
+    }
+
+    /**
+     * @param \PharData $pharTar
+     * @param $applicationName
+     *
+     * @return array files added
+     */
+    protected function addApplication(\PharData $pharTar, $applicationName)
+    {
+        $addedFiles = $this->addDirectory(
+            $pharTar, $this->inputPath . DIRECTORY_SEPARATOR . $applicationName
+        );
+
+        //inject variables into application_init.php file
+        $appParamFile = $applicationName . DIRECTORY_SEPARATOR
+            . $applicationName . "_init.php";
+        $appParamContent = $this->templateEngine->render(
+            '{{=@ @=}}' . file_get_contents(
+                $this->inputPath . DIRECTORY_SEPARATOR . $appParamFile
+            ), $this->conf
+        );
+        $pharTar->addFromString($appParamFile, $appParamContent);
+
+        return $addedFiles;
+    }
+}

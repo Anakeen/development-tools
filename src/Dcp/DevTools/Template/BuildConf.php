@@ -2,6 +2,8 @@
 
 namespace Dcp\DevTools\Template;
 
+use Dcp\DevTools\Utils\ConfigFile;
+
 class BuildConf extends Template
 {
 
@@ -45,7 +47,7 @@ class BuildConf extends Template
         }
         $arguments["includedPath"] = json_encode($arguments["includedPath"]);
         if (!empty($outputPath)) {
-            $outputPath .= DIRECTORY_SEPARATOR . "build.json";
+            $outputPath .= DIRECTORY_SEPARATOR . ConfigFile::DEFAULT_FILE_NAME;
         }
         $devtool = join(
             DIRECTORY_SEPARATOR,
