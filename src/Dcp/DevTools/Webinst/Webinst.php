@@ -50,6 +50,20 @@ class Webinst {
         }
     }
 
+    public function setConfProperty($property, $value) {
+        $this->conf[$property] = $value;
+    }
+
+    public function getConf($property=null) {
+        if(is_null($property)) {
+            return array_merge($this->conf);
+        }
+        if(isset($this->conf[$property])) {
+            return $this->conf[$property];
+        }
+        return null;
+    }
+
     public function makeWebinst($outputPath) {
         $contentTar = $this->inputPath . DIRECTORY_SEPARATOR . "temp_tar";
         $pharTar = new \PharData($contentTar . ".tar");
