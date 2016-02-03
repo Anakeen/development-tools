@@ -1,21 +1,20 @@
 <?php
 
-{{# oldCommentStypeLabel}}
-    $i18nOldCommentStyle = _("{{{.}}}");
-{{/ oldCommentStypeLabel}}
+{{# sharpLabels}}
+//_COMMENT: {{# class}}{{{.}}} ({{{file}}}){{/ class}}{{^ class}}{{{file}}}{{/ class}}
+$i18nOldCommentStyle = _("{{{key}}}");
+{{/ sharpLabels}}
 
-{{# searchLabel}}
-    $i18nSearchLabel = _("{{{.}}}");
-{{/ searchLabel}}
+{{# searchLabels}}
+//_COMMENT: {{# class}}{{{.}}} ({{{file}}}){{/ class}}{{^ class}}{{{file}}}{{/ class}}
+//_COMMENT: searchLabel key
+//_COMMENT: types: {{{types}}}
+$i18nSearchLabel = _("{{{key}}}");
+{{/ searchLabels}}
 
-{{# stateLabel}}
-    $i18nStateLabel = _("{{{.}}}");
-{{/ stateLabel}}
-
-{{# transitionLabel}}
-    $i18nTransitionLabel = _("{{{.}}}");
-{{/ transitionLabel}}
-
-{{# activityLabel}}
-    $i18nActivityLabel = _("{{{.}}}");
-{{/ activityLabel}}
+{{# workflowLabels}}
+//_COMMENT: {{# class}}{{{.}}} ({{{file}}}){{/ class}}{{^ class}}{{{file}}}{{/ class}}
+//_COMMENT: workflow key
+//_COMMENT: constant name: {{{constName}}}
+$i18nWorkflowLabels = _("{{{key}}}");
+{{/ workflowLabels}}
