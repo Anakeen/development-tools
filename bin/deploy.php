@@ -45,7 +45,7 @@ $getopt = new Getopt([
         ),
     (new Option('a', 'auto-release', Getopt::NO_ARGUMENT))
         ->setDescription('append current timestamp to release to force upgrade'),
-    (new Option('v', 'verbose', Getopt::NO_ARGUMENT)),
+    (new Option('q', 'quiet', Getopt::NO_ARGUMENT)),
     (new Option('h', 'help', Getopt::NO_ARGUMENT))
         ->setDescription(
             'show the usage message'
@@ -81,43 +81,56 @@ try {
     $result = $deployer->deploy();
 
     if (!$result['success']) {
-        print "\nAn error occured on server.";
-        print "\n--- script error:";
-        print "\n    " . $result['error'];
-        print "\n--- script messages:";
-        foreach ($result['warnings'] as $message) {
-            print "\n    " . $message;
+        if (!isset($getopt['q']) || $getopt['q'] < 2) {
+            print "\nAn error occured on server.\n";
         }
-        if (isset($getopt['v']) && $getopt['v'] > 0
-            && isset($result['data'])
-        ) {
-            print "\n--- raw output:";
-            if (is_array($result['data'])) {
-                foreach ($result['data'] as $out) {
-                    print "\n    " . $out;
+        if(!isset($getopt['q']) || $getopt['q'] < 2) {
+            print "\n--- script error:";
+            print "\n    " . $result['error'];
+            print "\n--- script messages:";
+            foreach ($result['warnings'] as $message) {
+                print "\n    " . $message;
+            }
+            if (isset($result['data'])
+            ) {
+                print "\n--- raw output:";
+                if (is_array($result['data'])) {
+                    foreach ($result['data'] as $out) {
+                        print "\n    " . $out;
+                    }
+                } else {
+                    print "\n    " . $result['data'];
                 }
             } else {
-                print "\n    " . $result['data'];
+                print "\n--- no output from server";
             }
         }
+        print "\n";
+        exit(1);
     } else {
-        print "\nsuccess";
-        print "\n--- script messages:";
-        foreach ($result['warnings'] as $message) {
-            print "\n    " . $message;
+        if (!isset($getopt['q']) || $getopt['q'] < 2) {
+            print "\nsuccess\n";
         }
-        if (isset($getopt['v']) && $getopt['v'] > 0
-            && isset($result['data'])
-        ) {
-            print "\n--- raw output:";
-            if (is_array($result['data'])) {
-                foreach ($result['data'] as $out) {
-                    print "\n    " . $out;
+        if (!isset($getopt['q']) || $getopt['q'] < 1) {
+            print "\n--- script messages:";
+            foreach ($result['warnings'] as $message) {
+                print "\n    " . $message;
+            }
+            if (isset($result['data'])
+            ) {
+                print "\n--- raw output:";
+                if (is_array($result['data'])) {
+                    foreach ($result['data'] as $out) {
+                        print "\n    " . $out;
+                    }
+                } else {
+                    print "\n    " . $result['data'];
                 }
             } else {
-                print "\n    " . $result['data'];
+                print "\n--- no output from server";
             }
         }
+        print "\n";
     }
 } catch (UnexpectedValueException $e) {
     echo "Error: " . $e->getMessage() . "\n";
