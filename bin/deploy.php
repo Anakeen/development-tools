@@ -30,9 +30,6 @@ $getopt = new Getopt([
         ),
     (new Option('w', 'webinst', Getopt::REQUIRED_ARGUMENT))
         ->setDescription('webinst to deploy. If no webinst provided, a new one will be generated.'),
-    (new Option(null, 'additional_args', Getopt::REQUIRED_ARGUMENT))
-        ->setDescription('additional arguments to pass to remote wiff command (like --nothing).'),
-    (new Option('v', 'verbose', Getopt::NO_ARGUMENT)),
     (new Option(
         's', 'sourcePath', Getopt::REQUIRED_ARGUMENT
     ))
@@ -46,6 +43,9 @@ $getopt = new Getopt([
                 return true;
             }
         ),
+    (new Option('a', 'auto-release', Getopt::NO_ARGUMENT))
+        ->setDescription('append current timestamp to release to force upgrade'),
+    (new Option('v', 'verbose', Getopt::NO_ARGUMENT)),
     (new Option('h', 'help', Getopt::NO_ARGUMENT))
         ->setDescription(
             'show the usage message'
@@ -61,8 +61,17 @@ try {
         exit();
     }
 
+    $unexpectedValueErrors = [];
+
     if (!isset($getopt['sourcePath'])) {
-        throw new UnexpectedValueException("You need to set the sourcepath of the application with -s or --sourcePath");
+        $unexpectedValueErrors['sourcePath'] =  "You need to set the sourcepath of the application with -s or --sourcePath";
+    }
+    if(isset($getopt['w']) && isset($getopt['a']) && $getopt['a'] > 0) {
+        $unexpectedValueErrors['auto-release'] = "--webinst and --auto-release are not compatible";
+    }
+
+    if(0 < count($unexpectedValueErrors)) {
+        throw new UnexpectedValueException("\n -  " . implode("\n -  ", $unexpectedValueErrors) . "\n");
     }
 
     $options = $getopt->getOptions();

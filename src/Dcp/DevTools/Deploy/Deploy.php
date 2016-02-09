@@ -52,6 +52,12 @@ class Deploy
                 );
             }
             $webinstBuilder = new Webinst($this->options['sourcePath']);
+            if(isset($this->options['auto-release'])) {
+                $webinstBuilder->setConfProperty(
+                    'release',
+                    $webinstBuilder->getConf('release') . strftime(".%Y%m%d.%H%M%S")
+                );
+            }
             $webinst = $webinstBuilder->makeWebinst($this->tmpdir);
         }
 
