@@ -2,7 +2,6 @@
 
 namespace Dcp\DevTools\Po;
 
-
 class extractPhp
 {
     protected $tokens;
@@ -14,7 +13,13 @@ class extractPhp
             throw new \Exception("$file does not exists or is not readable");
         }
         $this->file = $file;
-        $this->tokens = token_get_all(file_get_contents($file));
+    }
+
+    protected function getTokens() {
+        if(null === $this->tokens) {
+            $this->tokens = token_get_all(file_get_contents($this->file));
+        }
+        return $this->tokens;
     }
 
     public function extractSearchLabels()
@@ -28,7 +33,7 @@ class extractPhp
         //and need to collect the string values after them
         $gettingNamespace = $gettingClass = false;
 
-        foreach ($this->tokens as $token) {
+        foreach ($this->getTokens() as $token) {
             if (is_array($token)) {
 
                 //If this token is the namespace declaring,
@@ -106,7 +111,7 @@ class extractPhp
         //and need to collect the string values after them
         $gettingNamespace = $gettingClass = false;
 
-        foreach($this->tokens as $token) {
+        foreach($this->getTokens() as $token) {
             if (is_array($token)) {
 
                 //If this token is the namespace declaring,
@@ -183,7 +188,7 @@ class extractPhp
         //and need to collect the string values after them
         $gettingConstant = $gettingNamespace = $gettingClass = false;
 
-        foreach ($this->tokens as $token) {
+        foreach ($this->getTokens() as $token) {
             if (is_array($token)) {
 
                 //If this token is the namespace declaring,

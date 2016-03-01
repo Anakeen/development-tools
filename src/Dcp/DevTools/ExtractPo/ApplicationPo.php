@@ -3,6 +3,7 @@ namespace Dcp\DevTools\ExtractPo;
 
 use Dcp\DevTools\Po\AnalyzePhp;
 use Dcp\DevTools\Po\AnalyzeLayout;
+use Dcp\DevTools\Po\AnalyzeMustache;
 
 class ApplicationPo extends PoGenerator
 {
@@ -12,20 +13,29 @@ class ApplicationPo extends PoGenerator
         if (isset($this->conf["application"])) {
             foreach ($this->conf["application"] as $currentApp) {
                 $currentAppPath = $this->inputPath . DIRECTORY_SEPARATOR . $currentApp;
+
                 $filesList = $this->globRecursive($currentAppPath . DIRECTORY_SEPARATOR . '*.app');
                 $tempApp = tempnam(sys_get_temp_dir(), 'tmp_app_po_' . $currentApp);
                 unlink($tempApp);
                 $extractor = new AnalyzePhp($tempApp . ".pot", $this->gettextpath);
                 $extractor->extract($filesList);
+
                 $filesList = $this->globRecursive($currentAppPath . DIRECTORY_SEPARATOR . '*.php');
                 $tempPhp = tempnam(sys_get_temp_dir(), 'tmp_php_po_' . $currentApp);
                 unlink($tempPhp);
                 $extractor = new AnalyzePhp($tempPhp . ".pot", $this->gettextpath);
                 $extractor->extract($filesList);
+
                 $filesList = $this->globRecursive($currentAppPath . DIRECTORY_SEPARATOR . 'Layout' . DIRECTORY_SEPARATOR . '*');
                 $tempLayout = tempnam(sys_get_temp_dir(), 'tmp_layout_' . $currentApp);
                 unlink($tempLayout);
                 $extractor = new AnalyzeLayout($tempLayout . ".pot", $this->gettextpath);
+                $extractor->extract($filesList);
+
+                $filesList = $this->globRecursive($currentAppPath . DIRECTORY_SEPARATOR . '*.mustache');
+                $tempDdui = tempnam(sys_get_temp_dir(), 'tmp_ddui_' . $currentApp);
+                unlink($tempDdui);
+                $extractor = new AnalyzeMustache($tempDdui . ".pot", $this->gettextpath);
                 $extractor->extract($filesList);
 
                 $filesToBeGenerated = array();
@@ -40,6 +50,10 @@ class ApplicationPo extends PoGenerator
 
                 if (is_file($tempLayout . ".pot")) {
                     $filesToBeGenerated[] = $tempLayout . ".pot";
+                }
+
+                if (is_file($tempDdui . ".pot")) {
+                    $filesToBeGenerated[] = $tempDdui . ".pot";
                 }
 
                 if (!empty($filesToBeGenerated)) {
