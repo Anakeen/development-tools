@@ -1,6 +1,11 @@
 <?php
 
-require_once "initializeAutoloader.php";
+try {
+    require_once "initializeAutoloader.php";
+} catch (\Exception $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+    exit(1);
+}
 
 use Ulrichsg\Getopt\Getopt;
 use Ulrichsg\Getopt\Option;
@@ -76,6 +81,9 @@ try {
 } catch (UnexpectedValueException $e) {
     echo "Error: " . $e->getMessage() . "\n";
     echo $getopt->getHelpText();
+    exit(1);
+} catch (\Exception $e) {
+    echo "Error: " . $e->getMessage() . "\n";
     exit(1);
 }
 
