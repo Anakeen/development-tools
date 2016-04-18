@@ -80,12 +80,17 @@ try {
 }
 
 function listOfSubCommand($basePath) {
+    $subCommands = [];
     $scripts = new \DirectoryIterator($basePath);
     foreach ($scripts as $currentScript) {
         /* @var $currentScript \DirectoryIterator */
         if ($currentScript->isDot() || $currentScript->getFilename() === basename(__FILE__) || $currentScript->getFilename() === "initializeAutoloader.php") {
             continue;
         }
-        print "\t" . str_replace(".php", "", $currentScript->getFilename()) . "\n";
+        $subCommands[] = str_replace(".php", "", $currentScript->getFilename());
+    }
+    sort($subCommands);
+    foreach($subCommands as $subCommand) {
+        print "\t$subCommand\n";
     }
 }
