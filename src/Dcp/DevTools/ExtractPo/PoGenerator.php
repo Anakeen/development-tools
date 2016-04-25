@@ -33,7 +33,7 @@ class PoGenerator
 
         $this->conf = array_replace_recursive($config->getConfig(), [
             'toolsPath' => [
-                'getttext' => ""
+                'gettext' => ""
             ],
             'csvParam' => [
                 'enclosure' => '"',
@@ -41,7 +41,7 @@ class PoGenerator
             ]
         ]);
 
-        $this->gettextpath = $this->conf['toolsPath']['getttext'];
+        $this->gettextpath = isset($this->conf['toolsPath']['getttext']) ? $this->conf['toolsPath']['getttext'] : $this->conf['toolsPath']['gettext'];
         $this->xgettextWrapper = new XgettextWrapper($this->gettextpath);
     }
 

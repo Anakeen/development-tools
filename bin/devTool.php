@@ -1,6 +1,11 @@
 <?php
 
-require_once "initializeAutoloader.php";
+try {
+    require_once "initializeAutoloader.php";
+} catch (\Exception $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+    exit(1);
+}
 
 use Ulrichsg\Getopt\Getopt;
 use Ulrichsg\Getopt\Option;
@@ -77,15 +82,23 @@ try {
     echo "Error: " . $e->getMessage() . "\n";
     echo $getopt->getHelpText();
     exit(1);
+} catch (\Exception $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+    exit(1);
 }
 
 function listOfSubCommand($basePath) {
+    $subCommands = [];
     $scripts = new \DirectoryIterator($basePath);
     foreach ($scripts as $currentScript) {
         /* @var $currentScript \DirectoryIterator */
         if ($currentScript->isDot() || $currentScript->getFilename() === basename(__FILE__) || $currentScript->getFilename() === "initializeAutoloader.php") {
             continue;
         }
-        print "\t" . str_replace(".php", "", $currentScript->getFilename()) . "\n";
+        $subCommands[] = str_replace(".php", "", $currentScript->getFilename());
+    }
+    sort($subCommands);
+    foreach($subCommands as $subCommand) {
+        print "\t$subCommand\n";
     }
 }
