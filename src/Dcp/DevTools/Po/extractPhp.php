@@ -144,10 +144,10 @@ class extractPhp
                     $gettingClass = false;
                 }
 
-                if ($token[0] == T_DOC_COMMENT && $token[1][0] === '#') {
+                if ($token[0] == T_COMMENT && $token[1][0] === '#') {
                     $matches = [];
                     if (preg_match_all(
-                        '/\sN?_\("(?<key>[^\)]+)"\)/', $token[1], $matches
+                        '/\s?N?_\("(?<key>[^\)]+)"\)/', $token[1], $matches
                     )) {
                         foreach ($matches["key"] as $key) {
                             $keys[$key] = [
