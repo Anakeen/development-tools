@@ -2,12 +2,12 @@
 
 BUNDLE_DIR=dynacase-devtool-bundle
 COMPOSER_VERSION=1.0.0
-PHP_VERSION=5.6.20
+PHP_VERSION=7.0.8
 
 SHELL=/bin/bash
 
 composer-path = https://getcomposer.org/download/$(COMPOSER_VERSION)/composer.phar
-php-path = http://windows.php.net/downloads/releases/php-$(PHP_VERSION)-Win32-VC11-x86.zip
+php-path = http://windows.php.net/downloads/releases/php-$(PHP_VERSION)-Win32-VC14-x86.zip
 getText-path = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gettext/gettext-0.18.3.2-1/gettext-0.18.3.2-1-mingw32-dev.tar.xz
 libGetText-path = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gettext/gettext-0.18.3.2-1/libgettextpo-0.18.3.2-1-mingw32-dll-0.tar.xz
 libintl-path = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gettext/gettext-0.18.3.2-1/libintl-0.18.3.2-1-mingw32-dll-8.tar.xz
