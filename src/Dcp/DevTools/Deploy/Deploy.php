@@ -123,7 +123,7 @@ class Deploy
             } elseif (299 < $httpCode) {
                 throw new Exception(
                     sprintf(
-                        "%s returned an error status code: %d",
+                        "Http returned an error status code: %s",
                         $httpCode
                     )
                 );
