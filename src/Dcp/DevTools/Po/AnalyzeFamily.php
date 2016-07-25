@@ -143,13 +143,13 @@ class AnalyzeFamily
                                 if ($cv_lview_index && $tcv_lview[$i]) {
                                     $cvContentToWrite .= "#: $inputFile\n";
                                     $cvContentToWrite .= "#, fuzzy\n";
-                                    $cvContentToWrite .= "msgid \"" . $cvName . "#label#" . $id . "\"\n";
+                                    $cvContentToWrite .= "msgid \"" . $this->escapeId($cvName) . "#label#" . $this->escapeId($id) . "\"\n";
                                     $cvContentToWrite .= "msgstr \"" . $this->escapeTranslation($tcv_lview[$i]) . "\"\n\n";
                                 }
                                 if ($cv_menu_index && $tcv_menu[$i]) {
                                     $cvContentToWrite .= "#: $inputFile\n";
                                     $cvContentToWrite .= "#, fuzzy\n";
-                                    $cvContentToWrite .= "msgid \"" . $cvName . "#menu#" . $id . "\"\n";
+                                    $cvContentToWrite .= "msgid \"" . $this->escapeId($cvName) . "#menu#" . $this->escapeId($id) . "\"\n";
                                     $cvContentToWrite .= "msgstr \"" . $this->escapeTranslation($tcv_menu[$i]) . "\"\n\n";
                                 }
                             }
@@ -235,7 +235,14 @@ class AnalyzeFamily
 
     public function escapeTranslation($key)
     {
-        return str_replace('"', '\"', $key);
+        $key =  str_replace('"', '\"', $key);
+        return str_replace("\n", '\n', $key);
     }
+
+    public function escapeId($key)
+    {
+        return str_replace("\n", '\n', $key);
+    }
+
 
 } 

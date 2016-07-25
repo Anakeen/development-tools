@@ -2,7 +2,7 @@
 
 BUNDLE_DIR=dynacase-devtool-bundle
 COMPOSER_VERSION=1.0.0
-PHP_VERSION=7.0.8
+PHP_VERSION=7.0.9
 
 SHELL=/bin/bash
 
