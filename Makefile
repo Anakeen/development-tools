@@ -29,7 +29,7 @@ box.phar:
 
 dynacase-devtool.phar: composer.phar box.phar
 	php composer.phar install
-	./box.phar build
+	php -d phar.readonly=false box.phar build
 
 ######################
 #  PHP from PHP.net  #
