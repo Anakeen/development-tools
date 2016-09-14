@@ -1,0 +1,63 @@
+#!/bin/bash
+
+function usage {
+	cat <<EOF
+Usage
+-----
+
+	$0 <url> <output-file> <sha256-checksum>
+
+
+EOF
+}
+
+function main {
+	if [ $# -ne 3 ]; then
+		usage
+		return 1
+	fi
+
+	local URL=$1
+	local OUTFILE=$2
+	local CHECKSUM=$3
+
+	local TMPFILE=$(mktemp fetch.tmp.XXXXXX)
+	if [ $? -ne 0 ]; then
+		echo "Error creating temporary file."
+		return 1
+	fi
+
+	echo "[+] Fetching '$URL' into '$TMPFILE'..."
+	wget -O "$TMPFILE" "$URL"
+	if [ $? -ne 0 ]; then
+		echo "Error downloading '$URL'."
+		rm -f "$TMPFILE"
+		return 1
+	fi
+	echo "[+] Done."
+	echo "[+] Checking checksum of '$TMPFILE' ($CHECKSUM)..."
+	local SUM=$(openssl dgst -sha256 -r < "$TMPFILE" | awk '{print $1}')
+	if [ $? -ne 0 ]; then
+		echo "Error computing checksum for '$URL'."
+		rm -f "$TMPFILE"
+		return 1
+	fi
+	if [ "$SUM" != "$CHECKSUM" ]; then
+		echo "Checksum mismatch for '$URL': got '$SUM' / expecting '$CHECKSUM'."
+		rm -f "$TMPFILE"
+		return 1
+	fi
+	echo "[+] Done."
+	echo "[+] Renaming '$TMPFILE' to '$OUTFILE'..."
+	mv "$TMPFILE" "$OUTFILE"
+	if [ $? -ne 0 ]; then
+		echo "Error renaming '$TMPFILE' to '$OUTFILE'."
+		rm -f "$TMPFILE"
+		return 1
+	fi
+	echo "[+] Done."
+	return 0
+}
+
+main "$@"
+

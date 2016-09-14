@@ -6,14 +6,32 @@ PHP_VERSION=7.0.11
 BUILD_DIR=./build
 SHELL=/bin/bash
 
-composer-path = https://getcomposer.org/download/$(COMPOSER_VERSION)/composer.phar
-php-path = http://windows.php.net/downloads/releases/php-$(PHP_VERSION)-Win32-VC14-x86.zip
-getText-path = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gettext/gettext-0.18.3.2-1/gettext-0.18.3.2-1-mingw32-dev.tar.xz
-libGetText-path = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gettext/gettext-0.18.3.2-1/libgettextpo-0.18.3.2-1-mingw32-dll-0.tar.xz
-libintl-path = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gettext/gettext-0.18.3.2-1/libintl-0.18.3.2-1-mingw32-dll-8.tar.xz
-gcc-core-path = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gcc/Version4/gcc-4.8.1-4/gcc-core-4.8.1-4-mingw32-dll.tar.lzma
-gcc-c++-path = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gcc/Version4/gcc-4.8.1-4/gcc-c++-4.8.1-4-mingw32-dll.tar.lzma
-libconv-path = http://downloads.sourceforge.net/project/mingw/MinGW/Base/libiconv/libiconv-1.14-3/libiconv-1.14-3-mingw32-dll.tar.lzma
+composer-path   = https://getcomposer.org/download/$(COMPOSER_VERSION)/composer.phar
+composer-sha256 = 1acc000cf23bd9d19e1590c2edeb44fb915f88d85f1798925ec989c601db0bd6
+
+php-path   = http://windows.php.net/downloads/releases/php-$(PHP_VERSION)-Win32-VC14-x86.zip
+php-sha256 = 4cb2064c484cb4b632867a81243bfda3d702b5e5548fed037d6787ec0c43d7e3
+
+getText-path   = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gettext/gettext-0.18.3.2-1/gettext-0.18.3.2-1-mingw32-dev.tar.xz
+getText-sha256 = 1cf8a5f9b9c6e29985e84c9918928c4b5ffc236b72b1789235eb7cb3cce53439
+
+libGetText-path   = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gettext/gettext-0.18.3.2-1/libgettextpo-0.18.3.2-1-mingw32-dll-0.tar.xz
+libGetText-sha256 = 93974ceb8d259f0e502ba94cf93116aa488ea1308c795873edc651a4b5d1c9ed
+
+libintl-path   = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gettext/gettext-0.18.3.2-1/libintl-0.18.3.2-1-mingw32-dll-8.tar.xz
+libintl-sha256 = a2ffd68d7991e0e44aa26c6224e5f0223bce29143bdbdf4b5d5d4798990cda76
+
+gcc-core-path   = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gcc/Version4/gcc-4.8.1-4/gcc-core-4.8.1-4-mingw32-dll.tar.lzma
+gcc-core-sha256 = 0dab5f923c5d289b8e7e22a3b16ebff5ff8b7c7c0d295ac71806d97ef87b8bee
+
+gcc-c++-path   = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gcc/Version4/gcc-4.8.1-4/gcc-c++-4.8.1-4-mingw32-dll.tar.lzma
+gcc-c++-sha256 = 53f9bc499d606460196b0cda57c6331d019d58de46d3ddb1708984e06781b8d3
+
+libiconv-path   = http://downloads.sourceforge.net/project/mingw/MinGW/Base/libiconv/libiconv-1.14-3/libiconv-1.14-3-mingw32-dll.tar.lzma
+libiconv-sha256 = fbdab03c19c6c50f15b58d02a3cb8c31e8d95baafaa67239f389b9023c7757fd
+
+box2installer-path   = https://github.com/box-project/box2/releases/download/2.7.4/box-2.7.4.phar
+box2installer-sha256 = bb4896d231f64e7e0383660e5548092e5447619aaface50103ac0af41b6f29ac
 
 all: linux win32 ## generate all binaries
 
@@ -22,10 +40,10 @@ linux: dynacase-devtool.phar ## generate binary for linux
 win32: dynacase-devtool-win32.zip ## generate binary for windows
 
 composer.phar:
-	wget -O $@ $(composer-path)
+	./fetch $(composer-path) $@ $(composer-sha256)
 
 box.phar:
-	curl -LSs https://box-project.github.io/box2/installer.php | php
+	./fetch $(box2installer-path) $@ $(box2installer-sha256)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
@@ -40,7 +58,7 @@ dynacase-devtool.phar: composer.phar box.phar $(BUILD_DIR)
 ######################
 php-get: php.zip
 php.zip:
-	wget -O php.zip $(php-path)
+	./fetch $(php-path) $@ $(php-sha256)
 
 ######################
 # Gettext from MinGW #
@@ -48,27 +66,27 @@ php.zip:
 
 gettext-get: gettext.tar.xz
 gettext.tar.xz:
-	wget -O $@ $(getText-path)
+	./fetch $(getText-path) $@ $(getText-sha256)
 
 libgettextpo-get: libgettextpo.tar.xz
 libgettextpo.tar.xz:
-	wget -O $@ $(libGetText-path)
+	./fetch $(libGetText-path) $@ $(libGetText-sha256)
 
 libintl-get: libintl.tar.xz
 libintl.tar.xz:
-	wget -O $@ $(libintl-path)
+	./fetch $(libintl-path) $@ $(libintl-sha256)
 
 gcc-core-get: gcc-core.tar.lzma
 gcc-core.tar.lzma:
-	wget -O $@ $(gcc-core-path)
+	./fetch $(gcc-core-path) $@ $(gcc-core-sha256)
 
 gcc-c++-get: gcc-c++.tar.lzma
 gcc-c++.tar.lzma:
-	wget -O $@ $(gcc-c++-path)
+	./fetch $(gcc-c++-path) $@ $(gcc-c++-sha256)
 
 libiconv-get: libiconv.tar.lzma
 libiconv.tar.lzma:
-	wget -O $@ $(libconv-path)
+	./fetch $(libiconv-path) $@ $(libiconv-sha256)
 
 dynacase-devtool-win32.zip: php-get gettext-get libgettextpo-get libintl-get gcc-core-get gcc-c++-get libiconv-get dynacase-devtool.phar dynacase-devtool.bat $(BUILD_DIR)
 	mkdir -p "tmp/${BUNDLE_DIR}"
@@ -108,6 +126,7 @@ clean-libs: ## remove lib files
 
 clean-tmp: ## remove temp files
 	rm -Rf tmp
+	rm -f fetch.tmp.*
 
 ######################
 #        HELP        #
