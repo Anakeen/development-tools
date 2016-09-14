@@ -2,8 +2,8 @@
 
 BUNDLE_DIR=dynacase-devtool-bundle
 COMPOSER_VERSION=1.0.0
-PHP_VERSION=7.0.9
-
+PHP_VERSION=7.0.11
+BUILD_DIR=./build
 SHELL=/bin/bash
 
 composer-path = https://getcomposer.org/download/$(COMPOSER_VERSION)/composer.phar
@@ -27,9 +27,13 @@ composer.phar:
 box.phar:
 	curl -LSs https://box-project.github.io/box2/installer.php | php
 
-dynacase-devtool.phar: composer.phar box.phar
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+dynacase-devtool.phar: composer.phar box.phar $(BUILD_DIR)
 	php composer.phar install
-	./box.phar build
+	php -d phar.readonly=false box.phar build
+	mv $@ $(BUILD_DIR)
 
 ######################
 #  PHP from PHP.net  #
@@ -66,9 +70,8 @@ libiconv-get: libiconv.tar.lzma
 libiconv.tar.lzma:
 	wget -O $@ $(libconv-path)
 
-dynacase-devtool-win32.zip: php-get gettext-get libgettextpo-get libintl-get gcc-core-get gcc-c++-get libiconv-get dynacase-devtool.phar dynacase-devtool.bat
+dynacase-devtool-win32.zip: php-get gettext-get libgettextpo-get libintl-get gcc-core-get gcc-c++-get libiconv-get dynacase-devtool.phar dynacase-devtool.bat $(BUILD_DIR)
 	mkdir -p "tmp/${BUNDLE_DIR}"
-	
 	cd "tmp/${BUNDLE_DIR}" && yes | unzip ../../php.zip
 	cp "tmp/${BUNDLE_DIR}/php.ini-production" "tmp/${BUNDLE_DIR}/php.ini"
 	echo -e "\r" >> "tmp/${BUNDLE_DIR}/php.ini"
@@ -76,18 +79,16 @@ dynacase-devtool-win32.zip: php-get gettext-get libgettextpo-get libintl-get gcc
 	echo -e "extension_dir = 'ext'\r" >> "tmp/${BUNDLE_DIR}/php.ini"
 	echo -e "extension=php_bz2.dll\r" >> "tmp/${BUNDLE_DIR}/php.ini"
 	echo -e "extension=php_mbstring.dll\r" >> "tmp/${BUNDLE_DIR}/php.ini"
-	
 	tar -C "tmp/${BUNDLE_DIR}" -Jxf gettext.tar.xz
 	tar -C "tmp/${BUNDLE_DIR}" -Jxf libgettextpo.tar.xz
 	tar -C "tmp/${BUNDLE_DIR}" -Jxf libintl.tar.xz
 	tar -C "tmp/${BUNDLE_DIR}" --lzma -xf gcc-core.tar.lzma
 	tar -C "tmp/${BUNDLE_DIR}" --lzma -xf gcc-c++.tar.lzma
 	tar -C "tmp/${BUNDLE_DIR}" --lzma -xf libiconv.tar.lzma
-	
-	cp dynacase-devtool.phar "tmp/${BUNDLE_DIR}"
+	cp  $(BUILD_DIR)/dynacase-devtool.phar "tmp/${BUNDLE_DIR}"
 	cp dynacase-devtool.bat tmp
-	
-	cd tmp && zip -r ../dynacase-devtool-win32.zip "${BUNDLE_DIR}" dynacase-devtool.bat
+	cd tmp && zip -r dynacase-devtool-win32.zip "${BUNDLE_DIR}" dynacase-devtool.bat
+	mv tmp/dynacase-devtool-win32.zip $(BUILD_DIR)
 
 clean-all: clean-buildtools clean-bin clean-libs clean-tmp ## remove temp, lib, binaries files and build tools
 
@@ -96,8 +97,8 @@ clean-buildtools: ## remove build tools
 	rm -f box.phar
 
 clean-bin: ## remove binaries
-	rm -f dynacase-devtool.phar
-	rm -f dynacase-devtool-win32.zip
+	rm -f $(BUILD_DIR)/dynacase-devtool.phar
+	rm -f $(BUILD_DIR)/dynacase-devtool-win32.zip
 
 clean: clean-libs clean-tmp ## remove temp and lib files
 
