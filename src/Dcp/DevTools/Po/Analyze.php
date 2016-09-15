@@ -20,7 +20,12 @@ class Analyze
 
     public function extract($filesPath)
     {
-        $filesPath = array_map(function($path) { return escapeshellarg($path);}, $filesPath);
+        $filesPath = array_map(
+            function($path) {
+                return escapeshellarg($path);
+            },
+            $filesPath
+        );
         if (!empty($filesPath)) {
             $options = $this->getTextOptions;
             $options .= " -o " . escapeshellarg($this->outputFile) . " ";

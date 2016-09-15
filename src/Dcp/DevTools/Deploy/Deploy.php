@@ -118,12 +118,13 @@ class Deploy
                 );
             } elseif (403 === $httpCode) {
                 throw new Exception(
-                    "invalid credentials for %s"
+                    "invalid credentials"
                 );
             } elseif (299 < $httpCode) {
                 throw new Exception(
                     sprintf(
-                        "Http returned an error status code: %s",
+                        "%s returned an error status code: %d",
+                        curl_getinfo($request, CURLINFO_EFFECTIVE_URL),
                         $httpCode
                     )
                 );

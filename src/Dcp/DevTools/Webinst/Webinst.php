@@ -74,8 +74,13 @@ class Webinst {
             }
         }
         if (isset($this->conf["includedPath"]) && is_array($this->conf["includedPath"])) {
-            foreach ($this->conf["includedPath"] as $includedPathDirectory) {
-                $this->addDirectory($pharTar, $this->inputPath . DIRECTORY_SEPARATOR . $includedPathDirectory);
+            foreach ($this->conf["includedPath"] as $includedPath) {
+                $includedFullPath = $this->inputPath . DIRECTORY_SEPARATOR . $includedPath;
+                if (is_dir($includedFullPath)) {
+                    $this->addDirectory($pharTar, $includedFullPath);
+                } elseif(is_file($includedFullPath)) {
+                    $this->addFile($pharTar, $includedFullPath);
+                }
             }
         }
         $pharTar->stopBuffering();
@@ -136,15 +141,28 @@ class Webinst {
             ),
             $this->inputPath
         );
-        foreach ($addedFiles as $pharFilePath => $systemFilePath) {
-            if (!is_dir($systemFilePath) && is_executable($systemFilePath)) {
-                echo "marking $pharFilePath as executable \n";
-                $pharTar[$pharFilePath]->chmod(
-                    $pharTar[$pharFilePath]->getPerms()
-                    | $this->WEBINST_EXEC_MASK
-                );
-            }
+        $this->setFlags($pharTar, $addedFiles);
+        return $addedFiles;
+    }
+
+    /**
+     * @param \PharData $pharTar
+     * @param $filePath
+     * @param $localName
+     * @return array files added
+     * @internal param $directory
+     *
+     */
+    protected function addFile(\PharData $pharTar, $filePath, $localName = null)
+    {
+        if(null === $localName) {
+            $localName = str_replace($this->inputPath, '', $filePath, $localName);
         }
+        $pharTar->addFile($filePath, $localName);
+        $addedFiles = [
+            $localName, $filePath
+        ];
+        $this->setFlags($pharTar, $addedFiles);
         return $addedFiles;
     }
 
@@ -171,5 +189,22 @@ class Webinst {
         $pharTar->addFromString($appParamFile, $appParamContent);
 
         return $addedFiles;
+    }
+
+    /**
+     * @param \PharData $pharTar
+     * @param $addedFiles
+     */
+    protected function setFlags(\PharData $pharTar, $addedFiles)
+    {
+        foreach ($addedFiles as $pharFilePath => $systemFilePath) {
+            if (!is_dir($systemFilePath) && is_executable($systemFilePath)) {
+                echo "marking $pharFilePath as executable \n";
+                $pharTar[$pharFilePath]->chmod(
+                    $pharTar[$pharFilePath]->getPerms()
+                    | $this->WEBINST_EXEC_MASK
+                );
+            }
+        }
     }
 }
