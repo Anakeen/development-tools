@@ -5,6 +5,8 @@
 Ce programme est un développer toolkit pour Dynacase Platform, il facilite 
 l'initialisation et la maintenance d'un projet Dynacase Platform.
 
+La documentation est générée à l'[adresse suivante][doc]
+
 ## Contenu
 
 Il contient, les fonctionnalités suivantes :
@@ -23,31 +25,6 @@ Il contient, les fonctionnalités suivantes :
     * production du paquet (format webinst)
 * stubs :
     * génération des stubs
-
-## Liste des commandes
-
-L'ensemble des commandes sont mises à disposition par le phar `devtool.phar`
-
-L'ensemble des commandes est :
-
-```
-DevTools for Dynacase 3.2
-You can access to the sub command :
-	createAction
-	createApplication
-	createFamily
-	createInfoXml
-	createModule
-	createWorkflow
-	extractPo
-	generateStub
-	generateWebinst
-```
-
-Les commandes en create permette d'initialiser les fichiers d'un paquet, la commande extract po extrait les po d'un paquet,
-la commande generateWebinst produit le webinst et generateStub produit les stubs pour aider au développement.
-
-NB: On peut exécuter les commandes directement avec les sources (sans le packaging) en lançant le fichier `bin/devTool.php`
 
 ## Dépendances
 
@@ -78,3 +55,5 @@ celui-ci contient alors le nécessaire pour lancer les devtools sous window (tes
 Vous pouvez ensuite nettoyer avec la commande :
 
 `make clean`
+
+[doc]: http://docs.anakeen.com/dynacase/3.2/devtools/index.html
