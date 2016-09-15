@@ -1,5 +1,10 @@
 # Installation {#devtools:e9e7fc63-031f-44c7-8443-60787e35d7be}
 
+Le developer toolkit est téléchargeable depuis [notre site][eec-public-development-tools] :
+
+-   `dynacase-devtool.phar` pour linux
+-   `dynacase-devtool-win32.zip` pour windows
+
 ## Linux {#devtools:60a0918c-d2cf-41a6-8164-83fa32b4789e}
 
 Pour Linux, le developper toolkit est un [phar][php_phar].
@@ -17,5 +22,7 @@ Le répertoire obtenu contient un .bat `dynacase-devtool.bat` qui doit être ex�
     dynacase-devtool.bat
 
 <!-- links -->
-[url_win_toolkit]: https://docs.anakeen.com/dynacase/3.2/quick-start/dynacase-devtool-win32.zip
-[url_linux_toolkit]: https://docs.anakeen.com/dynacase/3.2/quick-start/dynacase-devtool.phar
+
+[eec-public-development-tools]: http://eec.anakeen.com/public/tools/development
+[url_win_toolkit]: http://eec.anakeen.com/public/tools/development/dynacase-devtool-win32.zip
+[url_linux_toolkit]: http://eec.anakeen.com/public/tools/development/dynacase-devtool.phar
