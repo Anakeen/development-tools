@@ -18,25 +18,5 @@ book:
         - level:   1
           content:  "40-commandes.md"
           subtoc: 2
-        - level:   2
-          content:  "commandes/10-createAction.md"
-        - level:   2
-          content:  "commandes/20-createApplication.md"
-        - level:   2
-          content:  "commandes/30-createFamily.md"
-        - level:   2
-          content:  "commandes/40-createInfoXml.md"
-        - level:   2
-          content:  "commandes/50-createModule.md"
-        - level:   2
-          content:  "commandes/60-createWorkflow.md"
-        - level:   2
-          content:  "commandes/70-deploy.md"
-        - level:   2
-          content:  "commandes/80-extractPo.md"
-        - level:   2
-          content:  "commandes/90-generateStub.md"
-        - level:   2
-          content:  "commandes/100-generateWebinst.md"
         - level:   1
           content:  "50-advanced.md"
