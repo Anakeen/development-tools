@@ -26,7 +26,7 @@ $getopt = new Getopt(array(
 try {
 
     // Test extension
-    $requiredExtension = array("mbstring", "zlib", "zip", "Phar", "bz2");
+    $requiredExtension = array("mbstring", "zlib", "zip", "Phar", "bz2", "curl");
     $requiredError = "";
     foreach($requiredExtension as $currentRequired) {
         if (!extension_loaded($currentRequired)) {
