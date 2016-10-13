@@ -242,7 +242,7 @@ class extractPhp
                             //if we have a string
                             if ('' !== $constName && $token[0] == T_CONSTANT_ENCAPSED_STRING) {
                                 //store the constant
-                                $keys[$constName] = [
+                                $keys[uniqid($constName)] = [
                                     'key' => substr($token[1], 1, -1),
                                     'constName' => $constName,
                                     'file' => basename($this->file),
