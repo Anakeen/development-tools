@@ -97,6 +97,7 @@ dynacase-devtool-win32.zip: php-get gettext-get libgettextpo-get libintl-get gcc
 	echo -e "extension_dir = 'ext'\r" >> "tmp/${BUNDLE_DIR}/php.ini"
 	echo -e "extension=php_bz2.dll\r" >> "tmp/${BUNDLE_DIR}/php.ini"
 	echo -e "extension=php_mbstring.dll\r" >> "tmp/${BUNDLE_DIR}/php.ini"
+	echo -e "extension=php_curl.dll\r" >> "tmp/${BUNDLE_DIR}/php.ini"
 	tar -C "tmp/${BUNDLE_DIR}" -Jxf gettext.tar.xz
 	tar -C "tmp/${BUNDLE_DIR}" -Jxf libgettextpo.tar.xz
 	tar -C "tmp/${BUNDLE_DIR}" -Jxf libintl.tar.xz
