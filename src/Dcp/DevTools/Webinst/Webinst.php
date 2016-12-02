@@ -198,12 +198,29 @@ class Webinst {
     protected function setFlags(\PharData $pharTar, $addedFiles)
     {
         foreach ($addedFiles as $pharFilePath => $systemFilePath) {
-            if (!is_dir($systemFilePath) && is_executable($systemFilePath)) {
-                echo "marking $pharFilePath as executable \n";
-                $pharTar[$pharFilePath]->chmod(
-                    $pharTar[$pharFilePath]->getPerms()
-                    | $this->WEBINST_EXEC_MASK
-                );
+            if (!is_dir($systemFilePath)){
+                if(isset($this->conf['permission_masks'])) {
+                    if(!empty($this->conf['permission_masks'][$pharFilePath])) {
+                        $mask = $this->conf['permission_masks'][$pharFilePath];
+                        $oldPerms = $pharTar[$pharFilePath]->getPerms();
+                        $newPerms = $oldPerms | $mask;
+                        echo sprintf("applying mask %s to %s (%s => %s) \n",
+                            $mask,
+                            $pharFilePath,
+                            substr(sprintf('%o', $oldPerms), -4),
+                            substr(sprintf('%o', $newPerms), -4)
+                        );
+                        $pharTar[$pharFilePath]->chmod($newPerms);
+                    }
+                } else {
+                    if (is_executable($systemFilePath)) {
+                        echo "marking $pharFilePath as executable \n";
+                        $pharTar[$pharFilePath]->chmod(
+                            $pharTar[$pharFilePath]->getPerms()
+                            | $this->WEBINST_EXEC_MASK
+                        );
+                    }
+                }
             }
         }
     }
