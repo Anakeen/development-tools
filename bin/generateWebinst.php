@@ -29,6 +29,8 @@ $getopt = new Getopt(array(
             return true;
         }
     ),
+    (new Option('a', 'auto-release', Getopt::NO_ARGUMENT))
+        ->setDescription('append current timestamp to release to force upgrade'),
     (new Option('h', 'help', Getopt::NO_ARGUMENT))->setDescription('show the usage message'),
 ));
 
@@ -58,6 +60,12 @@ try {
     }
 
     $webinst = new Webinst($getopt['sourcePath']);
+    if(isset($getopt['auto-release'])) {
+        $webinst->setConfProperty(
+            'release',
+            $webinst->getConf('release') . strftime(".%Y%m%d.%H%M%S")
+        );
+    }
     $webinst->makeWebinst($outputPath);
 
 
