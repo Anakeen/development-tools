@@ -10,8 +10,8 @@ class Module extends Template
         if (!empty($outputPath) && !is_dir($outputPath)) {
             throw new Exception("The output path $outputPath is not a dir");
         }
-        if (!isset($arguments["name"]) || !$this->checkLogicalName($arguments["name"])) {
-            throw new Exception("You need to set the name of the module with a valid name " . $this->logicalNameRegExp);
+        if (!isset($arguments["name"]) || !$this->checkModuleName($arguments["name"])) {
+            throw new Exception("You need to set the name of the module with a valid name " . $this->moduleNameRegExp);
         }
         //$outputPath = $outputPath . DIRECTORY_SEPARATOR . $arguments['name'];
         $this->createDir($outputPath);
