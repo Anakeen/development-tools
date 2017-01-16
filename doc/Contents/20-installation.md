@@ -23,6 +23,7 @@ Le répertoire obtenu contient un .bat `dynacase-devtool.bat` qui doit être ex�
 
 <!-- links -->
 
+[php_phar]: https://en.wikipedia.org/wiki/PHAR_(file_format) "Phar"
 [eec-public-development-tools]: http://eec.anakeen.com/public/tools/development
 [url_win_toolkit]: http://eec.anakeen.com/public/tools/development/dynacase-devtool-win32.zip
 [url_linux_toolkit]: http://eec.anakeen.com/public/tools/development/dynacase-devtool.phar
