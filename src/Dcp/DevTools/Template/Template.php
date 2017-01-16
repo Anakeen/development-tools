@@ -8,6 +8,7 @@ class Template
     protected $templateBaseDir;
     protected $templates = array();
     protected $logicalNameRegExp = '/^[A-Za-z][A-Za-z0-9_]*$/';
+    protected $moduleNameRegExp = '/^[A-Za-z][A-Za-z0-9_-]*$/';
 
     public function __construct()
     {
@@ -57,6 +58,10 @@ class Template
     public function checkLogicalName($name)
     {
         return preg_match($this->logicalNameRegExp, $name) === 1;
+    }
+    public function checkModuleName($name)
+    {
+        return preg_match($this->moduleNameRegExp, $name) === 1;
     }
 
 } 
