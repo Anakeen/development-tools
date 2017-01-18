@@ -1,9 +1,10 @@
 <?php
 namespace Dcp\DevTools\Template;
 
-class Application extends Template {
-
-    public function render($arguments, $outputPath, $force = false) {
+class Application extends Template
+{
+    public function render($arguments, $outputPath, $force = false)
+    {
         if (!empty($outputPath) && !is_dir($outputPath)) {
             throw new Exception("The output path $outputPath is not a dir");
         }
@@ -13,7 +14,6 @@ class Application extends Template {
         if (!empty($outputPath)) {
             $outputPath .= DIRECTORY_SEPARATOR.$arguments["name"].".app";
         }
-        return parent::main_render("application", $arguments, $outputPath, $force);
+        return parent::mainRender("application", $arguments, $outputPath, $force);
     }
-
-} 
+}

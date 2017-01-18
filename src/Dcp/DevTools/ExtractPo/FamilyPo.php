@@ -10,8 +10,8 @@ namespace Dcp\DevTools\ExtractPo;
 
 use Dcp\DevTools\Po\AnalyzeFamily;
 
-class FamilyPo extends PoGenerator {
-
+class FamilyPo extends PoGenerator
+{
     public function extractPo()
     {
         if (isset($this->conf["application"])) {
@@ -28,7 +28,7 @@ class FamilyPo extends PoGenerator {
                 $extractor->extract($filesList);
                 $potList = array_merge($potList, $this->globRecursive($tempParam . DIRECTORY_SEPARATOR . "*.pot"));
                 $tempFusion = $this->tempdir('tmp_fusion_' . $currentApp);
-                foreach($potList as $currentPot) {
+                foreach ($potList as $currentPot) {
                     $baseName = pathinfo($currentPot, PATHINFO_BASENAME);
                     if (!is_file($tempFusion . DIRECTORY_SEPARATOR . $baseName)) {
                         rename($currentPot, $tempFusion . DIRECTORY_SEPARATOR . $baseName);
@@ -36,7 +36,6 @@ class FamilyPo extends PoGenerator {
                         $this->xgettextWrapper->msgcat("-o ".$tempFusion . DIRECTORY_SEPARATOR . $baseName.".new $currentPot ".$tempFusion . DIRECTORY_SEPARATOR . $baseName);
                         rename($tempFusion . DIRECTORY_SEPARATOR . $baseName . ".new", $tempFusion . DIRECTORY_SEPARATOR . $baseName);
                     }
-
                 }
                 $potList = $this->globRecursive($tempFusion . DIRECTORY_SEPARATOR . "*.pot");
                 foreach ($potList as $currentPot) {
@@ -51,5 +50,4 @@ class FamilyPo extends PoGenerator {
             }
         }
     }
-
-} 
+}

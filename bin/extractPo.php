@@ -47,8 +47,6 @@ try {
 
     $extractor = new FamilyPo($getopt['sourcePath']);
     $extractor->extractPo();
-
-
 } catch (UnexpectedValueException $e) {
     echo "Error: " . $e->getMessage() . "\n";
     echo $getopt->getHelpText();

@@ -2,12 +2,10 @@
 
 namespace Dcp\DevTools\Po;
 
-
 use Dcp\DevTools\Template\Template;
 
 class AnalyzeLayout extends Analyze
 {
-
     public function extractODT($filePath)
     {
         $content = "";
@@ -86,7 +84,7 @@ class AnalyzeLayout extends Analyze
         $temporaryFile = tempnam(sys_get_temp_dir(), "additionnal_keys_");
 
         $template = new Template();
-        $template->main_render("temporary_layout_file",
+        $template->mainRender("temporary_layout_file",
             array("odtLayoutKeys" => $odtLayout, "layoutKeys" => $layout),
             $temporaryFile, true);
         $filesPath[] = $temporaryFile;
@@ -94,4 +92,4 @@ class AnalyzeLayout extends Analyze
 
         unset($temporaryFile);
     }
-} 
+}

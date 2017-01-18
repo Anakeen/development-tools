@@ -1,4 +1,5 @@
 box.phar
 composer.phar
-/.idea/
+/.idea/workspace.xml
+/.idea/tasks.xml
 /vendor/

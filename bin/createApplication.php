@@ -10,7 +10,7 @@ use Dcp\DevTools\Template\ApplicationParameter;
 
 $getopt = new Getopt(array(
     (new Option('f', 'force', Getopt::NO_ARGUMENT))->setDescription('force the write if the file exist (needed)'),
-    (new Option('s', 'sourcePath', Getopt::REQUIRED_ARGUMENT))->setDescription('path of the module source')->setValidation(function($path) {
+    (new Option('s', 'sourcePath', Getopt::REQUIRED_ARGUMENT))->setDescription('path of the module source')->setValidation(function ($path) {
         return is_dir($path);
     }),
     (new Option('n', 'name', Getopt::REQUIRED_ARGUMENT))->setDescription('name of the application (needed)'),
@@ -54,7 +54,6 @@ try {
     $applicationTemplate->render($renderOptions, $outputPath, $force);
     $applicationParamTemplate = new ApplicationParameter();
     $applicationParamTemplate->render($renderOptions, $outputPath, $force);
-
 } catch (UnexpectedValueException $e) {
     echo "Error: " . $e->getMessage() . "\n";
     echo $getopt->getHelpText();

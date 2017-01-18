@@ -1,6 +1,6 @@
 <?php
 
-namespace Dcp\Devtools\Utils;
+namespace Dcp\DevTools\Utils;
 
 class ConfigFile
 {
@@ -23,7 +23,7 @@ class ConfigFile
             $this->fileName = $fileName;
         }
 
-        if(!is_dir($sourcePath) && !(is_link($sourcePath) && is_dir(readlink($sourcePath)))) {
+        if (!is_dir($sourcePath) && !(is_link($sourcePath) && is_dir(readlink($sourcePath)))) {
             throw new \Exception(
                 sprintf(
                     "%s is not a directory.",
@@ -34,7 +34,7 @@ class ConfigFile
 
         $this->sourcePath = $sourcePath;
 
-        if(!file_exists($this->getConfigFilePath())) {
+        if (!file_exists($this->getConfigFilePath())) {
             throw new \Exception(
                 sprintf(
                     "%s does not exists.",
@@ -46,10 +46,11 @@ class ConfigFile
         $this->loadConfig();
     }
 
-    public function get($property, $default=null, $options=0) {
-        if(isset($this->config[$property])) {
+    public function get($property, $default=null, $options=0)
+    {
+        if (isset($this->config[$property])) {
             $val = $this->config[$property];
-            if(is_array($val) && ($options & self::GET_MERGE_DEFAULTS)) {
+            if (is_array($val) && ($options & self::GET_MERGE_DEFAULTS)) {
                 $val = array_merge($val, $default);
             }
             return $val;
@@ -57,35 +58,42 @@ class ConfigFile
         return $default;
     }
 
-    public function set($property, $value) {
+    public function set($property, $value)
+    {
         $oldValue = $this->get($property, []);
         $this->config[$property] = $value;
         return $oldValue;
     }
 
-    public function getConfig() {
+    public function getConfig()
+    {
         return array_merge($this->config);
     }
 
-    public function getConfigFilePath() {
+    public function getConfigFilePath()
+    {
         return $this->sourcePath . DIRECTORY_SEPARATOR . $this->fileName;
     }
 
-    public function getModulePath() {
+    public function getModulePath()
+    {
         return $this->sourcePath;
     }
 
-    public function __get($property) {
+    public function __get($property)
+    {
         return $this->get($property);
     }
 
-    public function __set($property, $value) {
+    public function __set($property, $value)
+    {
         $this->set($property, $value);
     }
 
-    public function saveConfig() {
+    public function saveConfig()
+    {
         $jsonConfig = json_encode($this->config, JSON_PRETTY_PRINT);
-        if(JSON_ERROR_NONE !== json_last_error()) {
+        if (JSON_ERROR_NONE !== json_last_error()) {
             throw new \Exception(
                 sprintf(
                     "An error occured while saving %s: %d (%s).",

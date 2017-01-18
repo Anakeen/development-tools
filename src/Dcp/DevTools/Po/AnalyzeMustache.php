@@ -25,7 +25,7 @@ class AnalyzeMustache extends Analyze
         $temporaryFile = tempnam(sys_get_temp_dir(), "mustache_keys_");
 
         $template = new Template();
-        $template->main_render(
+        $template->mainRender(
             "temporary_mustache_file",
             [
                 "keys" => array_values($keys)
@@ -38,4 +38,4 @@ class AnalyzeMustache extends Analyze
 
         unset($temporaryFile);
     }
-} 
+}

@@ -3,7 +3,6 @@ namespace Dcp\DevTools\Template;
 
 class ApplicationParameter extends Template
 {
-
     public function render($arguments, $outputPath, $force = false)
     {
         if (!empty($outputPath) && !is_dir($outputPath)) {
@@ -15,7 +14,6 @@ class ApplicationParameter extends Template
         if (!empty($outputPath)) {
             $outputPath .= DIRECTORY_SEPARATOR . $arguments["name"] . "_init.php";
         }
-        return parent::main_render("application_param", $arguments, $outputPath, $force);
+        return parent::mainRender("application_param", $arguments, $outputPath, $force);
     }
-
-} 
+}

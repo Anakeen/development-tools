@@ -3,7 +3,6 @@ namespace Dcp\DevTools\Stub;
 
 class Stub
 {
-
     public $content = array();
     public $famname = null;
     public $attr = array();
@@ -35,13 +34,12 @@ class Stub
     {
         $csvFile = $file;
         $famName = $className = $fromName = $famId = $famTitle = $name = '';
-        if (($handle = fopen($csvFile, "r")) !== FALSE) {
+        if (($handle = fopen($csvFile, "r")) !== false) {
             while ($data = $this->getLine($handle)) {
                 switch ($data[0]) {
                     case "BEGIN":
                         $this->famname = $famName = strtolower($data[5]);
                         if (isset($this->content[$famName])) {
-
                             $className = $this->content[$famName]["className"];
                             $fromName = $this->content[$famName]["fromName"];
                             $famId = $this->content[$famName]["id"];
@@ -59,7 +57,6 @@ class Stub
                                 $famTitle = $data[2];
                             }
                         } else {
-
                             $className = $data[4];
                             $fromName = ($data[1] == '--') ? '' : $data[1];
                             $famId = $data[3];
@@ -68,7 +65,7 @@ class Stub
                         }
                         $this->attr[$famName] = array();
                         break;
-                    case 'CLASS';
+                    case 'CLASS':
                         $className = $data[1];
                         break;
                     case 'PARAM':
@@ -80,7 +77,7 @@ class Stub
                             "label" => $data[3],
                             "famName" => $famName);
                         break;
-                    case 'END';
+                    case 'END':
                         $this->content[$famName] = array(
                             "famName" => $famName,
                             "name" => $name,
@@ -90,7 +87,6 @@ class Stub
                             "fromName" => $fromName);
                         break;
                 }
-
             }
         }
         fclose($handle);
@@ -135,12 +131,10 @@ class Stub
         $comment = sprintf('/** %s  */', $info["title"]);
         $template = sprintf('class %s extends %s { const familyName="%s";}', $famName, $parentClass, $info["name"]);
         return $comment . "\n\t" . $template;
-
     }
 
     protected function generateStubAttrFile()
     {
-
         $phpContent = "namespace Dcp\\AttributeIdentifiers {\n";
         foreach ($this->attr as $famName => $attrInfo) {
             $phpContent .= "\t" . $this->getPhpAttrPart($famName, $attrInfo) . "\n";
@@ -162,7 +156,6 @@ class Stub
             $template = sprintf("class %s extends %s {\n", ucwords($famName), $parentClass);
         } else {
             $template = sprintf("class %s {\n", ucwords($famName));
-
         }
         foreach ($info as $attrInfo) {
             $template .= sprintf("\t\t/** [%s] %s */\n", str_replace('*', ' ', $attrInfo["type"]), str_replace('*', ' ', $attrInfo["label"]));
@@ -184,4 +177,4 @@ class Stub
             return $line;
         }
     }
-} 
+}

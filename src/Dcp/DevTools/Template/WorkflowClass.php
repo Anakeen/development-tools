@@ -21,6 +21,6 @@ class WorkflowClass extends Template
         if (!empty($outputPath)) {
             $outputPath .= DIRECTORY_SEPARATOR . $arguments["name"] . "__WFL.php";
         }
-        return parent::main_render("workflow_class", $arguments, $outputPath, $force);
+        return parent::mainRender("workflow_class", $arguments, $outputPath, $force);
     }
-} 
+}

@@ -45,7 +45,7 @@ try {
     }
 
     if (!is_dir($getopt['output'])) {
-        mkdir($getopt['output'], 0777,true);
+        mkdir($getopt['output'], 0777, true);
     }
 
     $inputDir = $getopt['sourcePath'];
@@ -56,7 +56,6 @@ try {
     }
 
     $globRecursive = function ($pattern, $flags = 0) use (&$globRecursive) {
-
         $files = glob($pattern, $flags);
 
         foreach (glob(dirname($pattern) . DIRECTORY_SEPARATOR . '*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
@@ -78,19 +77,15 @@ try {
     $enclosure = $csvParam["enclosure"];
     $delimiter = $csvParam["delimiter"];
 
-    if (isset($getopt['file']))
-    {
+    if (isset($getopt['file'])) {
         $files = [$getopt['file']];
-    }
-    else
-    {
+    } else {
         $files = array_merge($globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__STRUCT.csv"), $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__WFL.csv"));
     }
     foreach ($files as $currentFile) {
         $stub = new Stub($enclosure, $delimiter);
         $stub->generate($currentFile, $getopt['output']);
     }
-
 } catch (UnexpectedValueException $e) {
     echo "Error: " . $e->getMessage() . "\n";
     echo $getopt->getHelpText();

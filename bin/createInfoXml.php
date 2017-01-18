@@ -48,7 +48,6 @@ try {
 
     $template = new InfoXml();
     $template->render($renderOptions, $outputPath, $force);
-
 } catch (UnexpectedValueException $e) {
     echo "Error: " . $e->getMessage() . "\n";
     echo $getopt->getHelpText();

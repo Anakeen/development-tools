@@ -6,7 +6,6 @@ use Dcp\DevTools\Template\Template;
 
 class XgettextWrapper
 {
-
     protected $getTextPath = null;
 
     public function __construct($getTextPath = "")
@@ -35,7 +34,7 @@ class XgettextWrapper
     public function msginit($options)
     {
         $template = new Template();
-        $template->main_render("msginit", $options, $options["poTarget"]);
+        $template->mainRender("msginit", $options, $options["poTarget"]);
         $this->msgmerge(sprintf(" --sort-output --no-fuzzy-matching -o %s %s %s", escapeshellarg($options["poTarget"] . '.new'), escapeshellarg($options["poTarget"]), escapeshellarg($options["potFile"])));
         rename($options["poTarget"] . '.new', $options["poTarget"]);
     }
@@ -48,5 +47,4 @@ class XgettextWrapper
             throw new Exception("Exec : $cmd - " . print_r($out, true));
         }
     }
-
-} 
+}

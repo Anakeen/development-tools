@@ -9,6 +9,6 @@ class WorkflowInfo extends Template
         if (!isset($arguments["name"]) || !$this->checkLogicalName($arguments["name"])) {
             throw new Exception("You need to set the name of the workflow with a valid name " . $this->logicalNameRegExp);
         }
-        return parent::main_render("workflow_info", $arguments);
+        return parent::mainRender("workflow_info", $arguments);
     }
-} 
+}

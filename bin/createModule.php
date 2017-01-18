@@ -79,7 +79,7 @@ try {
         $renderOptions["delimiter"] = ';';
     }
 
-    if($renderOptions["enclosure"] === 1) {
+    if ($renderOptions["enclosure"] === 1) {
         $renderOptions["enclosure"] = "";
     }
 
@@ -91,7 +91,7 @@ try {
 
     if (isset($renderOptions["application"])) {
         $applications = explode(",", $renderOptions["application"]);
-        foreach($applications as $currentApplication) {
+        foreach ($applications as $currentApplication) {
             $applicationPath = $outputPath . DIRECTORY_SEPARATOR . $currentApplication;
             $applicationRenderOptions = array(
                 "name" => $currentApplication,
@@ -121,7 +121,6 @@ try {
 
     $extractor = new FamilyPo($outputPath);
     $extractor->extractPo();
-
 } catch (UnexpectedValueException $e) {
     echo "Error: " . $e->getMessage() . "\n";
     echo $getopt->getHelpText();

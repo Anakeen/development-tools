@@ -8,7 +8,6 @@
 
 namespace Dcp\DevTools\ExtractPo;
 
-
-class Exception extends \Exception {
-
-} 
+class Exception extends \Exception
+{
+}

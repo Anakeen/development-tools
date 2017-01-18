@@ -2,8 +2,8 @@
 
 namespace Dcp\DevTools\Template;
 
-class FamilyStructure extends Template{
-
+class FamilyStructure extends Template
+{
     public function render($arguments, $outputPath, $force = false)
     {
         if (!empty($outputPath) && !is_dir($outputPath)) {
@@ -21,7 +21,6 @@ class FamilyStructure extends Template{
         if (!empty($outputPath)) {
             $outputPath .= DIRECTORY_SEPARATOR . $arguments["name"] . "__STRUCT.csv";
         }
-        return parent::main_render("family_struct", $arguments, $outputPath, $force);
+        return parent::mainRender("family_struct", $arguments, $outputPath, $force);
     }
-
-} 
+}

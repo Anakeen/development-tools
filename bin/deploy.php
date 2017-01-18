@@ -19,8 +19,8 @@ $getopt = new Getopt([
     (new Option(null, 'action', Getopt::REQUIRED_ARGUMENT))
         ->setDescription('action to execute (install|upgrade)')
         ->setValidation(
-            function($action) {
-                if('install' !== $action && 'upgrade' !== $action) {
+            function ($action) {
+                if ('install' !== $action && 'upgrade' !== $action) {
                     print "$action is not a valid action.";
                     print "action must be either 'install' or 'upgrade'";
                     return false;
@@ -31,7 +31,9 @@ $getopt = new Getopt([
     (new Option('w', 'webinst', Getopt::REQUIRED_ARGUMENT))
         ->setDescription('webinst to deploy. If no webinst provided, a new one will be generated.'),
     (new Option(
-        's', 'sourcePath', Getopt::REQUIRED_ARGUMENT
+        's',
+        'sourcePath',
+        Getopt::REQUIRED_ARGUMENT
     ))
         ->setDescription('path of the module')
         ->setValidation(
@@ -51,27 +53,33 @@ $getopt = new Getopt([
             'show the usage message'
         )
 ]);
-$getopt->setBanner("Usage: %s [options] -- [additional cli options]\n\nadditional cli options are passed directly to the remote wiff command.\n\n");
+$getopt->setBanner("Usage: %s [options] -- [additional cli options]\n" .
+    "\nadditional cli options are passed directly to the remote wiff command.\n\n");
 
 try {
     $getopt->parse();
 
-    if(isset($getopt['help'])) {
+    if (isset($getopt['help'])) {
         echo $getopt->getHelpText();
         exit();
     }
-
     $unexpectedValueErrors = [];
 
     if (!isset($getopt['sourcePath'])) {
-        $unexpectedValueErrors['sourcePath'] =  "You need to set the sourcepath of the application with -s or --sourcePath";
+        $unexpectedValueErrors['sourcePath']
+            = "You need to set the sourcepath of the application with -s or --sourcePath";
     }
-    if(isset($getopt['w']) && isset($getopt['a']) && $getopt['a'] > 0) {
-        $unexpectedValueErrors['auto-release'] = "--webinst and --auto-release are not compatible";
+    if (isset($getopt['w']) && isset($getopt['a']) && $getopt['a'] > 0) {
+        $unexpectedValueErrors['auto-release']
+            = "--webinst and --auto-release are not compatible";
     }
 
-    if(0 < count($unexpectedValueErrors)) {
-        throw new UnexpectedValueException("\n -  " . implode("\n -  ", $unexpectedValueErrors) . "\n");
+    if (0 < count($unexpectedValueErrors)) {
+        throw new UnexpectedValueException("\n -  " .
+            implode(
+                "\n -  ",
+                $unexpectedValueErrors
+            ) . "\n");
     }
 
     $options = $getopt->getOptions();
@@ -84,7 +92,7 @@ try {
         if (!isset($getopt['q']) || $getopt['q'] < 2) {
             print "\nAn error occured on server.\n";
         }
-        if(!isset($getopt['q']) || $getopt['q'] < 2) {
+        if (!isset($getopt['q']) || $getopt['q'] < 2) {
             print "\n--- script error:";
             print "\n    " . $result['error'];
             print "\n--- script messages:";

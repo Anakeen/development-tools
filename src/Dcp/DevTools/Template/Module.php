@@ -4,7 +4,6 @@ namespace Dcp\DevTools\Template;
 
 class Module extends Template
 {
-
     public function render($arguments, $outputPath, $force = false)
     {
         if (!empty($outputPath) && !is_dir($outputPath)) {
@@ -19,11 +18,16 @@ class Module extends Template
             $application = explode(",", $arguments["application"]);
             foreach ($application as $currentApplication) {
                 if (isset($currentApplication) && !$this->checkLogicalName($currentApplication)) {
-                    throw new Exception("You need to set the name of the application with a valid name $currentApplication : " . $this->logicalNameRegExp);
+                    throw new Exception(
+                        "You need to set the name of the application with a valid name $currentApplication : " .
+                        $this->logicalNameRegExp
+                    );
                 }
                 $this->createDir($outputPath . DIRECTORY_SEPARATOR . $currentApplication)
-                    ->createDir($outputPath . DIRECTORY_SEPARATOR . $currentApplication . DIRECTORY_SEPARATOR . "Images")
-                    ->createDir($outputPath . DIRECTORY_SEPARATOR . $currentApplication . DIRECTORY_SEPARATOR . "Layout");
+                    ->createDir($outputPath . DIRECTORY_SEPARATOR
+                        . $currentApplication . DIRECTORY_SEPARATOR . "Images")
+                    ->createDir($outputPath . DIRECTORY_SEPARATOR
+                        . $currentApplication . DIRECTORY_SEPARATOR . "Layout");
             }
         }
         if (isset($arguments["external"])) {
@@ -59,4 +63,4 @@ class Module extends Template
         }
         return $this;
     }
-} 
+}

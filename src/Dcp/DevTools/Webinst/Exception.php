@@ -8,8 +8,6 @@
 
 namespace Dcp\DevTools\Webinst;
 
-
 class Exception extends \Exception
 {
-
-} 
+}

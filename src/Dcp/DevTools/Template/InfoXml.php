@@ -2,8 +2,8 @@
 
 namespace Dcp\DevTools\Template;
 
-class InfoXml extends Template {
-
+class InfoXml extends Template
+{
     public function render($arguments, $outputPath, $force = false)
     {
         if (!empty($outputPath) && !is_dir($outputPath)) {
@@ -27,6 +27,6 @@ class InfoXml extends Template {
         if (!empty($outputPath)) {
             $outputPath .= DIRECTORY_SEPARATOR . "info.xml";
         }
-        return parent::main_render("info", $arguments, $outputPath, $force);
+        return parent::mainRender("info", $arguments, $outputPath, $force);
     }
-} 
+}

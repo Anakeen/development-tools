@@ -9,7 +9,8 @@ class Deploy
     protected $options;
     protected $tmpdir;
 
-    public function __construct(Array $options = []) {
+    public function __construct(array $options = [])
+    {
         $missingOptions = [];
 
         if (!isset($options['url'])) {
@@ -34,8 +35,8 @@ class Deploy
         $this->options = $options;
     }
 
-    public function deploy() {
-
+    public function deploy()
+    {
         if (isset($this->options['webinst'])) {
             $webinst = $this->options['webinst'];
         } else {
@@ -52,7 +53,7 @@ class Deploy
                 );
             }
             $webinstBuilder = new Webinst($this->options['sourcePath']);
-            if(isset($this->options['auto-release'])) {
+            if (isset($this->options['auto-release'])) {
                 $webinstBuilder->setConfProperty(
                     'release',
                     $webinstBuilder->getConf('release') . strftime(".%Y%m%d.%H%M%S")
@@ -64,7 +65,6 @@ class Deploy
         $request = curl_init();
 
         try {
-
             $data = [
                 'deployWebinst' => true,
                 'webinst' => new \CURLFile($webinst),
@@ -151,7 +151,8 @@ class Deploy
         return $result;
     }
 
-    private function recursiveRmDir($dir) {
+    private function recursiveRmDir($dir)
+    {
         $files = array_diff(scandir($dir), array('.', '..'));
         foreach ($files as $file) {
             (is_dir("$dir/$file")) ? $this->recursiveRmDir("$dir/$file") : unlink("$dir/$file");
@@ -159,4 +160,3 @@ class Deploy
         return rmdir($dir);
     }
 }
-

@@ -2,8 +2,8 @@
 
 namespace Dcp\DevTools\Template;
 
-class FamilyClass extends Template{
-
+class FamilyClass extends Template
+{
     public function render($arguments, $outputPath, $force = false)
     {
         if (!empty($outputPath) && !is_dir($outputPath)) {
@@ -21,6 +21,6 @@ class FamilyClass extends Template{
         if (!empty($outputPath)) {
             $outputPath .= DIRECTORY_SEPARATOR . $arguments["name"] . "__CLASS.php";
         }
-        return parent::main_render("family_class", $arguments, $outputPath, $force);
+        return parent::mainRender("family_class", $arguments, $outputPath, $force);
     }
-} 
+}

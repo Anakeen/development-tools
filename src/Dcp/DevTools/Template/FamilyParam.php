@@ -26,6 +26,6 @@ class FamilyParam extends Template
         if (!empty($outputPath)) {
             $outputPath .= DIRECTORY_SEPARATOR . $arguments["name"] . "__PARAM.csv";
         }
-        return parent::main_render("family_param", $arguments, $outputPath, $force);
+        return parent::mainRender("family_param", $arguments, $outputPath, $force);
     }
-} 
+}

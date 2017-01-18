@@ -51,7 +51,6 @@ class AnalyzeFamily
         $cv_menu_index = 0;
         $date = date("c");
         while ($data = $this->getLine($file)) {
-
             $nline++;
 
             $num = count($data);
@@ -105,10 +104,16 @@ class AnalyzeFamily
                     $cv_menu_index = 0;
                     if ($type === "CVDOC") {
                         foreach ($data as $index => $value) {
-                            if ($value === "cv_idview") $cv_idview_index = $index;
-                            else if ($value === "cv_lview") $cv_lview_index = $index;
-                            else if ($value === "cv_menu") $cv_menu_index = $index;
-                            if ($cv_idview_index && $cv_lview_index && $cv_menu_index) break;
+                            if ($value === "cv_idview") {
+                                $cv_idview_index = $index;
+                            } elseif ($value === "cv_lview") {
+                                $cv_lview_index = $index;
+                            } elseif ($value === "cv_menu") {
+                                $cv_menu_index = $index;
+                            }
+                            if ($cv_idview_index && $cv_lview_index && $cv_menu_index) {
+                                break;
+                            }
                         }
                     }
                     break;
@@ -243,6 +248,4 @@ class AnalyzeFamily
     {
         return str_replace("\n", '\n', $key);
     }
-
-
-} 
+}

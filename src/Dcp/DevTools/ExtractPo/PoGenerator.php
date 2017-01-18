@@ -7,7 +7,6 @@ use Dcp\DevTools\Utils\ConfigFile;
 
 class PoGenerator
 {
-
     protected $conf = null;
     protected $inputPath = null;
     protected $xgettextWrapper = null;
@@ -71,7 +70,6 @@ class PoGenerator
 
     protected function globRecursive($pattern, $flags = 0)
     {
-
         $files = glob($pattern, $flags);
 
         foreach (glob(dirname($pattern) . DIRECTORY_SEPARATOR .'*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
@@ -99,5 +97,4 @@ class PoGenerator
         array_map('unlink', glob($dirPath . DIRECTORY_SEPARATOR . "*"));
         rmdir($dirPath);
     }
-
-} 
+}
