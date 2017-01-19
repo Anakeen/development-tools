@@ -15,8 +15,9 @@ class extractPhp
         $this->file = $file;
     }
 
-    protected function getTokens() {
-        if(null === $this->tokens) {
+    protected function getTokens()
+    {
+        if (null === $this->tokens) {
             $this->tokens = token_get_all(file_get_contents($this->file));
         }
         return $this->tokens;
@@ -55,7 +56,6 @@ class extractPhp
                     if ($token[0] == T_STRING || $token[0] == T_NS_SEPARATOR) {
                         //Append the token's value to the name of the namespace
                         $namespace .= $token[1];
-
                     }
                 }
 
@@ -111,7 +111,7 @@ class extractPhp
         //and need to collect the string values after them
         $gettingNamespace = $gettingClass = false;
 
-        foreach($this->getTokens() as $token) {
+        foreach ($this->getTokens() as $token) {
             if (is_array($token)) {
 
                 //If this token is the namespace declaring,
@@ -132,7 +132,6 @@ class extractPhp
                     if ($token[0] == T_STRING || $token[0] == T_NS_SEPARATOR) {
                         //Append the token's value to the name of the namespace
                         $namespace .= $token[1];
-
                     }
                 }
 
@@ -178,7 +177,8 @@ class extractPhp
         return $keys;
     }
 
-    public function extractWorkflowLabels() {
+    public function extractWorkflowLabels()
+    {
         $keys = [];
 
         //Start with a blank namespace, class and constant
@@ -210,7 +210,6 @@ class extractPhp
                     ) {
                         //Append the token's value to the name of the namespace
                         $namespace .= $token[1];
-
                     }
                 }
 
@@ -234,7 +233,7 @@ class extractPhp
                             $gettingConstant = false;
                             $prefix = substr($token[1], 0, 2);
                             //If this is a state constant
-                            if ("e_" === $prefix || "s_" === $prefix|| "a_" === $prefix || "t_" === $prefix ) {
+                            if ("e_" === $prefix || "s_" === $prefix|| "a_" === $prefix || "t_" === $prefix) {
                                 //store the constant name
                                 $constName = $token[1];
                             }
@@ -267,5 +266,4 @@ class extractPhp
         }
         return $keys;
     }
-
 }

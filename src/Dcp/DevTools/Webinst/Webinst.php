@@ -4,15 +4,16 @@ namespace Dcp\DevTools\Webinst;
 
 use Dcp\DevTools\Utils\ConfigFile;
 
-class Webinst {
-
+class Webinst
+{
     protected $inputPath;
     protected $conf;
     protected $templateEngine;
 
     private $WEBINST_EXEC_MASK = 0100;
 
-    public function __construct($inputPath) {
+    public function __construct($inputPath)
+    {
         if (!is_dir($inputPath)) {
             throw new Exception("The input path doesn't exist ($inputPath)");
         }
@@ -50,21 +51,24 @@ class Webinst {
         }
     }
 
-    public function setConfProperty($property, $value) {
+    public function setConfProperty($property, $value)
+    {
         $this->conf[$property] = $value;
     }
 
-    public function getConf($property=null) {
-        if(is_null($property)) {
+    public function getConf($property=null)
+    {
+        if (is_null($property)) {
             return array_merge($this->conf);
         }
-        if(isset($this->conf[$property])) {
+        if (isset($this->conf[$property])) {
             return $this->conf[$property];
         }
         return null;
     }
 
-    public function makeWebinst($outputPath) {
+    public function makeWebinst($outputPath)
+    {
         $contentTar = $this->inputPath . DIRECTORY_SEPARATOR . "temp_tar";
         $pharTar = new \PharData($contentTar . ".tar");
         $pharTar->startBuffering();
@@ -78,7 +82,7 @@ class Webinst {
                 $includedFullPath = $this->inputPath . DIRECTORY_SEPARATOR . $includedPath;
                 if (is_dir($includedFullPath)) {
                     $this->addDirectory($pharTar, $includedFullPath);
-                } elseif(is_file($includedFullPath)) {
+                } elseif (is_file($includedFullPath)) {
                     $this->addFile($pharTar, $includedFullPath);
                 }
             }
@@ -155,7 +159,7 @@ class Webinst {
      */
     protected function addFile(\PharData $pharTar, $filePath, $localName = null)
     {
-        if(null === $localName) {
+        if (null === $localName) {
             $localName = str_replace($this->inputPath, '', $filePath, $localName);
         }
         $pharTar->addFile($filePath, $localName);
@@ -198,9 +202,9 @@ class Webinst {
     protected function setFlags(\PharData $pharTar, $addedFiles)
     {
         foreach ($addedFiles as $pharFilePath => $systemFilePath) {
-            if (!is_dir($systemFilePath)){
-                if(isset($this->conf['permission_masks'])) {
-                    if(!empty($this->conf['permission_masks'][$pharFilePath])) {
+            if (!is_dir($systemFilePath)) {
+                if (isset($this->conf['permission_masks'])) {
+                    if (!empty($this->conf['permission_masks'][$pharFilePath])) {
                         $mask = $this->conf['permission_masks'][$pharFilePath];
                         $oldPerms = $pharTar[$pharFilePath]->getPerms();
                         $newPerms = $oldPerms | $mask;

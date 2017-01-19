@@ -10,8 +10,8 @@ namespace Dcp\DevTools\ExtractPo;
 
 use Dcp\DevTools\Po\AnalyzeJavascript;
 
-class JavascriptPo extends PoGenerator {
-
+class JavascriptPo extends PoGenerator
+{
     public function extractPo()
     {
         if (isset($this->conf["application"])) {
@@ -38,5 +38,4 @@ class JavascriptPo extends PoGenerator {
             }
         }
     }
-
-} 
+}

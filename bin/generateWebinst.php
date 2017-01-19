@@ -60,15 +60,13 @@ try {
     }
 
     $webinst = new Webinst($getopt['sourcePath']);
-    if(isset($getopt['auto-release'])) {
+    if (isset($getopt['auto-release'])) {
         $webinst->setConfProperty(
             'release',
             $webinst->getConf('release') . strftime(".%Y%m%d.%H%M%S")
         );
     }
     $webinst->makeWebinst($outputPath);
-
-
 } catch (UnexpectedValueException $e) {
     echo "Error: " . $e->getMessage() . "\n";
     echo $getopt->getHelpText();

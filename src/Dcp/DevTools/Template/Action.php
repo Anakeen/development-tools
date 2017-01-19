@@ -3,7 +3,6 @@ namespace Dcp\DevTools\Template;
 
 class Action extends Template
 {
-
     public function render($arguments, $outputPath, $force = false)
     {
         if (!empty($outputPath) && !is_dir($outputPath)) {
@@ -19,16 +18,15 @@ class Action extends Template
             }
             $arguments["layoutFileName"] = strtolower($arguments["name"]) . ".html";
             $layoutPath .= $arguments["layoutFileName"];
-            parent::main_render("action_layout", $arguments, $layoutPath, $force);
+            parent::mainRender("action_layout", $arguments, $layoutPath, $force);
         }
 
         if (isset($arguments["script"])) {
             $scriptPath = $outputPath . DIRECTORY_SEPARATOR . strtolower("action." . $arguments["name"]) . ".php";
             $arguments["script_name"] = strtolower($arguments["name"]);
-            parent::main_render("action_script", $arguments, $scriptPath, $force);
+            parent::mainRender("action_script", $arguments, $scriptPath, $force);
         }
 
-        return parent::main_render("action", $arguments, false);
+        return parent::mainRender("action", $arguments, false);
     }
-
-} 
+}

@@ -22,7 +22,8 @@ class extractMustache
         $this->file = $file;
     }
 
-    protected function getTokens() {
+    protected function getTokens()
+    {
         if (null === $this->tokens) {
             $mustacheEngine = new Mustache_Engine();
             $this->tokens = $mustacheEngine->getTokenizer()->scan(
@@ -93,7 +94,7 @@ class extractMustache
                         );
 
                         //we've got a PCRE error or the message is not well formed
-                        if(!$pregResult) {
+                        if (!$pregResult) {
                             throw new Exception(
                                 sprintf(
                                     'message %s in file %s at line %d is not well formed (error code is %s)',
@@ -118,5 +119,4 @@ class extractMustache
         }
         return $keys;
     }
-
 }

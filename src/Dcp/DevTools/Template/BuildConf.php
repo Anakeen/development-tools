@@ -6,7 +6,6 @@ use Dcp\DevTools\Utils\ConfigFile;
 
 class BuildConf extends Template
 {
-
     public function render($arguments, $outputPath, $force = false)
     {
         if (!empty($outputPath) && !is_dir($outputPath)) {
@@ -55,6 +54,6 @@ class BuildConf extends Template
         );
         $devtool = json_decode(file_get_contents($devtool), true);
         $arguments["devtool"] = $devtool;
-        return parent::main_render("build", $arguments, $outputPath, $force);
+        return parent::mainRender("build", $arguments, $outputPath, $force);
     }
 }

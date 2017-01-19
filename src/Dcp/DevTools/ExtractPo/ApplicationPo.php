@@ -7,7 +7,6 @@ use Dcp\DevTools\Po\AnalyzeMustache;
 
 class ApplicationPo extends PoGenerator
 {
-
     public function extractPo()
     {
         if (isset($this->conf["application"])) {

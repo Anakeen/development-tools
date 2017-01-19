@@ -28,7 +28,7 @@ try {
     // Test extension
     $requiredExtension = array("mbstring", "zlib", "zip", "Phar", "bz2", "curl");
     $requiredError = "";
-    foreach($requiredExtension as $currentRequired) {
+    foreach ($requiredExtension as $currentRequired) {
         if (!extension_loaded($currentRequired)) {
             $requiredError .= "\t * $currentRequired \n";
         }
@@ -76,8 +76,6 @@ try {
     unset($argv[1]);
 
     require($currentDirName . DIRECTORY_SEPARATOR . $command . ".php");
-
-
 } catch (UnexpectedValueException $e) {
     echo "Error: " . $e->getMessage() . "\n";
     echo $getopt->getHelpText();
@@ -87,7 +85,8 @@ try {
     exit(1);
 }
 
-function listOfSubCommand($basePath) {
+function listOfSubCommand($basePath)
+{
     $subCommands = [];
     $scripts = new \DirectoryIterator($basePath);
     foreach ($scripts as $currentScript) {
@@ -98,7 +97,7 @@ function listOfSubCommand($basePath) {
         $subCommands[] = str_replace(".php", "", $currentScript->getFilename());
     }
     sort($subCommands);
-    foreach($subCommands as $subCommand) {
+    foreach ($subCommands as $subCommand) {
         print "\t$subCommand\n";
     }
 }

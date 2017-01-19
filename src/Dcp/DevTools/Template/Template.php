@@ -4,7 +4,6 @@ namespace Dcp\DevTools\Template;
 
 class Template
 {
-
     protected $templateBaseDir;
     protected $templates = array();
     protected $logicalNameRegExp = '/^[A-Za-z][A-Za-z0-9_]*$/';
@@ -37,7 +36,7 @@ class Template
         return $this->templates[$templateName];
     }
 
-    public function main_render($templateName, $arguments, $outputPath = false, $force = false)
+    public function mainRender($templateName, $arguments, $outputPath = false, $force = false)
     {
         $mustacheEngine = new \Mustache_Engine;
         $templatePath = $this->getTemplate($templateName);
@@ -63,5 +62,4 @@ class Template
     {
         return preg_match($this->moduleNameRegExp, $name) === 1;
     }
-
-} 
+}

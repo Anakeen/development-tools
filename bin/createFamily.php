@@ -132,7 +132,6 @@ try {
         $template = new WorkflowInfo();
         print $template->render($renderOptions);
     }
-
 } catch (UnexpectedValueException $e) {
     echo "Error: " . $e->getMessage() . "\n";
     echo $getopt->getHelpText();

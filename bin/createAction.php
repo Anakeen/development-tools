@@ -55,7 +55,6 @@ try {
 
     $actionTemplate = new Action();
     print $actionTemplate->render($renderOptions, $outputPath, $force);
-
 } catch (UnexpectedValueException $e) {
     echo "Error: " . $e->getMessage() . "\n";
     echo $getopt->getHelpText();

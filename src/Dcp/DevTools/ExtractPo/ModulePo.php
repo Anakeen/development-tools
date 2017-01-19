@@ -4,14 +4,14 @@ namespace Dcp\DevTools\ExtractPo;
 
 use Dcp\DevTools\Po\AnalyzePhp;
 
-class ModulePo extends PoGenerator {
-
+class ModulePo extends PoGenerator
+{
     public function extractPo()
     {
         if (isset($this->conf["includedPath"])) {
             $filesList = array();
             foreach ($this->conf["includedPath"] as $currentApp) {
-                $filesList = array_merge( $filesList,
+                $filesList = array_merge($filesList,
                     $this->globRecursive($this->inputPath. DIRECTORY_SEPARATOR . $currentApp . DIRECTORY_SEPARATOR . '*.php'));
             }
             if (empty($filesList)) {
@@ -28,4 +28,4 @@ class ModulePo extends PoGenerator {
             }
         }
     }
-} 
+}

@@ -31,7 +31,7 @@ class AnalyzePhp extends Analyze
         $temporaryFile = tempnam(sys_get_temp_dir(), "additionnal_keys_");
 
         $template = new Template();
-        $template->main_render(
+        $template->mainRender(
             "temporary_php_file",
             array(
                 "sharpLabels" => array_values($sharpLabels),
@@ -47,4 +47,4 @@ class AnalyzePhp extends Analyze
 
         unset($temporaryFile);
     }
-} 
+}

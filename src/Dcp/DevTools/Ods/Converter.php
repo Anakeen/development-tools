@@ -4,7 +4,6 @@ namespace Dcp\DevTools\Ods;
 
 class Converter
 {
-
     protected $enclosure = null;
     protected $delimiter = null;
 
@@ -63,12 +62,13 @@ class Converter
      * @param string $outputFile path to the output file
      * @throws ConverterException
      */
-    protected function writeCSVFile($outputFile) {
+    protected function writeCSVFile($outputFile)
+    {
         $outputFile = fopen($outputFile, "w");
         if ($outputFile === false) {
             throw new ConverterException("Unable to open $outputFile in w mode");
         }
-        foreach($this->rows as $currentRow) {
+        foreach ($this->rows as $currentRow) {
             fputcsv($outputFile, $currentRow, $this->delimiter, $this->enclosure);
         }
         fclose($outputFile);
@@ -119,7 +119,6 @@ class Converter
      */
     protected function parseContent($xmlcontent)
     {
-
         $xml_parser = xml_parser_create();
         xml_parser_set_option($xml_parser, XML_OPTION_CASE_FOLDING, true);
         xml_parser_set_option($xml_parser, XML_OPTION_SKIP_WHITE, 0);
@@ -138,7 +137,6 @@ class Converter
         /** @noinspection PhpUnusedParameterInspection */
         $parser, $name, $attrs)
     {
-
         if ($name == "TABLE:TABLE-ROW") {
             $this->inrow = true;
             if (isset($this->rows[$this->nrows])) {
@@ -177,7 +175,6 @@ class Converter
 
     protected function endElement($parser, $name)
     {
-
         if ($name == "TABLE:TABLE-ROW") {
             // Remove trailing empty cells
             $i = $this->ncol - 1;
@@ -216,7 +213,6 @@ class Converter
 
     protected function characterData($parser, $data)
     {
-
         if ($this->inrow && $this->incell) {
             $this->celldata .= $data;
         }
@@ -239,4 +235,4 @@ class Converter
         }
         return $value;
     }
-} 
+}
