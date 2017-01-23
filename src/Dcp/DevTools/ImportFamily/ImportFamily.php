@@ -83,3 +83,24 @@ class ImportFamily
         return $parentDirPath;
     }
 
+    /**
+     * Equivalent to rm -rf $filePathName on *nix.
+     * Delete the file and all its sub-directory / files if it's a
+     * directory.
+     *
+     * @param string $filePathName
+     */
+    public function rmrf($filePathName)
+    {
+        if (is_dir($filePathName)) {
+            $files = array_diff(scandir($filePathName), ['.', '..']);
+            foreach ($files as $file) {
+                $this->rmrf($filePathName . "/" . $file);
+            }
+        } else {
+            unlink($filePathName);
+            return;
+        }
+        rmdir($filePathName);
+    }
+
