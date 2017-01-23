@@ -139,6 +139,37 @@ class ImportFamily
         return $newDomNodes;
     }
 
+    /**
+     * Replace the string $target with the string $replacement inside the
+     * value of the attribute named $attributeName, which is an attribute of the DomNode $domNode.
+     *
+     * @param \DOMNode $domNode A DomNode having the attribute named $attributeName.
+     * @param string $attributeName The name of the attribute you want the value to be changed.
+     * @param string $target The string that will be replaced by $replacement.
+     * @param string $replacement The string that will replace $target.
+     */
+    public function domAttributeStrReplace(\DOMNode $domNode, $attributeName, $target, $replacement)
+    {
+        $domNode->attributes->getNamedItem($attributeName)->nodeValue =
+            str_replace($target, $replacement, $domNode->attributes->getNamedItem($attributeName)->nodeValue);
+    }
+
+    /**
+     * Replace the string $target with the string $replacement inside the
+     * value of the attribute named $attributeName, which is an attribute of each nodes
+     * from the DomNodeList $domNodes.
+     *
+     * @param \DOMNodeList $domNodes DomNodes having the attribute named $attributeName.
+     * @param string $attributeName The name of the attribute you want the value to be changed.
+     * @param string $target The string that will be replaced by $replacement.
+     * @param string $replacement The string that will replace $target.
+     */
+    public function domAttributesStrReplace(\DOMNodeList $domNodes, $attributeName, $target, $replacement)
+    {
+        for ($i = 0; $i < $domNodes->length; $i++) {
+            $this->domAttributeStrReplace($domNodes[$i], $attributeName, $target, $replacement);
+        }
+    }
 
     /**
      * Append the DomNode $child to the DomNode $parent.
