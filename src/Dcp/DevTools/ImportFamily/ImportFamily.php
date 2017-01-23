@@ -104,6 +104,41 @@ class ImportFamily
         rmdir($filePathName);
     }
 
+    /**
+     * Returns the DomNodes from $domNodes
+     * that are missing from the DomNodes $oldDomNodes,
+     * the comparison between nodes is made
+     * by the value of the attribute named $attributeName.
+     *
+     * @param \DOMNodeList
+     * $oldDomNodes The Nodes to search for the absence of the $domNodes.
+     * @param \DOMNodeList $domNodes The Nodes to be searched in $oldDomNodes.
+     * @param string $attributeName The name of the attribute used to compare nodes.
+     * @return \DOMNode[] The DomNodes from $domNodes missing from $oldDomNodes.
+     */
+    public function newDomNodesByAttribute(
+        \DOMNodeList $oldDomNodes,
+        \DOMNodeList $domNodes,
+        $attributeName
+    ) {
+        $newDomNodes = [];
+        for ($i = 0; $i < $domNodes->length; $i++) {
+            for ($j = 0; $j < $oldDomNodes->length; $j++) {
+                if ($domNodes[$i]->attributes->getNamedItem($attributeName) != null
+                    && $oldDomNodes[$j]->attributes->getNamedItem($attributeName) != null
+                    && $domNodes[$i]->attributes->getNamedItem($attributeName)->value ==
+                    $oldDomNodes[$j]->attributes->getNamedItem($attributeName)->value
+                ) {
+                    break;
+                }
+                if ($j == $oldDomNodes->length - 1) {
+                    $newDomNodes[] = $domNodes[$i];
+                }
+            }
+        }
+        return $newDomNodes;
+    }
+
 
     /**
      * Return the strings in $strings ending with $suffix.
