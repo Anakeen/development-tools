@@ -217,3 +217,18 @@ class ImportFamily
         return $filteredStrings;
     }
 
+    /**
+     * Return the string representation of each DomNode in the DomNodes $domNodes
+     * as an array.
+     *
+     * @param \DOMNode[] $domNodes The DomNodes to convert to strings.
+     * @return string[] The string representation of each DomNode in the DomNodes $domNodes.
+     */
+    public function domNodesToStrings(array $domNodes)
+    {
+        $strings = [];
+        foreach ($domNodes as $node) {
+            $strings[] = $node->C14N();
+        }
+        return $strings;
+    }
