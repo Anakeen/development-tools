@@ -56,6 +56,78 @@ class ImportFamily
 
 
     /**
+     * Add the <post-install> and <post-upgrade> DomNodes
+     * from $importedInfoXmlPathName
+     * to the info.xml located in $infoXmlPath, only if they don't already exist.
+     *
+     * @param string $infoXmlPath The directory absolute path
+     * where the module's info.xml is located.
+     * @param string $importedInfoXmlPathName The absolute path name
+     * of the imported .xml file.
+     * @return string[]
+     * The string representation of the process nodes which have been added to
+     * info.xml.
+     * @throws Exception
+     */
+    public function addProcessToInfoXml($infoXmlPath, $importedInfoXmlPathName)
+    {
+        $pathFromModuleToFamily = substr($this->options['familyPath'], strlen($infoXmlPath) + 1, -1);
+
+        $infoXmlDom = new \DOMDocument();
+        $infoXmlDom->formatOutput = true;
+        $infoXmlDom->preserveWhiteSpace = false;
+        $res = $infoXmlDom->load($infoXmlPath . '/info.xml');
+
+        if ($res === false) {
+            throw new Exception('Failed to load ' . $infoXmlPath . '/info.xml' . ' as XML document.');
+        }
+
+        $importedInfoXmlDom = new \DOMDocument();
+        $res = $importedInfoXmlDom->load($importedInfoXmlPathName);
+
+        if ($res === false) {
+            throw new Exception('Failed to load ' . $infoXmlPath . '/info.xml' . ' as XML document.');
+        }
+
+        /**@var $postInstallNode \DOMElement * */
+        /**@var $importedPostInstallNode \DOMElement * */
+        /**@var $postUpgradeNode \DOMElement * */
+        /**@var $importedPostUpgradeNode \DOMElement * */
+
+        $postInstallNode = $infoXmlDom->getElementsByTagName('post-install')[0];
+        $postInstallProcess = $postInstallNode->getElementsByTagName('process');
+
+        $importedPostInstallNode = $importedInfoXmlDom->getElementsByTagName('post-install')[0];
+        $importedPostInstallProcess = $importedPostInstallNode->getElementsByTagName('process');
+
+        $postUpgradeNode = $infoXmlDom->getElementsByTagName('post-upgrade')[0];
+        $postUpgradeProcess = $postUpgradeNode->getElementsByTagName('process');
+
+        $importedPostUpgradeNode = $importedInfoXmlDom->getElementsByTagName('post-upgrade')[0];
+        $importedPostUpgradeProcess = $importedPostUpgradeNode->getElementsByTagName('process');
+
+        $newInstallProcess = $this->newDomNodesByAttribute($postInstallProcess, $importedPostInstallProcess, 'id');
+        $newUpgradeProcess = $this->newDomNodesByAttribute($postUpgradeProcess, $importedPostUpgradeProcess, 'id');
+
+        $this->domAttributesStrReplace($importedPostInstallProcess, 'command', './@APPNAME@', $pathFromModuleToFamily);
+        $this->domAttributesStrReplace($importedPostUpgradeProcess, 'command', './@APPNAME@', $pathFromModuleToFamily);
+
+        $this->appendForeignDomNodesTo($infoXmlDom, $postInstallNode, $newInstallProcess);
+        $this->appendForeignDomNodesTo($infoXmlDom, $postUpgradeNode, $newUpgradeProcess);
+
+        $res = $infoXmlDom->save($infoXmlPath . '/info.xml');
+
+        if ($res === false) {
+            throw new Exception('Failed to save ' . $infoXmlPath . '/info.xml' . ' as XML document.');
+        }
+
+        return [
+            'installProcessAdded' => $this->domNodesToStrings($newInstallProcess),
+            'upgradeProcessAdded' => $this->domNodesToStrings($newUpgradeProcess)
+        ];
+    }
+
+    /**
      * Starting from $initialDirPath directory,
      * the function goes back to the parent directory,
      * until it reach a directory containing a file named $fileName.
