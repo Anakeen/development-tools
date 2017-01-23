@@ -54,6 +54,152 @@ class ImportFamily
         $this->options['familyPath'] = realpath($this->options['familyPath']);
     }
 
+    /**
+     * Download the zip file from
+     * {{ $this->options['url'] }}/admin.php
+     * ?app=DCPDEVEL&action=EXPORTFAMILYCONFIG&family={{ $this->options['family'] }}
+     * The file is then unzipped in a temporary folder.
+     * The csv files are moved to $this->options['familyPath'].
+     * The png files are moved to /Images.
+     * The post-install and post-upgrade process of the imported .xml
+     * are added to the module's info.xml file.
+     *
+     * @return string[] Logs specifying what files have been imported
+     * or modified during the importFamily command.
+     * @throws CurlException
+     * @throws Exception
+     */
+    public function importFamily()
+    {
+        $tempDirPathName = uniqid(sys_get_temp_dir() . '/import', true);
+        $tempFilePathName = tempnam($tempDirPathName, 'imp');
+        $tempFile = fopen($tempFilePathName, 'w+');
+
+        $request = curl_init();
+
+        try {
+            $data = [
+                'app' => 'DCPDEVEL',
+                'action' => 'EXPORTFAMILYCONFIG',
+                'family' => $this->options['family']
+            ];
+
+            curl_setopt_array(
+                $request,
+                [
+                    CURLOPT_URL => $this->options['url'] . '/admin.php',
+                    CURLOPT_PORT => $this->options['port'],
+                    CURLOPT_SSL_VERIFYPEER => false,
+                    CURLOPT_POST => true,
+                    CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
+                    CURLOPT_POSTFIELDS => $data,
+                    CURLOPT_FILE => $tempFile
+                ]
+            );
+
+            //FIXME: handle auth
+            $curl_result = curl_exec($request);
+
+            if (false === $curl_result) {
+                throw new Exception(
+                    sprintf(
+                        'An error occurred during connection to server: %d (%s)',
+                        curl_errno($request),
+                        curl_error($request)
+                    )
+                );
+            }
+
+            $httpCode = curl_getinfo($request, CURLINFO_HTTP_CODE);
+            if (401 === $httpCode) {
+                throw new Exception(
+                    'Authentication is required'
+                );
+            } elseif (403 === $httpCode) {
+                throw new Exception(
+                    'invalid credentials'
+                );
+            } elseif (299 < $httpCode) {
+                throw new Exception(
+                    sprintf(
+                        '%s returned an error status code: %d',
+                        curl_getinfo($request, CURLINFO_EFFECTIVE_URL),
+                        $httpCode
+                    )
+                );
+            }
+        } catch (CurlException $e) {
+            curl_close($request);
+            fclose($tempFile);
+            throw $e;
+        }
+
+        curl_close($request);
+        fclose($tempFile);
+
+        $importedFileNames = [];
+        try {
+            $zipArchive = new \ZipArchive();
+            $res = $zipArchive->open($tempFilePathName);
+            if ($res === true) {
+                for ($i = 0; $i < $zipArchive->numFiles; $i++) {
+                    $importedFileNames[] = $zipArchive->getNameIndex($i);
+                }
+                $zipArchive->extractTo($tempDirPathName);
+                $zipArchive->close();
+            } else {
+                throw new Exception(
+                    'Failed to unzip file ' . $tempFilePathName .
+                    ' in directory ' . $tempDirPathName . '.'
+                );
+            }
+        } catch (Exception $e) {
+            $zipArchive->close();
+            throw $e;
+        }
+
+        unlink($tempFilePathName);
+
+        $infoXmlPath = $this->parentDirPathContaining($this->options['familyPath'], 'info.xml');
+
+        if ($infoXmlPath == "") {
+            throw new Exception("The module's info.xml file cannot be found, please check the --familyPath option.");
+        }
+
+        $csvFileNames = $this->stringsWithSuffix($importedFileNames, 'csv');
+        $pngFileNames = $this->stringsWithSuffix($importedFileNames, 'png');
+
+        foreach ($csvFileNames as $fileName) {
+            rename(
+                $tempDirPathName . '/' . $fileName,
+                $this->options['familyPath'] . '/' . $fileName
+            );
+        }
+
+        foreach ($pngFileNames as $fileName) {
+            rename(
+                $tempDirPathName . '/' . $fileName,
+                $infoXmlPath . '/Images/' . $fileName
+            );
+        }
+
+        $importedInfoXmlPathName = glob($tempDirPathName . '/*.xml')[0];
+
+        $processAdded = $this->addProcessToInfoXml($infoXmlPath, $importedInfoXmlPathName);
+
+        $this->rmrf($tempDirPathName);
+
+
+        return [
+            'familyPath' => $this->options['familyPath'],
+            'infoXmlPath' => $infoXmlPath,
+            'infoXmlPathName' => $infoXmlPath . '/info.xml',
+            'importedCvsFileNames' => $csvFileNames,
+            'importedPngFileNames' => $pngFileNames,
+            'installProcessAdded' => $processAdded['installProcessAdded'],
+            'upgradeProcessAdded' => $processAdded['upgradeProcessAdded'],
+        ];
+    }
 
     /**
      * Add the <post-install> and <post-upgrade> DomNodes
@@ -304,3 +450,4 @@ class ImportFamily
         }
         return $strings;
     }
+}
