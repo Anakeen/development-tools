@@ -141,6 +141,34 @@ class ImportFamily
 
 
     /**
+     * Append the DomNode $child to the DomNode $parent.
+     * Nodes come from different DomDocuments.
+     *
+     * @param \DOMDocument $parentDomDocument The DomDocument of the $parent DomNode.
+     * @param \DOMNode $parent The DomNode to append the DomNode $child.
+     * @param \DOMNode $child The DomNode to be appended to the DomNode $parent.
+     */
+    public function appendForeignDomNodeTo(\DOMDocument $parentDomDocument, \DOMNode $parent, \DOMNode $child)
+    {
+        $parent->appendChild($parentDomDocument->importNode($child, true));
+    }
+
+    /**
+     * Append the DomNodeList $children to the DomNode $parent.
+     * Nodes come from different DomDocuments.
+     *
+     * @param \DOMDocument $parentDomDocument The DomDocument of the $parent DomNode.
+     * @param \DOMNode $parent The DomNode to append the DomNodes $children.
+     * @param \DOMNode[] $children The DomNodes to be appended to the DomNode $parent.
+     */
+    public function appendForeignDomNodesTo(\DOMDocument $parentDomDocument, \DOMNode $parent, array $children)
+    {
+        foreach ($children as $child) {
+            $this->appendForeignDomNodeTo($parentDomDocument, $parent, $child);
+        }
+    }
+
+    /**
      * Return the strings in $strings ending with $suffix.
      *
      * @param string[] $strings The strings to filter.
