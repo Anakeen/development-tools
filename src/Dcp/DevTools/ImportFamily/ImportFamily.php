@@ -104,3 +104,22 @@ class ImportFamily
         rmdir($filePathName);
     }
 
+
+    /**
+     * Return the strings in $strings ending with $suffix.
+     *
+     * @param string[] $strings The strings to filter.
+     * @param string $suffix The ending a string need to have to be in the returned array.
+     * @return string[] The strings in $strings ending with $suffix.
+     */
+    public function stringsWithSuffix(array $strings, $suffix)
+    {
+        $filteredStrings = [];
+        for ($i = 0; $i < count($strings); $i++) {
+            if (substr($strings[$i], -strlen($suffix)) == $suffix) {
+                $filteredStrings[] = $strings[$i];
+            }
+        }
+        return $filteredStrings;
+    }
+
