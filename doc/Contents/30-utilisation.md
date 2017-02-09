@@ -61,7 +61,7 @@ Ce fichier json contient les clés suivantes :
     Il contient les clés suivantes :
     
     `enclosure`
-    :   caractère de de délimiteur de texte
+    :   caractère de délimiteur de texte
     
     `delimiter`
     :   caractère de séparation des champs
