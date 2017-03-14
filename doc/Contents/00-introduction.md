@@ -9,6 +9,7 @@ C'est un outil en ligne de commande compatible Windows et Linux.
 Ses principales fonctionnalités sont :
 
 -   la production des paquets `webinst`,
--   le déploiement du code
+-   le déploiement du code,
+-   l'importation du la configuration de familles,
 -   l'extraction des chaînes à traduire,
 -   la génération de templates de code.
