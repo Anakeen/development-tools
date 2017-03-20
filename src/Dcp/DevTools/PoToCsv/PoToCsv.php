@@ -55,364 +55,73 @@ class PoToCsv
             );
         }
 
-        $poFiles = $this->fileNamesWithExt($this->options['sourcePath'], 'po');
+        $poFileNames = $this->fileNamesWithExt($this->options['sourcePath'], 'po');
 
-        $result = $this->poFilesToArray($poFiles);
-        $poArray = $result['poArray'];
-        $headers = $result['headers'];
-        $trailingMetas = $result['trailingMetas'];
+        $poMerger = new PoMerger(['fr', 'en']);
+        $mergedPo = $poMerger->merge($poFileNames);
 
-    /* // TODO: Handle the msgctxt to have same id several times */
-    /* foreach ($unifiedPoArray as $key => $value) { */
-    /*     if (isset($value['context_en'])) { */
-    /*         $unifiedPoArray[$key . "(" . $value['context_en'] . ")"] = $value; */
-    /*         unset($value['context_en']); */
-
-    /*         if (!isset($value['context_fr'])) { */
-    /*             unset($unifiedPoArray[$key]); */
-    /*         } */
-    /*     } */
-        /*     if (isset($value['context_fr'])) { */
-        /*         $unifiedPoArray[$key . "(" . $value['context_fr'] . ")"] = $value; */
-        /*         unset($value['context_fr']); */
-
-        /*         if (!isset($value['context_en'])) { */
-        /*             unset($unifiedPoArray[$key]); */
-        /*         } */
-        /*     } */
-        /* } */
-
-        $csvString = $this->poArrayToCsvString($poArray);
-        $csvString .= $this->headersToCsvString($headers);
-        $csvString .= $this->trailingMetasToCsvString($trailingMetas);
+        $csvString = $this->mergedPoToCsvString($mergedPo, $this->options['sourcePath']);
 
         file_put_contents($this->options['outputPath'], $csvString);
 
         return [
-            'convertedPoFiles' => $poFiles,
+            'convertedPoFiles' => $poFileNames,
         ];
     }
 
-    public function poFileToArray($fileName)
+    public function mergedPoToCsvString($mergedPo, $projectRootDir)
     {
-        $truncatedFileName = $this->keepAfter('afnor-opera/', $fileName);
-        $lang = $this->fileLang($truncatedFileName);
-        $fileKey = 'file_' . $lang;
-        $msgctxtKey = 'context_' . $lang;
-        $metaContentKey = 'meta_' . $lang;
+        $csvHeader = "id;";
+        foreach ($mergedPo->langs as $lang) {
+            $csvHeader .= $lang . ";";
+        }
+        foreach ($mergedPo->langs as $lang) {
+            $csvHeader .= "context " . $lang . ";";
+        }
+        foreach ($mergedPo->langs as $lang) {
+            $csvHeader .= "meta " . $lang . ";";
+        }
+        foreach ($mergedPo->langs as $lang) {
+            $csvHeader .= "file " . $lang . ";";
+        }
+        $csvHeader .= "\n";
 
-        $fileContent = file_get_contents($fileName);
-        $contentLength = strlen($fileContent);
-        $pos = 0;
-        $poArray = [];
-        $header = [];
-        $trailingMeta = [];
+        $csvMergedPoElements = '';
+        foreach ($mergedPo->mergedPoElements as $elem) {
+            $csvMergedPoElements .= $this->toCsvString($elem->id);
 
-        while ($pos < $contentLength) {
-            $result = $this->nextMetaContent($fileContent, $contentLength, $pos);
-            $pos = $result['newPos'];
-            $metaContent = $result['metaContent'];
-
-            $result = $this->nextToken($fileContent, $contentLength, $pos);
-            $token = $result['token'];
-            $pos = $result['newPos'];
-
-            $msgctxt = '';
-            if ($token == 'msgctxt') {
-                $result = $this->nextString($fileContent, $contentLength, $pos);
-                $pos = $result['newPos'];
-                $msgctxt = $result['msg'];
-
-                $result = $this->nextToken($fileContent, $contentLength, $pos);
-                $pos = $result['newPos'];
+            foreach ($mergedPo->langs as $lang) {
+                $csvMergedPoElements .= $this->toCsvString($elem->messages[$lang]);
             }
-
-            $result = $this->nextString($fileContent, $contentLength, $pos);
-            $pos = $result['newPos'];
-            $msgid = $result['msg'];
-
-            $result = $this->nextToken($fileContent, $contentLength, $pos);
-            $pos = $result['newPos'];
-
-            $result = $this->nextString($fileContent, $contentLength, $pos);
-            $pos = $result['newPos'];
-            $msgstr = $result['msg'];
-
-            if ($msgid == '') {
-                if (count($header) == 0) {
-                    $header = ['file' => $truncatedFileName, 'header' => $msgstr];
-                } else if ($metaContent != '') {
-                    $trailingMeta = ['file' => $truncatedFileName, 'trailingMeta' => $metaContent];
-                }
-            } else {
-                $poArray[$msgid] = [
-                    'fr' => '',
-                    'en' => '',
-                    'context_fr' => '',
-                    'context_en' => '',
-                    'meta_fr' => '',
-                    'meta_en' => '',
-                    'file_fr' => '',
-                    'file_en' => ''
-                ];
-                $poArray[$msgid][$lang] = $msgstr;
-                $poArray[$msgid][$msgctxtKey] = $msgctxt;
-                $poArray[$msgid][$metaContentKey] = $metaContent;
-                $poArray[$msgid][$fileKey] = $truncatedFileName;
+            foreach ($mergedPo->langs as $lang) {
+                $csvMergedPoElements .= $this->toCsvString($elem->contexts[$lang]);
             }
-        }
-
-        return ['poArray' => $poArray, 'header' => $header, 'trailingMeta' => $trailingMeta];
-    }
-
-    public function poFilesToArray($poFileNames)
-    {
-        $poArrays = [];
-        $headers = [];
-        $trailingMetas = [];
-
-        foreach ($poFileNames as $poFileName) {
-            $result = $this->poFileToArray($poFileName);
-            $poArrays[] = $result['poArray'];
-            $headers[] = $result['header'];
-            if (count($result['trailingMeta']) > 0) {
-                $trailingMetas[] = $result['trailingMeta'];
+            foreach ($mergedPo->langs as $lang) {
+                $csvMergedPoElements .= $this->toCsvString($elem->metas[$lang]);
             }
-        }
-
-        return [
-            'poArray' => $this->combinedPoArrays($poArrays),
-            'headers' => $headers,
-            'trailingMetas' => $trailingMetas
-        ];
-    }
-
-    public function combinedPoArrays($poArrays)
-    {
-        $combined = [];
-
-        foreach ($poArrays as $line) {
-            foreach ($line as $key => $value) {
-                if (!isset($combined[$key])) {
-                    $combined[$key] = $value;
-                } else {
-                    $combined[$key] = $this->arrayCombine($combined[$key], $value);
-                }
+            foreach ($mergedPo->langs as $lang) {
+                $csvMergedPoElements .= $this->toCsvString($this->keepAfter($projectRootDir, $elem->fileNames[$lang]));
             }
+            $csvMergedPoElements .= "\n";
         }
 
-        return $combined;
-    }
+        $warning = "\n\n\n\n\n\nIGNORE THE FOLLOWING LINES\n";
+        $csvMetaInfoHeader = "file;header;header meta;trailing meta;\n";
 
-    public function poArrayToCsvString($poArray)
-    {
-        $csvString = "id;fr;en;context fr;context en;meta fr;meta en;file fr;file en\n";
-
-        $poArray = $this->toCsvStrings($poArray);
-
-        foreach ($poArray as $key => $value) {
-            $csvString .= $key . $value['fr'] . $value['en'] .
-                          $value['context_fr'] . $value['context_en'] .
-                          $value['meta_fr'] . $value['meta_en'] .
-                          $value['file_fr'] . $value['file_en'] . "\n";
+        $csvMetaInfo = '';
+        foreach ($mergedPo->metaInfos as $metaInfo) {
+            $csvMetaInfo .= $this->toCsvString($this->keepAfter($projectRootDir, $metaInfo->fileName)) .
+                            $this->toCsvString($metaInfo->header) .
+                            $this->toCsvString($metaInfo->headerMeta) .
+                            $this->toCsvString($metaInfo->trailingMeta) . "\n";
         }
 
-        return $csvString;
-    }
-
-    public function headersToCsvString($headers)
-    {
-        $csvString = "header;file\n";
-
-        $headers = $this->toCsvStrings($headers);
-
-        foreach ($headers as $header) {
-            $csvString .= $header['header'] . $header['file'] . "\n";
-        }
-
-        return $csvString;
-    }
-
-    public function trailingMetasToCsvString($trailingMetas)
-    {
-        $csvString = "trailing meta;file\n";
-
-        $trailingMetas = $this->toCsvStrings($trailingMetas);
-
-        foreach ($trailingMetas as $trailingMeta) {
-            $csvString .= $trailingMeta['trailingMeta'] . $trailingMeta['file'] . "\n";
-        }
-
-        return $csvString;
-    }
-
-    public function toCsvStrings($array)
-    {
-        $csvStringArray = [];
-
-        foreach ($array as $key => $value) {
-            if (is_array($value)) {
-                $value = $this->toCsvStrings($value);
-                $key = $this->toCsvString($key);
-            } else {
-                $value = $this->toCsvString($value);
-            }
-            $csvStringArray[$key] = $value;
-        }
-
-        return $csvStringArray;
+        return $csvHeader . $csvMergedPoElements . $warning . $csvMetaInfoHeader . $csvMetaInfo;
     }
 
     public function toCsvString($string)
     {
         return '"' . str_replace('"', '""', $string) . '";';
-    }
-
-    public function fileLang($filePathName)
-    {
-        if (strpos($filePathName, '/fr/') !== false || strpos($filePathName, '_fr') !== false) {
-            return 'fr';
-        } else {
-            return 'en';
-        }
-    }
-
-    public function nextMetaContent($fileContent, $contentLength, $pos)
-    {
-        $metaContent = '';
-
-        $pos = $this->skipSpaces($fileContent, $contentLength, $pos);
-
-        for (; $pos < $contentLength; $pos++) {
-            if ($fileContent[$pos] == '#') {
-                $result = $this->getLine($fileContent, $contentLength, $pos);
-                $pos = $result['newPos'];
-                $metaContent .= $result['lineContent'];
-            } elseif (!ctype_space($fileContent[$pos])) {
-                break;
-            }
-        }
-        return ['metaContent' => $metaContent, 'newPos' => $pos];
-    }
-
-    public function nextToken($fileContent, $contentLength, $pos)
-    {
-        $token = '';
-
-        $pos = $this->skipSpaces($fileContent, $contentLength, $pos);
-
-        for (; $pos < $contentLength; $pos++) {
-
-            if (!ctype_space($fileContent[$pos]) && $fileContent[$pos] != '"') {
-                $token .= $fileContent[$pos];
-            } else {
-                break;
-            }
-        }
-
-        return ['token' => $token, 'newPos' => $pos];
-    }
-
-    public function nextString($fileContent, $contentLength, $pos)
-    {
-        $msg = '';
-
-        $pos = $this->skipSpaces($fileContent, $contentLength, $pos);
-
-        for (; $pos < $contentLength; $pos++) {
-            if ($fileContent[$pos] == '"') {
-                for ($pos++; $pos < $contentLength; $pos++) {
-                    if ($fileContent[$pos] == '"' && !$this->escapedChar($fileContent, $contentLength, $pos)) {
-                        $pos++;
-                        if ($this->nextNonSpaceCharIs('"', $fileContent, $contentLength, $pos)) {
-                            $result = $this->nextString($fileContent, $contentLength, $pos);
-                            $msg = $msg . $result['msg'];
-                            $pos = $result['newPos'];
-                        }
-                        return ['msg' => $msg, 'newPos' => $pos];
-                    } else {
-                        $msg .= $fileContent[$pos];
-                    }
-                }
-            }
-        }
-
-        return ['msg' => $msg, 'newPos' => $pos];
-    }
-
-    public function escapedChar($fileContent, $contentLength, $pos)
-    {
-        if ($pos <= 0) {
-            return false;
-        } else {
-            if ($fileContent[$pos - 1] == '\\') {
-                return !$this->escapedChar($fileContent, $contentLength, $pos - 1);
-            } else {
-                return false;
-            }
-        }
-    }
-
-    public function nextNonSpaceCharIs($char, $fileContent, $contentLength, $pos)
-    {
-        for (; $pos < $contentLength; $pos++) {
-            if (!ctype_space($fileContent[$pos])) {
-                if ($fileContent[$pos] != $char) {
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public function getLine($fileContent, $contentLength, $pos)
-    {
-        $lineContent = '';
-        for (; $pos < $contentLength; $pos++) {
-            $lineContent .= $fileContent[$pos];
-            if ($fileContent[$pos] == "\n") {
-                break;
-            }
-        }
-
-        return ['lineContent' => $lineContent, 'newPos' => $pos];
-    }
-
-    public function skipSpaces($fileContent, $contentLength, $pos)
-    {
-        for (; $pos < $contentLength; $pos++) {
-            if (!ctype_space($fileContent[$pos])) {
-                break;
-            }
-        }
-
-        return $pos;
-    }
-
-    public function arrayCombine($array, $array2)
-    {
-        $combined = [];
-        foreach ($array as $key => $value) {
-            $combined[$key] = $value == '' ? $array2[$key] : $value;
-        }
-
-        return $combined;
-    }
-
-    /**
-     * Return the part of the string after $target
-     * E.g: $target is 'dog' $source is 'dogcat', 'cat' is returned.
-     *
-     * @param string $target The string used as a point
-     * to truncate the $source string.
-     * @param string $source The string to truncate.
-     * @return string The remaining string.
-     */
-    public function keepAfter($target, $source)
-    {
-        return substr(strstr($source, $target), strlen($target));
     }
 
     /**
@@ -478,5 +187,19 @@ class PoToCsv
             }
         }
         return $fileNames;
+    }
+
+    /**
+     * Return the part of the string after $target
+     * E.g: $target is 'dog' $source is 'dogcat', 'cat' is returned.
+     *
+     * @param string $target The string used as a point
+     * to truncate the $source string.
+     * @param string $source The string to truncate.
+     * @return string The remaining string.
+     */
+    public function keepAfter($target, $source)
+    {
+        return substr(strstr($source, $target), strlen($target));
     }
 }
