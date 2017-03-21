@@ -15,6 +15,12 @@ class PoFile
     public $headerMeta = '';
     public $trailingMeta = '';
 
+    /**
+     * PoFile constructor.
+     *
+     * @param string $fileName.
+     * @param string $lang.
+     */
     public function __construct($fileName, $lang)
     {
         $this->fileName = $fileName;

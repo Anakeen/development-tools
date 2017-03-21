@@ -10,6 +10,13 @@ class PoToCsv
 {
     protected $options;
 
+    /**
+     * PoToCsv constructor.
+     *
+     * @param array $options
+     *
+     * @throws Exception
+     */
     public function __construct(array $options = [])
     {
         $missingOptions = [];
@@ -69,6 +76,17 @@ class PoToCsv
         ];
     }
 
+    /**
+     * Return the content of the csv file to write as a string.
+     *
+     * @param MergedPo $mergedPo
+     * @param string $projectRootDir The file names have to be
+     * truncated in the csv file, $projectRootDir specify the part
+     * to remove from the beginning of each file.
+     * which should be the root directory containing the .po files.
+     *
+     * @return string
+     */
     public function mergedPoToCsvString($mergedPo, $projectRootDir)
     {
         $csvHeader = "id;";
@@ -119,6 +137,15 @@ class PoToCsv
         return $csvHeader . $csvMergedPoElements . $warning . $csvMetaInfoHeader . $csvMetaInfo;
     }
 
+    /**
+     * Put $string between double quotes,
+     * replace double quotes by two double quotes,
+     * put a ';' at the end and return it.
+     *
+     * @param $string
+     *
+     * @return string
+     */
     public function toCsvString($string)
     {
         return '"' . str_replace('"', '""', $string) . '";';

@@ -12,6 +12,11 @@ class MergedPo
     public $metaInfos = [];
     public $mergedPoElements = [];
 
+    /**
+     * MergedPo constructor.
+     *
+     * @param string[] $langs.
+     */
     public function __construct($langs)
     {
         $this->langs = $langs;

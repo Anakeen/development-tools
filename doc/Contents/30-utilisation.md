@@ -19,6 +19,7 @@ Lancé sans option, le developer toolkit liste les commandes disponibles :
         generateStub
         generateWebinst
         importFamily
+        poToCsv
 
 Chaque commande est auto-documentée via l'option `-h` ou `--help`.
 

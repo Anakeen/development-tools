@@ -13,6 +13,12 @@ class MetaInfo
     public $headerMeta;
     public $trailingMeta;
 
+    /**
+     * MetaInfo constructor.
+     *
+     * @param PoFile $poFile The PoFile object you
+     * want to retrieve the meta infos from.
+     */
     public function __construct($poFile)
     {
         $this->fileName = $poFile->fileName;

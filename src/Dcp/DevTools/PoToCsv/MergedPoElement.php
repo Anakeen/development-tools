@@ -14,6 +14,19 @@ class MergedPoElement
     public $metas = [];
     public $fileNames = [];
 
+    /**
+     * MergedPoElement constructor.
+     * Create a MergedPoElement from a
+     * PoElement and some information related
+     * to its PoFile.
+     *
+     * @param PoElement $poElement.
+     * @param string $fileName The name of the PoFile
+     * the $poElement comes from.
+     * @param string $elemLang The lang of the PoFile
+     * the $poElement comes from.
+     * @param string[] $langs.
+     */
     public function __construct($poElement, $fileName, $elemLang, $langs)
     {
         $this->id = $poElement->id;
