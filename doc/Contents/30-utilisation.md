@@ -20,6 +20,7 @@ Lancé sans option, le developer toolkit liste les commandes disponibles :
         generateWebinst
         importFamily
         poToCsv
+        csvToPo
 
 Chaque commande est auto-documentée via l'option `-h` ou `--help`.
 

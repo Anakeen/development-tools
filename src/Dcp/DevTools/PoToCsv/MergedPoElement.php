@@ -37,9 +37,12 @@ class MergedPoElement
             $this->metas[$lang] = '';
             $this->fileNames[$lang] = '';
         }
-        $this->messages[$elemLang] = $poElement->message;
-        $this->contexts[$elemLang] = $poElement->context;
-        $this->metas[$elemLang] = $poElement->meta;
-        $this->fileNames[$elemLang] = $fileName;
+        if ($elemLang != '') {
+            $this->messages[$elemLang] = $poElement->message;
+            $this->contexts[$elemLang] = $poElement->context;
+            $this->metas[$elemLang] = $poElement->meta;
+            $this->fileNames[$elemLang] = $fileName;
+        }
     }
 }
+
