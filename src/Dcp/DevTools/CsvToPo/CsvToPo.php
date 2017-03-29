@@ -141,7 +141,7 @@ class CsvToPo
      */
     public function toMultiLineString($string)
     {
-        if ($string === null) {
+        if ($string === null || $string === '') {
             return '""';
         }
 
