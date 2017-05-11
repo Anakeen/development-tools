@@ -1,38 +1,42 @@
 <?php
 
-require_once "initializeAutoloader.php";
+require_once __DIR__ . '/' . 'initializeAutoloader.php';
 
 use Dcp\DevTools\ImportFamily\ImportFamily;
+use Dcp\DevTools\Utils\ConfigFile;
 use Ulrichsg\Getopt\Getopt;
 use Ulrichsg\Getopt\Option;
 
 $getopt = new Getopt([
-    (new Option('u', 'url', Getopt::REQUIRED_ARGUMENT))
-        ->setDescription('Dynacase Control url'),
-    (new Option('p', 'port', Getopt::REQUIRED_ARGUMENT))
-        ->setDescription('Dynacase Control port')
-        ->setDefaultValue(80),
-    (new Option('f', 'familyPath', Getopt::REQUIRED_ARGUMENT))
-        ->setDescription('path of the directory where to import the family')
+    (new Option('s', 'sourcePath', Getopt::REQUIRED_ARGUMENT))
+        ->setDescription('source Path (required)')
         ->setValidation(
             function ($path) {
                 if (!is_dir($path)) {
-                    print "$path is not a directory";
+                    print "$path is not a directory\n";
+                    return false;
+                }
+                if (!file_exists($path . '/' . ConfigFile::DEFAULT_FILE_NAME)) {
+                    print sprintf("$path does not contains a %s file\n", ConfigFile::DEFAULT_FILE_NAME);
                     return false;
                 }
                 return true;
             }
         ),
+    (new Option('u', 'url', Getopt::REQUIRED_ARGUMENT))
+        ->setDescription('Dynacase context url (required)'),
+    (new Option('p', 'port', Getopt::REQUIRED_ARGUMENT))
+        ->setDescription('Dynacase context port (required)')->setDefaultValue(80),
+    (new Option('n', 'name', Getopt::REQUIRED_ARGUMENT))
+        ->setDescription('Family name (required)'),
+    (new Option('o', 'outputDir', Getopt::REQUIRED_ARGUMENT))
+        ->setDescription('Path for the retrieved family files, relative to source path (required)'),
+    (new Option(null, 'no-backup', Getopt::NO_ARGUMENT))
+        ->setDescription('Do not backup overwritten files'),
     (new Option('q', 'quiet', Getopt::NO_ARGUMENT)),
     (new Option('h', 'help', Getopt::NO_ARGUMENT))
-        ->setDescription(
-            'show the usage message'
-        )
+        ->setDescription('Show the usage message')
 ]);
-$getopt->setBanner(
-    "Usage: %s [options] -- [additional cli options]\\n\\n
-additional cli options are passed directly to the remote wiff command.\\n\\n"
-);
 
 try {
     $getopt->parse();
@@ -44,9 +48,17 @@ try {
 
     $unexpectedValueErrors = [];
 
-    if (!isset($getopt['familyPath'])) {
-        $unexpectedValueErrors['familyPath'] = "You need to set the path of the directory where 
-to import the family with -f or --familyPath";
+    if (!isset($getopt['name'])) {
+        $unexpectedValueErrors['name'] = 'name is required';
+    }
+
+    $options = $getopt->getOptions();
+
+    if (!isset($options['outputDir'])) {
+        $unexpectedValueErrors['outputDir'] = 'outputDir is required';
+    } elseif (!is_dir($options['sourcePath'] . '/' . $options['outputDir'])) {
+        $unexpectedValueErrors['outputDir'] = sprintf('%s is not a directory',
+            $options['sourcePath'] . '/' . $options['outputDir']);
     }
 
     if (0 < count($unexpectedValueErrors)) {
@@ -54,44 +66,46 @@ to import the family with -f or --familyPath";
             . implode("\n -  ", $unexpectedValueErrors) . "\n");
     }
 
-    $options = $getopt->getOptions();
-    $options['additional_args'] = $getopt->getOperands();
-
     $importer = new ImportFamily($options);
     $actionLogs = $importer->importFamily();
 
-    if (count($actionLogs['importedCvsFileNames']) > 0) {
-        echo "\nIMPORTED FILES IN : " . $actionLogs['familyPath'] . "\n";
-
-        foreach ($actionLogs['importedCvsFileNames'] as $fileName) {
-            echo $fileName . "\n";
+    if (!isset($getopt['quiet']) || $getopt['quiet'] < 1) {
+        if (count($actionLogs['overwrittenFiles']) > 0) {
+            echo "\n[Warning] Following files have been overwritten " .
+                (empty($getopt['no-backup'])
+                    ? "(their backup is in " . $actionLogs['backupDir'] . ")"
+                    : "(backup disabled)");
+            echo "\n- " . implode("\n- ", $actionLogs['overwrittenFiles']) . "\n";
         }
     }
 
-    if (count($actionLogs['importedPngFileNames']) > 0) {
-        echo "\nIMPORTED FILES IN : " . $actionLogs['infoXmlPath'] . "/Images" . "\n";
+    if (!isset($getopt['quiet']) || $getopt['quiet'] < 2) {
+        if (count($actionLogs['importedCsvFileNames']) > 0) {
+            echo "\nImported csv files in " . $actionLogs['outputDir'] . ":";
+            echo "\n- " . implode("\n- ", $actionLogs['importedCsvFileNames']) . "\n";
+        }
 
-        foreach ($actionLogs['importedPngFileNames'] as $fileName) {
-            echo $fileName . "\n";
+        if (count($actionLogs['importedPhpFileNames']) > 0) {
+            echo "\nImported csv files in " . $actionLogs['outputDir'] . ":";
+            echo "\n- " . implode("\n- ", $actionLogs['importedPhpFileNames']) . "\n";
+        }
+
+        if (count($actionLogs['importedImgFileNames']) > 0) {
+            echo "\nImported image files in " . $actionLogs['infoXmlPath'] . "/Images:";
+            echo "\n- " . implode("\n- ", $actionLogs['importedImgFileNames']) . "\n";
+        }
+
+        if (count($actionLogs['installProcessAdded']) > 0) {
+            echo "\nadded post-install processes in " . $actionLogs['infoXmlPathName'] . ":";
+            echo "\n- " . implode("\n- ", $actionLogs['installProcessAdded']) . "\n";
+        }
+
+        if (count($actionLogs['upgradeProcessAdded']) > 0) {
+            echo "\nadded post-install processes in " . $actionLogs['infoXmlPathName'] . ":";
+            echo "\n- " . implode("\n- ", $actionLogs['upgradeProcessAdded']) . "\n";
         }
     }
 
-    if (count($actionLogs['installProcessAdded']) > 0) {
-        echo "\nADDED POST-INSTALL PROCESS IN "
-            . $actionLogs['infoXmlPathName'] . ":\n";
-
-        foreach ($actionLogs['installProcessAdded'] as $process) {
-            echo $process . "\n";
-        }
-    }
-
-    if (count($actionLogs['upgradeProcessAdded']) > 0) {
-        echo "\nADDED POST-UPGRADE PROCESS IN "
-            . $actionLogs['infoXmlPathName'] . ":\n";
-        foreach ($actionLogs['upgradeProcessAdded'] as $process) {
-            echo $process . "\n";
-        }
-    }
 } catch (UnexpectedValueException $e) {
     echo "Error: " . $e->getMessage() . "\n";
     echo $getopt->getHelpText();
