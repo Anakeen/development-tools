@@ -2,25 +2,37 @@
 
 namespace Dcp\DevTools\Template;
 
+use Dcp\DevTools\Utils\StringUtils;
+
 class WorkflowClass extends Template
 {
-    public function render($arguments, $outputPath, $force = false)
+    public function render($arguments, $outputDir, $force = false)
     {
-        if (!empty($outputPath) && !is_dir($outputPath)) {
-            throw new Exception("The output path $outputPath is not a dir");
+        if (!isset($arguments["namespace"]) || !$this->checkNamespace($arguments["namespace"])) {
+            throw new Exception("You need to set the namespace of the family with a valid name " . $this->namespaceRegExp);
         }
+
         if (!isset($arguments["name"]) || !$this->checkLogicalName($arguments["name"])) {
-            throw new Exception("You need to set the name of the workflow with a valid name " . $this->logicalNameRegExp);
+            throw new Exception("You need to set the name of the family with a valid name " . $this->logicalNameRegExp);
+        } else {
+            $arguments["lowerName"] = ucfirst(strtolower($arguments["name"]));
+            $arguments["className"] = StringUtils::normalizeClassName(strtolower($arguments["name"]));
         }
-        if (!isset($arguments["namespace"]) || !$this->checkLogicalName($arguments["namespace"])) {
-            throw new Exception("You need to set the namespace of the workflow with a valid name " . $this->logicalNameRegExp);
-        }
+
         if (isset($arguments["parent"]) && !$this->checkLogicalName($arguments["parent"])) {
-            throw new Exception("You need to set the parent of the workflow with a valid name " . $this->logicalNameRegExp);
+            throw new Exception("You need to set the parent of the family with a valid name " . $this->logicalNameRegExp);
         }
-        if (!empty($outputPath)) {
-            $outputPath .= DIRECTORY_SEPARATOR . $arguments["name"] . "__WFL.php";
+        $arguments['parentFQN'] = '\\Dcp\\Family\\' . (isset($arguments["parent"]) ? ucfirst(strtolower($arguments["parent"])) : 'Document');
+
+        if(false === $outputDir) {
+            $outputFile = false;
+        } else {
+            if(!is_dir($outputDir)) {
+                throw new Exception("The output dir $outputDir is not a dir");
+            }
+            $outputFile = $outputDir . DIRECTORY_SEPARATOR . $arguments["className"] . ".php";
         }
-        return parent::mainRender("workflow_class", $arguments, $outputPath, $force);
+
+        return parent::mainRender("workflow_class", $arguments, $outputFile, $force);
     }
 }
