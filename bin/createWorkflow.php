@@ -1,72 +1,80 @@
 <?php
 
-require_once "initializeAutoloader.php";
+require_once __DIR__ . '/' . 'initializeAutoloader.php';
 
+use Dcp\DevTools\CreateWorkflow\CreateWorkflow;
 use Ulrichsg\Getopt\Getopt;
 use Ulrichsg\Getopt\Option;
 
-use Dcp\DevTools\Template\WorkflowStructure;
-use Dcp\DevTools\Template\WorkflowClass;
-use Dcp\DevTools\Template\WorkflowInfo;
-use Dcp\DevTools\Utils\ConfigFile;
-
 $getopt = new Getopt(array(
-    (new Option('s', 'sourcePath', Getopt::REQUIRED_ARGUMENT))->setDescription('source Path (needed)')->setValidation(function ($path) {
-        if (!is_dir($path)) {
-            print "$path is not a valid directory";
-            return false;
-        }
-        return true;
-    }),
-    (new Option('n', 'name', Getopt::REQUIRED_ARGUMENT))->setDescription('name of family (needed)'),
-    (new Option('m', 'namespace', Getopt::REQUIRED_ARGUMENT))->setDescription('namespace of workflow (needed)'),
-    (new Option('a', 'application', Getopt::REQUIRED_ARGUMENT))->setDescription('associated application (needed)'),
-    (new Option('p', 'parent', Getopt::REQUIRED_ARGUMENT))->setDescription('name of the parent'),
-    (new Option('t', 'title', Getopt::REQUIRED_ARGUMENT))->setDescription('title of the workflow'),
-    (new Option('f', 'force', Getopt::NO_ARGUMENT))->setDescription('force the write if the file exist'),
-    (new Option('h', 'help', Getopt::NO_ARGUMENT))->setDescription('show the usage message'),
+    (new Option('s', 'sourcePath', Getopt::REQUIRED_ARGUMENT))
+        ->setDescription('source Path (needed)')
+        ->setValidation(function ($path) {
+            if (!is_dir($path)) {
+                print "$path is not a valid directory";
+                return false;
+            }
+            return true;
+        }),
+    (new Option('n', 'name', Getopt::REQUIRED_ARGUMENT))
+        ->setDescription('name of family (needed)'),
+    (new Option('m', 'namespace', Getopt::REQUIRED_ARGUMENT))
+        ->setDescription('namespace of workflow (needed)'),
+    (new Option('o', 'outputDir', Getopt::REQUIRED_ARGUMENT))
+        ->setDescription('output directory (relative to sourcepath)'),
+    (new Option('p', 'parent', Getopt::REQUIRED_ARGUMENT))
+        ->setDescription('name of the parent'),
+    (new Option('t', 'title', Getopt::REQUIRED_ARGUMENT))
+        ->setDescription('title of the workflow'),
+    (new Option('i', 'icon', Getopt::REQUIRED_ARGUMENT))
+        ->setDescription('icon of the family'),
+    (new Option(null, 'no-backup', Getopt::NO_ARGUMENT))
+        ->setDescription('Do not backup overwritten files'),
+    (new Option('q', 'quiet', Getopt::NO_ARGUMENT)),
+    (new Option('h', 'help', Getopt::NO_ARGUMENT))
+        ->setDescription('show the usage message'),
 ));
 
 try {
     $getopt->parse();
 
-    if (isset($getopt["help"])) {
+    if (isset($getopt['help'])) {
         echo $getopt->getHelpText();
         exit(0);
     }
 
     $error = array();
     if (!isset($getopt['name'])) {
-        $error[] = "You need to set the name of the application -n or --name";
+        $error[] = 'family name is required';
     }
 
     if (!isset($getopt['namespace'])) {
-        $error[] = "You need to set the name of the application -m or --namespace";
+        $error[] = 'namespace is required';
     }
 
-    if (!isset($getopt['application'])) {
-        $error[] = "You need to set the name of the application of the family -a or --application";
+    if (!isset($getopt['outputDir'])) {
+        $error[] = 'outputDir is required';
     }
 
     if (!isset($getopt['sourcePath'])) {
-        $error[] = "You need to set the sourcepath of the application -s or --sourcePath";
+        $error[] = 'sourcePath is required';
     }
 
-    $outputPath = $getopt['sourcePath'] . DIRECTORY_SEPARATOR . $getopt["application"];
+    $outputPath = $getopt['sourcePath'] . DIRECTORY_SEPARATOR . $getopt['outputDir'];
 
     if (!is_dir($outputPath)) {
-        $error[] = "The path of the application doesn't exist. Have you initialized it ?";
+        $error[] = $outputPath . ' does not exists.';
     }
 
     if (!empty($error)) {
-        echo join("\n", $error);
+        echo implode("\n", $error);
         echo "\n" . $getopt->getHelpText();
-        exit(42);
+        exit(1);
     }
 
-    $inputDir = $getopt["sourcePath"];
+    $inputDir = $getopt['sourcePath'];
 
-    $force = $getopt->getOption("force") ? true : false;
+    $force = $getopt->getOption('force') ? true : false;
 
     $renderOptions = $getopt->getOptions();
 
@@ -78,25 +86,61 @@ try {
         $renderOptions["title"] = mb_convert_encoding($renderOptions["title"], "UTF-8", $encoding);
     }
 
-    $config = new ConfigFile($inputDir);
+    if (isset($renderOptions["icon"]) && !mb_detect_encoding($renderOptions["icon"], 'UTF-8', true)) {
+        $encoding = mb_detect_encoding($renderOptions["icon"], "CP1252,CP1251,UTF-8");
+        if (!$encoding) {
+            throw new Exception("Unable to detect the encoding of the title args, try to change the encoding of your shell");
+        }
+        $renderOptions["title"] = mb_convert_encoding($renderOptions["title"], "UTF-8", $encoding);
+    }
 
-    $csvParam = $config->get(
-        'csvParam', [
-        "enclosure" => '"',
-        "delimiter" => ';'
-    ], ConfigFile::GET_MERGE_DEFAULTS
-    );
+    if (isset($renderOptions["icon"]) && !mb_detect_encoding($renderOptions["icon"], 'UTF-8', true)) {
+        $encoding = mb_detect_encoding($renderOptions["icon"], "CP1252,CP1251,UTF-8");
+        if (!$encoding) {
+            throw new Exception("Unable to detect the encoding of the title args, try to change the encoding of your shell");
+        }
+        $renderOptions["title"] = mb_convert_encoding($renderOptions["title"], "UTF-8", $encoding);
+    }
 
-    $renderOptions["enclosure"] = $csvParam["enclosure"];
-    $renderOptions["delimiter"] = $csvParam["delimiter"];
-    $renderOptions["output"] = $outputPath;
+    $workflowCreator = new CreateWorkflow($renderOptions);
+    $actionLogs = $workflowCreator->create();
 
-    $template = new WorkflowStructure();
-    $template->render($renderOptions, $outputPath, $force);
-    $template = new WorkflowClass();
-    $template->render($renderOptions, $outputPath, $force);
-    $template = new WorkflowInfo();
-    print $template->render($renderOptions);
+    if (!isset($getopt['quiet']) || $getopt['quiet'] < 1) {
+        if (count($actionLogs['overwrittenFiles']) > 0) {
+            echo "\n[Warning] Following files have been overwritten " .
+                (empty($getopt['no-backup'])
+                    ? "(their backup is in " . $actionLogs['backupDir'] . ")"
+                    : "(backup disabled)");
+            echo "\n- " . implode("\n- ", $actionLogs['overwrittenFiles']) . "\n";
+        }
+    }
+
+    if (!isset($getopt['quiet']) || $getopt['quiet'] < 2) {
+        if (count($actionLogs['importedCsvFileNames']) > 0) {
+            echo "\nImported csv files in " . $actionLogs['outputDir'] . ":";
+            echo "\n- " . implode("\n- ", $actionLogs['importedCsvFileNames']) . "\n";
+        }
+
+        if (count($actionLogs['importedPhpFileNames']) > 0) {
+            echo "\nImported csv files in " . $actionLogs['outputDir'] . ":";
+            echo "\n- " . implode("\n- ", $actionLogs['importedPhpFileNames']) . "\n";
+        }
+
+        if (count($actionLogs['importedImgFileNames']) > 0) {
+            echo "\nImported image files in " . $actionLogs['infoXmlPath'] . "/Images:";
+            echo "\n- " . implode("\n- ", $actionLogs['importedImgFileNames']) . "\n";
+        }
+
+        if (count($actionLogs['installProcessAdded']) > 0) {
+            echo "\nadded post-install processes in " . $actionLogs['infoXmlPathName'] . ":";
+            echo "\n- " . implode("\n- ", $actionLogs['installProcessAdded']) . "\n";
+        }
+
+        if (count($actionLogs['upgradeProcessAdded']) > 0) {
+            echo "\nadded post-install processes in " . $actionLogs['infoXmlPathName'] . ":";
+            echo "\n- " . implode("\n- ", $actionLogs['upgradeProcessAdded']) . "\n";
+        }
+    }
 } catch (UnexpectedValueException $e) {
     echo "Error: " . $e->getMessage() . "\n";
     echo $getopt->getHelpText();
