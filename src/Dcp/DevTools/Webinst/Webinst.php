@@ -69,6 +69,14 @@ class Webinst
 
     public function makeWebinst($outputPath)
     {
+        $webinstName = $this->getWebinstName();
+
+        if ((!isset($this->conf['force']) || !$this->conf['force'])
+            && file_exists($outputPath . DIRECTORY_SEPARATOR . $webinstName)
+        ) {
+            throw new Exception("output file already exists, use --force option");
+        }
+
         $addedFiles = [];
 
         $contentTar = $this->inputPath . DIRECTORY_SEPARATOR . "temp_tar";
@@ -127,7 +135,6 @@ class Webinst
             }
         }
 
-
         $webinstName = $this->getWebinstName();
         $pharTar = new \PharData($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"] . ".tar");
         $pharTar->startBuffering();
@@ -142,12 +149,12 @@ class Webinst
             $outputPath = $this->inputPath;
         }
         rename($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"] . ".tar.gz",
-            $outputPath . DIRECTORY_SEPARATOR . $webinstName . ".webinst");
+            $outputPath . DIRECTORY_SEPARATOR . $webinstName);
         unlink($contentTar . ".tar.gz");
         unset($pharTar);
         unlink($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"] . ".tar");
 
-        return $outputPath . DIRECTORY_SEPARATOR . $webinstName . ".webinst";
+        return $outputPath . DIRECTORY_SEPARATOR . $webinstName;
     }
 
     /**
@@ -156,7 +163,7 @@ class Webinst
     public function getWebinstName()
     {
         return $this->templateEngine->render(
-            "{{moduleName}}-{{version}}-{{release}}", $this->conf
+            $this->conf["file-name"] ?? "{{moduleName}}-{{version}}-{{release}}.webinst", $this->conf
         );
     }
 
