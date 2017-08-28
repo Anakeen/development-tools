@@ -17,7 +17,7 @@ class JavascriptPo extends PoGenerator
         if (isset($this->conf["application"])) {
             foreach ($this->conf["application"] as $currentApp) {
                 $currentAppPath = $this->inputPath . DIRECTORY_SEPARATOR . $currentApp;
-                $filesList = $this->globRecursive($currentAppPath . DIRECTORY_SEPARATOR . '*.js');
+                $filesList = $this->globRecursive($currentAppPath, '/^.*\.js$/');
                 if (empty($filesList)) {
                     continue;
                 }

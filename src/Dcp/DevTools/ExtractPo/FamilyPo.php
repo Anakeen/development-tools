@@ -16,17 +16,18 @@ class FamilyPo extends PoGenerator
     {
         if (isset($this->conf["application"])) {
             foreach ($this->conf["application"] as $currentApp) {
+                $potList = new \AppendIterator();
                 $currentAppPath = $this->inputPath . DIRECTORY_SEPARATOR . $currentApp;
-                $filesList = $this->globRecursive($currentAppPath . DIRECTORY_SEPARATOR . '*__STRUCT.csv');
+                $filesList = $this->globRecursive($currentAppPath, '/^.*__STRUCT.csv$/');
                 $tempStruct = $this->tempdir('tmp_family_struct_' . $currentApp);
                 $extractor = new AnalyzeFamily($tempStruct, $this->conf["csvParam"]["enclosure"], $this->conf["csvParam"]["delimiter"]);
                 $extractor->extract($filesList);
-                $potList = $this->globRecursive($tempStruct.DIRECTORY_SEPARATOR."*.pot");
-                $filesList = $this->globRecursive($currentAppPath . DIRECTORY_SEPARATOR .'*__PARAM.csv');
+                $potList->append($this->globRecursive($tempStruct, "/^.*\.pot$/"));
+                $filesList = $this->globRecursive($currentAppPath, '/^.*__PARAM.csv$/');
                 $tempParam = $this->tempdir('tmp_family_param_' . $currentApp);
                 $extractor = new AnalyzeFamily($tempParam, $this->conf["csvParam"]["enclosure"], $this->conf["csvParam"]["delimiter"]);
                 $extractor->extract($filesList);
-                $potList = array_merge($potList, $this->globRecursive($tempParam . DIRECTORY_SEPARATOR . "*.pot"));
+                $potList->append($this->globRecursive($tempParam, "/^.*\.pot$/"));
                 $tempFusion = $this->tempdir('tmp_fusion_' . $currentApp);
                 foreach ($potList as $currentPot) {
                     $baseName = pathinfo($currentPot, PATHINFO_BASENAME);
@@ -37,7 +38,7 @@ class FamilyPo extends PoGenerator
                         rename($tempFusion . DIRECTORY_SEPARATOR . $baseName . ".new", $tempFusion . DIRECTORY_SEPARATOR . $baseName);
                     }
                 }
-                $potList = $this->globRecursive($tempFusion . DIRECTORY_SEPARATOR . "*.pot");
+                $potList = $this->globRecursive($tempFusion, "/^.*\.pot$/");
                 foreach ($potList as $currentPot) {
                     $fileName = pathinfo($currentPot, PATHINFO_FILENAME);
                     foreach ($this->conf["lang"] as $currentLang) {

@@ -6,16 +6,11 @@ use Dcp\DevTools\Template\Template;
 
 class AnalyzePhp extends Analyze
 {
-    public function extract($filesPath)
+    public function extract(\Iterator $filesPath)
     {
         $searchLabels = [];
         $sharpLabels = [];
         $workflowLabels = [];
-
-        //Remove blank elements
-        $filesPath = array_filter($filesPath, function ($value) {
-            return trim($value);
-        });
 
         foreach ($filesPath as $phpInputFile) {
             $extractor = new extractPhp($phpInputFile);
@@ -41,9 +36,11 @@ class AnalyzePhp extends Analyze
             $temporaryFile,
             true
         );
-        $filesPath[] = $temporaryFile;
+        $filesIterator = new \AppendIterator();
+        $filesIterator->append($filesPath);
+        $filesIterator->append((new \ArrayObject([$temporaryFile]))->getIterator());
 
-        parent::extract($filesPath);
+        parent::extract($filesIterator);
 
         unset($temporaryFile);
     }

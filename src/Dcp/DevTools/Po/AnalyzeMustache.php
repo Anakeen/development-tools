@@ -6,13 +6,8 @@ use Dcp\DevTools\Template\Template;
 
 class AnalyzeMustache extends Analyze
 {
-    public function extract($filesPath)
+    public function extract(\Iterator $filesPath)
     {
-        //Remove blank elements
-        $filesPath = array_filter($filesPath, function ($value) {
-            return trim($value);
-        });
-
         $keys = [];
 
         foreach ($filesPath as $mustacheTpl) {
@@ -34,7 +29,7 @@ class AnalyzeMustache extends Analyze
             true
         );
 
-        parent::extract([$temporaryFile]);
+        parent::extract(new \ArrayIterator([$temporaryFile]));
 
         unset($temporaryFile);
     }

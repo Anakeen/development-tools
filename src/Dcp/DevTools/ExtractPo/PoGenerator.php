@@ -68,13 +68,13 @@ class PoGenerator
         }
     }
 
-    protected function globRecursive($pattern, $flags = 0)
+    protected function globRecursive($dir, $pattern)
     {
-        $files = glob($pattern, $flags);
-
-        foreach (glob(dirname($pattern) . DIRECTORY_SEPARATOR .'*', GLOB_ONLYDIR | GLOB_NOSORT) as $dir) {
-            $files = array_merge($files, $this->globRecursive($dir . DIRECTORY_SEPARATOR . basename($pattern), $flags));
-        }
+        $Directory = new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::CURRENT_AS_PATHNAME |
+            \RecursiveDirectoryIterator::KEY_AS_PATHNAME | \RecursiveDirectoryIterator::SKIP_DOTS|
+            \RecursiveDirectoryIterator::UNIX_PATHS);
+        $Iterator = new \RecursiveIteratorIterator($Directory);
+        $files = new \RegexIterator($Iterator, $pattern, \RegexIterator::MATCH);
 
         return $files;
     }

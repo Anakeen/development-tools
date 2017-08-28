@@ -64,14 +64,11 @@ class AnalyzeLayout extends Analyze
         return $return;
     }
 
-    public function extract($filesPath)
+    public function extract(\Iterator $filesPath)
     {
         $odtLayout = array();
         $layout = array();
-        //Remove blank elements
-        $filesPath = array_filter($filesPath, function ($value) {
-            return trim($value);
-        });
+
         foreach ($filesPath as $currentFile) {
             $extension = pathinfo($currentFile, PATHINFO_EXTENSION);
             if (strtolower($extension) === "odt") {
@@ -87,8 +84,11 @@ class AnalyzeLayout extends Analyze
         $template->mainRender("temporary_layout_file",
             array("odtLayoutKeys" => $odtLayout, "layoutKeys" => $layout),
             $temporaryFile, true);
-        $filesPath[] = $temporaryFile;
-        parent::extract($filesPath);
+
+        $filesIterator = new \AppendIterator();
+        $filesIterator->append($filesPath);
+        $filesIterator->append((new \ArrayObject([$temporaryFile]))->getIterator());
+        parent::extract($filesIterator);
 
         unset($temporaryFile);
     }

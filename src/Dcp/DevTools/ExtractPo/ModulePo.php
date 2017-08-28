@@ -9,12 +9,11 @@ class ModulePo extends PoGenerator
     public function extractPo()
     {
         if (isset($this->conf["includedPath"])) {
-            $filesList = array();
+            $filesList = new \AppendIterator();
             foreach ($this->conf["includedPath"] as $currentApp) {
-                $filesList = array_merge($filesList,
-                    $this->globRecursive($this->inputPath. DIRECTORY_SEPARATOR . $currentApp . DIRECTORY_SEPARATOR . '*.php'));
+                $filesList->append($this->globRecursive($this->inputPath. DIRECTORY_SEPARATOR . $currentApp, '/^.*\.php$/'));
             }
-            if (empty($filesList)) {
+            if (0 === count($filesList)) {
                 return;
             }
             $tempModule = tempnam(sys_get_temp_dir(), 'tmp_module_po_' . $this->conf["moduleName"]);
