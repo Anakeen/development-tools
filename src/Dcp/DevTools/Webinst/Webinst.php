@@ -56,7 +56,7 @@ class Webinst
         $this->conf[$property] = $value;
     }
 
-    public function getConf($property=null)
+    public function getConf($property = null)
     {
         if (is_null($property)) {
             return array_merge($this->conf);
@@ -84,32 +84,56 @@ class Webinst
                     $this->addDirectory($pharTar, $includedFullPath);
                 } elseif (is_file($includedFullPath)) {
                     $this->addFile($pharTar, $includedFullPath);
+                } elseif (strpos($includedFullPath, "*") !== false) {
+                    if (preg_match("/(.*)\/\*$/", $includedFullPath, $reg)) {
+                        $dir = $reg[1];
+                        if (is_dir($dir)) {
+                            $handle = opendir($dir);
+                            while (false !== ($entry = readdir($handle))) {
+                                if ($entry !== ".." && $entry !== ".") {
+                                    $fullEntry = $dir . DIRECTORY_SEPARATOR . $entry;
+
+                                    if (is_file($fullEntry)) {
+                                        $this->addFile($pharTar, $fullEntry, $entry);
+                                    } elseif (is_dir($fullEntry)) {
+                                        $this->addDirectory($pharTar, $fullEntry, basename($dir));
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
         $pharTar->stopBuffering();
         $pharTar->compress(\Phar::GZ);
         unset($pharTar);
-        unlink($contentTar.".tar");
-        $infoXML = $this->templateEngine->render(
-            '{{=@ @=}}' . file_get_contents(
-                $this->inputPath . DIRECTORY_SEPARATOR . "info.xml"
-            ), $this->conf
+        unlink($contentTar . ".tar");
+
+        $infoXML = file_get_contents(
+            $this->inputPath . DIRECTORY_SEPARATOR . "info.xml"
         );
+        foreach ($this->conf as $k => $value) {
+            if (is_scalar($value) && $value !== "") {
+                $infoXML = str_replace("@$k@", htmlspecialchars($value), $infoXML);
+            }
+        }
+
+
         $webinstName = $this->getWebinstName();
-        $pharTar = new \PharData($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"].".tar");
+        $pharTar = new \PharData($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"] . ".tar");
         $pharTar->startBuffering();
         $pharTar->addFromString("info.xml", $infoXML);
-        if (file_exists($this->inputPath.DIRECTORY_SEPARATOR."LICENSE")) {
-            $pharTar->addFile($this->inputPath.DIRECTORY_SEPARATOR."LICENSE", "LICENSE");
+        if (file_exists($this->inputPath . DIRECTORY_SEPARATOR . "LICENSE")) {
+            $pharTar->addFile($this->inputPath . DIRECTORY_SEPARATOR . "LICENSE", "LICENSE");
         }
-        $pharTar->addFile($contentTar.".tar.gz", "content.tar.gz");
+        $pharTar->addFile($contentTar . ".tar.gz", "content.tar.gz");
         $pharTar->stopBuffering();
         $pharTar->compress(\Phar::GZ);
         if (!$outputPath) {
             $outputPath = $this->inputPath;
         }
-        rename($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"].".tar.gz",
+        rename($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"] . ".tar.gz",
             $outputPath . DIRECTORY_SEPARATOR . $webinstName . ".webinst");
         unlink($contentTar . ".tar.gz");
         unset($pharTar);
@@ -130,20 +154,24 @@ class Webinst
 
     /**
      * @param \PharData $pharTar
-     * @param $directory
+     * @param           $directory
      *
      * @return array files added
      */
-    protected function addDirectory(\PharData $pharTar, $directory)
+    protected function addDirectory(\PharData $pharTar, $directory, $baseSubDirectory = '')
     {
+        $baseDirectory = $this->inputPath;
+        if ($baseSubDirectory) {
+            $baseDirectory .= '/' . $baseSubDirectory;
+        }
+
         $addedFiles = $pharTar->buildFromIterator(
             new \RecursiveIteratorIterator(
                 new \RecursiveDirectoryIterator(
                     $directory,
                     \FilesystemIterator::SKIP_DOTS
-                )
-            ),
-            $this->inputPath
+                )),
+            $baseDirectory
         );
         $this->setFlags($pharTar, $addedFiles);
         return $addedFiles;
@@ -151,8 +179,9 @@ class Webinst
 
     /**
      * @param \PharData $pharTar
-     * @param $filePath
-     * @param $localName
+     * @param           $filePath
+     * @param           $localName
+     *
      * @return array files added
      * @internal param $directory
      *
@@ -164,22 +193,24 @@ class Webinst
         }
         $pharTar->addFile($filePath, $localName);
         $addedFiles = [
-            $localName, $filePath
+            $localName => $filePath
         ];
+
         $this->setFlags($pharTar, $addedFiles);
         return $addedFiles;
     }
 
     /**
      * @param \PharData $pharTar
-     * @param $applicationName
+     * @param           $applicationName
      *
      * @return array files added
      */
     protected function addApplication(\PharData $pharTar, $applicationName)
     {
         $addedFiles = $this->addDirectory(
-            $pharTar, $this->inputPath . DIRECTORY_SEPARATOR . $applicationName
+            $pharTar,
+            $this->inputPath . DIRECTORY_SEPARATOR . $applicationName
         );
 
         //inject variables into application_init.php file
@@ -197,7 +228,7 @@ class Webinst
 
     /**
      * @param \PharData $pharTar
-     * @param $addedFiles
+     * @param           $addedFiles
      */
     protected function setFlags(\PharData $pharTar, $addedFiles)
     {
