@@ -1,4 +1,5 @@
 <?php
+
 namespace Dcp\DevTools\Stub;
 
 class Stub
@@ -19,9 +20,11 @@ class Stub
         $this->delimiter = $delimiter;
     }
 
-    public function generate($inputFile, $outputPath)
+    public function generate($inputFiles, $outputPath)
     {
-        $this->getSignifiantContent($inputFile);
+        foreach ((array)$inputFiles as $inputFile) {
+            $this->getSignifiantContent($inputFile);
+        }
         $content = "";
         $content .= $this->generateStubFile();
         $content .= "\n" . $this->generateStubAttrFile();
@@ -40,30 +43,50 @@ class Stub
                     case "BEGIN":
                         $this->famname = $famName = strtolower($data[5]);
                         if (isset($this->content[$famName])) {
-                            $className = $this->content[$famName]["className"];
                             $fromName = $this->content[$famName]["fromName"];
+                            $famTitle = $this->content[$famName]["title"];
                             $famId = $this->content[$famName]["id"];
+                            $className = $this->content[$famName]["className"];
                             $name = $this->content[$famName]["name"];
-                            if ($data[4] && $data[4] != '-') {
-                                $className = $data[4];
-                            }
+
                             if ($data[1] && $data[1] != '-') {
                                 $fromName = ($data[1] == '--') ? '' : $data[1];
-                            }
-                            if ($data[3] && $data[3] != '-') {
-                                $famId = $data[3];
                             }
                             if ($data[2] && $data[2] != '-') {
                                 $famTitle = $data[2];
                             }
+                            if ($data[3] && $data[3] != '-') {
+                                $famId = $data[3];
+                            }
+                            if ($data[4] && $data[4] != '-') {
+                                $className = $data[4];
+                            }
                         } else {
-                            $className = $data[4];
-                            $fromName = ($data[1] == '--') ? '' : $data[1];
-                            $famId = $data[3];
-                            $famTitle = $data[2];
-                            $name = $data[5];
+                            if ($data[1]) {
+                                $fromName = ($data[1] == '--') ? '' : $data[1];
+                            }
+                            if ($data[2]) {
+                                $famTitle = $data[2];
+                            }
+                            if ($data[3]) {
+                                $famId = $data[3];
+                            }
+                            if ($data[4]) {
+                                $className = $data[4];
+                            }
+                            if ($data[5]) {
+                                $name = $data[5];
+                            }
+                            $this->content[$famName] = array(
+                                "famName" => $famName,
+                                "fromName" => $fromName,
+                                "title" => $famTitle,
+                                "id" => $famId,
+                                "className" => $className,
+                                "name" => $name
+                            );
+                            $this->attr[$famName] = array();
                         }
-                        $this->attr[$famName] = array();
                         break;
                     case 'CLASS':
                         $className = $data[1];
@@ -75,16 +98,36 @@ class Stub
                             "id" => $attrid,
                             "type" => $data[6],
                             "label" => $data[3],
-                            "famName" => $famName);
+                            "famName" => $famName
+                        );
                         break;
                     case 'END':
+                        if ($famName) {
+                            $this->content[$famName]['famName'] = $famName;
+                        }
+                        if ($name) {
+                            $this->content[$famName]['name'] = $name;
+                        }
+                        if ($className) {
+                            $this->content[$famName]['className'] = $className;
+                        }
+                        if ($famId) {
+                            $this->content[$famName]['id'] = $famId;
+                        }
+                        if ($famTitle) {
+                            $this->content[$famName]['title'] = $famTitle;
+                        }
+                        if ($fromName) {
+                            $this->content[$famName]['fromName'] = $fromName;
+                        }
                         $this->content[$famName] = array(
                             "famName" => $famName,
                             "name" => $name,
                             "className" => $className,
                             "id" => $famId,
                             "title" => $famTitle,
-                            "fromName" => $fromName);
+                            "fromName" => $fromName
+                        );
                         break;
                 }
             }
@@ -158,7 +201,8 @@ class Stub
             $template = sprintf("class %s {\n", ucwords($famName));
         }
         foreach ($info as $attrInfo) {
-            $template .= sprintf("\t\t/** [%s] %s */\n", str_replace('*', ' ', $attrInfo["type"]), str_replace('*', ' ', $attrInfo["label"]));
+            $template .= sprintf("\t\t/** [%s] %s */\n", str_replace('*', ' ', $attrInfo["type"]),
+                str_replace('*', ' ', $attrInfo["label"]));
             $template .= sprintf("\t\tconst %s='%s';\n", $attrInfo["id"], $attrInfo["id"]);
         }
         $template .= "\t}";

@@ -9,7 +9,7 @@ class AnalyzeJavascript extends Analyze
         parent::__construct($outputFile, $getTextPath, $getTextOptions);
     }
 
-    public function extract($filesPath)
+    public function extract(\Iterator $filesPath)
     {
         parent::extract($filesPath);
     }

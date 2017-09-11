@@ -7,7 +7,8 @@ use Ulrichsg\Getopt\Option;
 use Dcp\DevTools\Webinst\Webinst;
 
 $getopt = new Getopt(array(
-    (new Option('s', 'sourcePath', Getopt::REQUIRED_ARGUMENT))->setDescription('path to the source of the module (nedded)')
+    (new Option('s', 'sourcePath', Getopt::REQUIRED_ARGUMENT))
+        ->setDescription('path to the source of the module (nedded)')
         ->setValidation(function ($inputDir) {
             if (!is_dir($inputDir)) {
                 print "The input dir must be a valid dir ($inputDir)";
@@ -15,22 +16,27 @@ $getopt = new Getopt(array(
             }
             return true;
         }),
-    (new Option('o', 'output', Getopt::REQUIRED_ARGUMENT))->setDescription(
-        'output Path (needed)'
-    )->setValidation(
-        function ($path) {
-            if (!$path) {
+    (new Option('o', 'output', Getopt::REQUIRED_ARGUMENT))
+        ->setDescription('output Path (needed)')
+        ->setValidation(
+            function ($path) {
+                if (!$path) {
+                    return true;
+                }
+                if (!is_dir($path)) {
+                    print "The output dir must be a valid dir ($path)";
+                    return false;
+                }
                 return true;
             }
-            if (!is_dir($path)) {
-                print "The output dir must be a valid dir ($path)";
-                return false;
-            }
-            return true;
-        }
-    ),
+        ),
+    (new Option('n', 'file-name', Getopt::REQUIRED_ARGUMENT))
+        ->setDescription('output file name')
+        ->setDefaultValue('{{moduleName}}-{{version}}-{{release}}.webinst'),
     (new Option('a', 'auto-release', Getopt::NO_ARGUMENT))
         ->setDescription('append current timestamp to release to force upgrade'),
+    (new Option(null, 'force', Getopt::NO_ARGUMENT))
+        ->setDescription('overwrite file even if it already exists'),
     (new Option('h', 'help', Getopt::NO_ARGUMENT))->setDescription('show the usage message'),
 ));
 
@@ -64,6 +70,18 @@ try {
         $webinst->setConfProperty(
             'release',
             $webinst->getConf('release') . strftime(".%Y%m%d.%H%M%S")
+        );
+    }
+    if (isset($getopt['force'])) {
+        $webinst->setConfProperty(
+            'force',
+            $getopt['force']
+        );
+    }
+    if (isset($getopt['file-name'])) {
+        $webinst->setConfProperty(
+            'file-name',
+            $getopt['file-name']
         );
     }
     $webinst->makeWebinst($outputPath);

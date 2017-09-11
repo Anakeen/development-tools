@@ -2,7 +2,7 @@
 
 BUNDLE_DIR=dynacase-devtool-bundle
 COMPOSER_VERSION=1.0.0
-PHP_VERSION=7.0.14
+PHP_VERSION=7.0.19
 BUILD_DIR=./build
 SHELL=/bin/bash
 
@@ -10,7 +10,7 @@ composer-path   = https://getcomposer.org/download/$(COMPOSER_VERSION)/composer.
 composer-sha256 = 1acc000cf23bd9d19e1590c2edeb44fb915f88d85f1798925ec989c601db0bd6
 
 php-path   = http://windows.php.net/downloads/releases/php-$(PHP_VERSION)-Win32-VC14-x86.zip
-php-sha256 = 4cb2064c484cb4b632867a81243bfda3d702b5e5548fed037d6787ec0c43d7e3
+php-sha256 = 287c4d6807c4b3f2917c8f331a0869bc2d17f7e5d7add4e0cb32ddaa81693992
 
 getText-path   = http://downloads.sourceforge.net/project/mingw/MinGW/Base/gettext/gettext-0.18.3.2-1/gettext-0.18.3.2-1-mingw32-dev.tar.xz
 getText-sha256 = 1cf8a5f9b9c6e29985e84c9918928c4b5ffc236b72b1789235eb7cb3cce53439

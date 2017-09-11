@@ -2,8 +2,12 @@
 
 namespace Dcp\DevTools\ImportFamily;
 
+use Dcp\DevTools\Utils\ConfigFile;
+use Dcp\DevTools\Utils\FileUtils;
+
 /**
  * Class ImportFamily
+ *
  * @package Dcp\DevTools\ImportFamily
  */
 class ImportFamily
@@ -13,45 +17,35 @@ class ImportFamily
     public function __construct(array $options = [])
     {
         $missingOptions = [];
-        $invalidOperands = [];
 
         if (!isset($options['url'])) {
-            $missingOptions['url'] = 'You must provide an url';
+            $missingOptions['url'] = 'Context url is required';
         }
         if (!isset($options['port'])) {
-            $missingOptions['port'] = 'You must provide a port';
+            $missingOptions['port'] = 'Context port is required';
         }
-        if (!isset($options['familyPath'])) {
-            $missingOptions['familyPath'] = 'You must provide the path to the directory where to import the family';
+        if (!isset($options['name'])) {
+            $missingOptions['name'] = 'name is required';
         }
-
-        if (!isset($options['additional_args']) ||
-            count($options['additional_args']) > 1
-        ) {
-            $invalidOperands['familyName'] = 'You must provide one and only one family name';
+        if (!isset($options['outputDir'])) {
+            $missingOptions['outputDir'] = 'outputDir is required';
+        }
+        if (!isset($options['sourcePath'])) {
+            $missingOptions['sourcePath'] = 'sourcePath is required';
         }
 
         if (0 < count($missingOptions)) {
             throw new Exception(
                 sprintf(
-                    'Missing options:\n%s',
-                    '  - ' . implode('\n  - ', $missingOptions)
-                )
-            );
-        }
-
-        if (0 < count($invalidOperands)) {
-            throw new Exception(
-                sprintf(
-                    'Invalid operands:\n%s',
-                    '  - ' . implode('\n  - ', $invalidOperands)
+                    "Missing options:\n%s",
+                    '  - ' . implode("\n  - ", $missingOptions)
                 )
             );
         }
 
         $this->options = $options;
-        $this->options['family'] = $options['additional_args'][0];
-        $this->options['familyPath'] = realpath($this->options['familyPath']);
+
+        $this->config = new ConfigFile($options['sourcePath']);
     }
 
     /**
@@ -59,7 +53,7 @@ class ImportFamily
      * {{ $this->options['url'] }}/admin.php
      * ?app=DCPDEVEL&action=EXPORTFAMILYCONFIG&family={{ $this->options['family'] }}
      * The file is then unzipped in a temporary folder.
-     * The csv files are moved to $this->options['familyPath'].
+     * The csv files are moved to $this->options['outputDir'].
      * The png files are moved to /Images.
      * The post-install and post-upgrade process of the imported .xml
      * are added to the module's info.xml file.
@@ -71,9 +65,33 @@ class ImportFamily
      */
     public function importFamily()
     {
-        $tempDirPathName = uniqid(sys_get_temp_dir() . '/import', true);
-        $tempFilePathName = tempnam($tempDirPathName, 'imp');
-        $tempFile = fopen($tempFilePathName, 'w+');
+        $tmpDir = sys_get_temp_dir() . '/dcp_import' . uniqid($this->options['name'], true);
+        if (!@mkdir($tmpDir) && !is_dir($tmpDir)) {
+            throw new Exception('could not create temp dir');
+        }
+        $this->getFamilyFiles($tmpDir);
+
+        $importInfos = $this->importFamilyFiles($tmpDir);
+
+        FileUtils::recursiveRm($tmpDir, true);
+
+        return $importInfos;
+    }
+
+    /**
+     * @param $tmpDir
+     *
+     * @throws CurlException
+     * @throws Exception
+     */
+    public function getFamilyFiles($tmpDir)
+    {
+        $tmpFilePath = $tmpDir . '/' . $this->options['name'] . '.zip';
+        $tmpFile = fopen($tmpFilePath, 'w+b');
+
+        if (false === $tmpFile) {
+            throw new Exception(sprintf('could not initialize zip file (%s)', $tmpFile));
+        }
 
         $request = curl_init();
 
@@ -81,9 +99,10 @@ class ImportFamily
             $data = [
                 'app' => 'DCPDEVEL',
                 'action' => 'EXPORTFAMILYCONFIG',
-                'family' => $this->options['family']
+                'family' => $this->options['name']
             ];
 
+            /** @noinspection CurlSslServerSpoofingInspection */
             curl_setopt_array(
                 $request,
                 [
@@ -93,7 +112,7 @@ class ImportFamily
                     CURLOPT_POST => true,
                     CURLOPT_HTTPAUTH => CURLAUTH_BASIC,
                     CURLOPT_POSTFIELDS => $data,
-                    CURLOPT_FILE => $tempFile
+                    CURLOPT_FILE => $tmpFile
                 ]
             );
 
@@ -115,11 +134,13 @@ class ImportFamily
                 throw new Exception(
                     'Authentication is required'
                 );
-            } elseif (403 === $httpCode) {
+            }
+            if (403 === $httpCode) {
                 throw new Exception(
                     'invalid credentials'
                 );
-            } elseif (299 < $httpCode) {
+            }
+            if (299 < $httpCode) {
                 throw new Exception(
                     sprintf(
                         '%s returned an error status code: %d',
@@ -130,324 +151,355 @@ class ImportFamily
             }
         } catch (CurlException $e) {
             curl_close($request);
-            fclose($tempFile);
+            fclose($tmpFile);
             throw $e;
         }
 
         curl_close($request);
-        fclose($tempFile);
+        fclose($tmpFile);
 
-        $importedFileNames = [];
         try {
             $zipArchive = new \ZipArchive();
-            $res = $zipArchive->open($tempFilePathName);
-            if ($res === true) {
-                for ($i = 0; $i < $zipArchive->numFiles; $i++) {
-                    $importedFileNames[] = $zipArchive->getNameIndex($i);
-                }
-                $zipArchive->extractTo($tempDirPathName);
-                $zipArchive->close();
-            } else {
+            if (false === $zipArchive->open($tmpFilePath)) {
                 throw new Exception(
-                    'Failed to unzip file ' . $tempFilePathName .
-                    ' in directory ' . $tempDirPathName . '.'
+                    'Failed to unzip file ' . $tmpFilePath .
+                    ' in directory ' . $tmpDir . '.'
                 );
             }
+            $zipArchive->extractTo($tmpDir);
+            $zipArchive->close();
         } catch (Exception $e) {
             $zipArchive->close();
             throw $e;
         }
 
-        unlink($tempFilePathName);
+        unlink($tmpFilePath);
+    }
 
-        $infoXmlPath = $this->parentDirPathContaining($this->options['familyPath'], 'info.xml');
 
-        if ($infoXmlPath == "") {
-            throw new Exception("The module's info.xml file cannot be found, please check the --familyPath option.");
+    /**
+     * @param $tmpDir
+     *
+     * @return array
+     * @throws Exception
+     */
+    public function importFamilyFiles($tmpDir)
+    {
+        if (!is_file(sprintf('%s/%s__DESC.json', $tmpDir, $this->options['name']))) {
+            throw new Exception('Family files does not include a description file. Ensure you have up to date dynacase version.');
         }
 
-        $csvFileNames = $this->stringsWithSuffix($importedFileNames, 'csv');
-        $pngFileNames = $this->stringsWithSuffix($importedFileNames, 'png');
+        $sourcePath = $this->options['sourcePath'];
+        $outputDir = $this->options['outputDir'];
 
-        foreach ($csvFileNames as $fileName) {
+        $familyDescription = json_decode(
+            file_get_contents(
+                sprintf('%s/%s__DESC.json',
+                    $tmpDir,
+                    $this->options['name']
+                )
+            ),
+            true
+        );
+
+        $overwrittenFiles = [];
+
+        if (empty($this->options['no-backup']) || true !== $this->options['no-backup']) {
+            $backupPath = $this->backupDir($outputDir);
+        } else {
+            $backupPath = 'backup disabled';
+        }
+
+        $phpFileNames = [];
+        foreach (
+            [
+                'Class'
+            ] as $fileType
+        ) {
+            if (isset($familyDescription[$fileType]) && file_exists($tmpDir . '/' . $familyDescription[$fileType])
+            ) {
+                $fileName = $familyDescription[$fileType];
+                $destFile = $sourcePath . '/' . $outputDir . '/' . $fileName;
+                if (file_exists($destFile)) {
+                    $overwrittenFiles[] = $fileName;
+                }
+                rename(
+                    $tmpDir . '/' . $fileName,
+                    $destFile
+                );
+                $phpFileNames[$fileType] = $outputDir . '/' . $fileName;
+            }
+        }
+
+        $csvFileNames = [];
+        foreach (
+            [
+                'Struct',
+                'Param',
+                'Config',
+                'Workflow',
+                'Others'
+            ] as $fileType
+        ) {
+            if (isset($familyDescription[$fileType]) && file_exists($tmpDir . '/' . $familyDescription[$fileType])
+            ) {
+                $fileName = $familyDescription[$fileType];
+                $destFile = $sourcePath . '/' . $outputDir . '/' . $fileName;
+                if (file_exists($destFile)) {
+                    $overwrittenFiles[] = $fileName;
+                }
+                rename(
+                    $tmpDir . '/' . $fileName,
+                    $destFile
+                );
+                $csvFileNames[$fileType] = $outputDir . '/' . $fileName;
+            }
+        }
+
+        $imgFilenames = [];
+        if (isset($familyDescription['Icon']) && file_exists($tmpDir . '/' . $familyDescription['Icon'])
+        ) {
+            if (!is_dir($sourcePath . '/Images')) {
+                if (!@mkdir($sourcePath . '/Images')
+                    && !is_dir($sourcePath . '/Images')
+                ) {
+                    throw new Exception('could not create Images dir');
+                }
+            }
+            $fileName = $familyDescription['Icon'];
+            $destFile = $sourcePath . '/Images/' . $familyDescription['Icon'];
+            if (file_exists($destFile)) {
+                $overwrittenFiles[] = $fileName;
+            }
             rename(
-                $tempDirPathName . '/' . $fileName,
-                $this->options['familyPath'] . '/' . $fileName
+                $tmpDir . '/' . $fileName,
+                $destFile
             );
+            $imgFilenames['Icon'] = '/Images/' . $fileName;
         }
 
-        foreach ($pngFileNames as $fileName) {
-            rename(
-                $tempDirPathName . '/' . $fileName,
-                $infoXmlPath . '/Images/' . $fileName
-            );
+        $infoXmlUpdates = $this->updateInfoXml($familyDescription);
+
+        if (empty($this->options['no-backup'])) {
+            $this->cleanBackup($backupPath, $overwrittenFiles);
         }
-
-        $importedInfoXmlPathName = glob($tempDirPathName . '/*.xml')[0];
-
-        $processAdded = $this->addProcessToInfoXml($infoXmlPath, $importedInfoXmlPathName);
-
-        $this->rmrf($tempDirPathName);
-
 
         return [
-            'familyPath' => $this->options['familyPath'],
-            'infoXmlPath' => $infoXmlPath,
-            'infoXmlPathName' => $infoXmlPath . '/info.xml',
-            'importedCvsFileNames' => $csvFileNames,
-            'importedPngFileNames' => $pngFileNames,
-            'installProcessAdded' => $processAdded['installProcessAdded'],
-            'upgradeProcessAdded' => $processAdded['upgradeProcessAdded'],
+            'outputDir' => $outputDir,
+            'infoXmlPath' => $sourcePath,
+            'infoXmlPathName' => $sourcePath . '/info.xml',
+            'overwrittenFiles' => $overwrittenFiles,
+            'backupDir' => $backupPath,
+            'importedPhpFileNames' => $phpFileNames,
+            'importedCsvFileNames' => $csvFileNames,
+            'importedImgFileNames' => $imgFilenames,
+            'installProcessAdded' => $infoXmlUpdates['installProcessAdded'],
+            'upgradeProcessAdded' => $infoXmlUpdates['upgradeProcessAdded'],
         ];
     }
 
-    /**
-     * Add the <post-install> and <post-upgrade> DomNodes
-     * from $importedInfoXmlPathName
-     * to the info.xml located in $infoXmlPath, only if they don't already exist.
-     *
-     * @param string $infoXmlPath The directory absolute path
-     * where the module's info.xml is located.
-     * @param string $importedInfoXmlPathName The absolute path name
-     * of the imported .xml file.
-     * @return string[]
-     * The string representation of the process nodes which have been added to
-     * info.xml.
-     * @throws Exception
-     */
-    public function addProcessToInfoXml($infoXmlPath, $importedInfoXmlPathName)
+    public function updateInfoXml($familyDescription)
     {
-        $pathFromModuleToFamily = substr($this->options['familyPath'], strlen($infoXmlPath) + 1, -1);
+        $infoXmlUpdates = [];
+
+        $sourcePath = $this->options['sourcePath'];
+        $infoXml = $sourcePath . DIRECTORY_SEPARATOR . 'info.xml';
 
         $infoXmlDom = new \DOMDocument();
         $infoXmlDom->formatOutput = true;
         $infoXmlDom->preserveWhiteSpace = false;
-        $res = $infoXmlDom->load($infoXmlPath . '/info.xml');
-
-        if ($res === false) {
-            throw new Exception('Failed to load ' . $infoXmlPath . '/info.xml' . ' as XML document.');
+        if (false === $infoXmlDom->load($infoXml)) {
+            throw new Exception('Failed to load ' . $infoXml . ' as XML document.');
         }
 
-        $importedInfoXmlDom = new \DOMDocument();
-        $res = $importedInfoXmlDom->load($importedInfoXmlPathName);
+        $csvParam = $this->config->get('csvParam', [
+            'enclosure' => '"',
+            'delimiter' => ';'
+        ], ConfigFile::GET_MERGE_DEFAULTS);
 
-        if ($res === false) {
-            throw new Exception('Failed to load ' . $infoXmlPath . '/info.xml' . ' as XML document.');
-        }
+        $options = [
+            'csvEnclosure' => '"' === $csvParam['enclosure'] ? "'" . $csvParam['enclosure'] . "'"
+                : '"' . $csvParam['enclosure'] . '"',
+            'csvSeparator' => $csvParam['delimiter']
+        ];
 
         /**@var $postInstallNode \DOMElement * */
-        /**@var $importedPostInstallNode \DOMElement * */
-        /**@var $postUpgradeNode \DOMElement * */
-        /**@var $importedPostUpgradeNode \DOMElement * */
-
         $postInstallNode = $infoXmlDom->getElementsByTagName('post-install')[0];
-        $postInstallProcess = $postInstallNode->getElementsByTagName('process');
+        $infoXmlUpdates['installProcessAdded'] = $this->addInfoXmlImportProcess(
+            $familyDescription,
+            $postInstallNode,
+            [
+                'Config',
+                'Struct',
+                'Param',
+                'Workflow',
+                'Others'
+            ],
+            $options
+        );
 
-        $importedPostInstallNode = $importedInfoXmlDom->getElementsByTagName('post-install')[0];
-        $importedPostInstallProcess = $importedPostInstallNode->getElementsByTagName('process');
-
+        /**@var $postUpgradeNode \DOMElement * */
         $postUpgradeNode = $infoXmlDom->getElementsByTagName('post-upgrade')[0];
-        $postUpgradeProcess = $postUpgradeNode->getElementsByTagName('process');
+        $infoXmlUpdates['upgradeProcessAdded'] = $this->addInfoXmlImportProcess(
+            $familyDescription,
+            $postUpgradeNode,
+            ['Struct'],
+            $options
+        );
 
-        $importedPostUpgradeNode = $importedInfoXmlDom->getElementsByTagName('post-upgrade')[0];
-        $importedPostUpgradeProcess = $importedPostUpgradeNode->getElementsByTagName('process');
-
-        $newInstallProcess = $this->newDomNodesByAttribute($postInstallProcess, $importedPostInstallProcess, 'id');
-        $newUpgradeProcess = $this->newDomNodesByAttribute($postUpgradeProcess, $importedPostUpgradeProcess, 'id');
-
-        $this->domAttributesStrReplace($importedPostInstallProcess, 'command', './@APPNAME@', $pathFromModuleToFamily);
-        $this->domAttributesStrReplace($importedPostUpgradeProcess, 'command', './@APPNAME@', $pathFromModuleToFamily);
-
-        $this->appendForeignDomNodesTo($infoXmlDom, $postInstallNode, $newInstallProcess);
-        $this->appendForeignDomNodesTo($infoXmlDom, $postUpgradeNode, $newUpgradeProcess);
-
-        $res = $infoXmlDom->save($infoXmlPath . '/info.xml');
-
-        if ($res === false) {
-            throw new Exception('Failed to save ' . $infoXmlPath . '/info.xml' . ' as XML document.');
+        if (false === $infoXmlDom->save($infoXml)) {
+            throw new Exception('Failed to save ' . $infoXml . ' as XML document.');
         }
 
-        return [
-            'installProcessAdded' => $this->domNodesToStrings($newInstallProcess),
-            'upgradeProcessAdded' => $this->domNodesToStrings($newUpgradeProcess)
-        ];
+        return $infoXmlUpdates;
     }
 
     /**
-     * Starting from $initialDirPath directory,
-     * the function goes back to the parent directory,
-     * until it reach a directory containing a file named $fileName.
-     * If it does, it returns the directory absolute path where $fileName is located.
-     * If it reach the root directory without finding $fileName it returns "".
+     * @param $familyDescription array
+     * @param $parentNode        \DOMElement
+     * @param $fileTypes         array
+     * @param $options           array
      *
-     * @param string $initialDirPath
-     * The directory absolute path from where to start searching for
-     * the file named $fileName.
-     * @param string $fileName The name of the file to search for.
-     * @return string
-     * The directory absolute path where $fileName is located.
-     * "" if $fileName cannot be found.
+     * @return array
      */
-    public function parentDirPathContaining($initialDirPath, $fileName)
-    {
-        $parentDirPath = $initialDirPath;
-        while (count(glob($parentDirPath . '/' . $fileName)) < 1) {
-            if (strlen($parentDirPath) == 1) {
-                return "";
-            }
-            $parentDirPath = dirname($parentDirPath);
-        }
-
-        return $parentDirPath;
-    }
-
-    /**
-     * Equivalent to rm -rf $filePathName on *nix.
-     * Delete the file and all its sub-directory / files if it's a
-     * directory.
-     *
-     * @param string $filePathName
-     */
-    public function rmrf($filePathName)
-    {
-        if (is_dir($filePathName)) {
-            $files = array_diff(scandir($filePathName), ['.', '..']);
-            foreach ($files as $file) {
-                $this->rmrf($filePathName . "/" . $file);
-            }
-        } else {
-            unlink($filePathName);
-            return;
-        }
-        rmdir($filePathName);
-    }
-
-    /**
-     * Returns the DomNodes from $domNodes
-     * that are missing from the DomNodes $oldDomNodes,
-     * the comparison between nodes is made
-     * by the value of the attribute named $attributeName.
-     *
-     * @param \DOMNodeList
-     * $oldDomNodes The Nodes to search for the absence of the $domNodes.
-     * @param \DOMNodeList $domNodes The Nodes to be searched in $oldDomNodes.
-     * @param string $attributeName The name of the attribute used to compare nodes.
-     * @return \DOMNode[] The DomNodes from $domNodes missing from $oldDomNodes.
-     */
-    public function newDomNodesByAttribute(
-        \DOMNodeList $oldDomNodes,
-        \DOMNodeList $domNodes,
-        $attributeName
+    protected function addInfoXmlImportProcess(
+        $familyDescription,
+        \DOMElement $parentNode,
+        Array $fileTypes,
+        Array $options
     ) {
-        $newDomNodes = [];
-        for ($i = 0; $i < $domNodes->length; $i++) {
-            for ($j = 0; $j < $oldDomNodes->length; $j++) {
-                if ($domNodes[$i]->attributes->getNamedItem($attributeName) != null
-                    && $oldDomNodes[$j]->attributes->getNamedItem($attributeName) != null
-                    && $domNodes[$i]->attributes->getNamedItem($attributeName)->value ==
-                    $oldDomNodes[$j]->attributes->getNamedItem($attributeName)->value
-                ) {
-                    break;
+        $newProcesses = [];
+
+        $outputDir = $this->options['outputDir'];
+
+        /** @var \DOMElement[] $processNodes */
+        $processNodes = $parentNode->getElementsByTagName('process');
+
+        $previousSibling = null;
+
+        if (!empty($familyDescription['parent'])) {
+            $patternParentFamily = sprintf('#^./wsh.php\s+--api=importDocuments.+/%s.*?$#',
+                $familyDescription['parent']
+            );
+        } else {
+            $patternParentFamily = false;
+        }
+        if (!empty($familyDescription['wfam'])) {
+            $patternWfamFamily = sprintf('#^./wsh.php\s+--api=importDocuments.+/%s.*?$#',
+                $familyDescription['wfam']
+            );
+        } else {
+            $patternWfamFamily = false;
+        }
+
+        foreach ($processNodes as $processNode) {
+            $command = $processNode->getAttribute('command');
+            if (false !== $patternParentFamily && preg_match($patternParentFamily, $command)) {
+                $previousSibling = $processNode;
+            }
+            if (false !== $patternWfamFamily && preg_match($patternWfamFamily, $command)) {
+                $previousSibling = $processNode;
+            }
+        }
+
+        foreach ($fileTypes as $fileType) {
+            $sourcePath = $this->options['sourcePath'];
+
+            if (isset($familyDescription[$fileType])
+                && file_exists($sourcePath . DIRECTORY_SEPARATOR . $outputDir . DIRECTORY_SEPARATOR .
+                    $familyDescription[$fileType])
+            ) {
+                $fileName = $familyDescription[$fileType];
+
+                $nodeFound = false;
+                foreach ($processNodes as $processNode) {
+                    $command = $processNode->getAttribute('command');
+                    $patternCurrentFamily = sprintf('#^./wsh.php\s+--api=importDocuments.+/%s(["\'\s].*)?$#',
+                        $fileName
+                    );
+                    if (preg_match($patternCurrentFamily, $command)) {
+                        $nodeFound = true;
+                        break;
+                    }
                 }
-                if ($j == $oldDomNodes->length - 1) {
-                    $newDomNodes[] = $domNodes[$i];
+                if ($nodeFound) {
+                    /** @noinspection PhpUndefinedVariableInspection */
+                    $previousSibling = $processNode;
+                } else {
+                    /** @var \DOMElement $currentProcessNode */
+                    $currentProcessNode = $parentNode->ownerDocument->createElement('process');
+                    $currentProcessNode->setAttribute('command',
+                        sprintf("./wsh.php --api=importDocuments --file='%s' --csv-separator='%s' --csv-enclosure=%s",
+                            $outputDir . DIRECTORY_SEPARATOR . $fileName,
+                            $options['csvSeparator'],
+                            $options['csvEnclosure']
+                        )
+                    );
+                    $labelNode = $parentNode->ownerDocument->createElement(
+                        'label',
+                        sprintf('Import %s of %s',
+                            $fileType,
+                            $this->options['name']
+                        )
+                    );
+                    $currentProcessNode->appendChild($labelNode);
+                    if (null === $previousSibling) {
+                        $previousSibling = $parentNode->appendChild($currentProcessNode);
+                    } else {
+                        $previousSibling = $parentNode->insertBefore($currentProcessNode,
+                            $previousSibling->nextSibling);
+                    }
+
+                    $newProcesses[$fileType] = $currentProcessNode->C14N();
                 }
             }
         }
-        return $newDomNodes;
+        return $newProcesses;
     }
 
-    /**
-     * Replace the string $target with the string $replacement inside the
-     * value of the attribute named $attributeName, which is an attribute of the DomNode $domNode.
-     *
-     * @param \DOMNode $domNode A DomNode having the attribute named $attributeName.
-     * @param string $attributeName The name of the attribute you want the value to be changed.
-     * @param string $target The string that will be replaced by $replacement.
-     * @param string $replacement The string that will replace $target.
-     */
-    public function domAttributeStrReplace(\DOMNode $domNode, $attributeName, $target, $replacement)
+    protected function backupDir($path)
     {
-        $domNode->attributes->getNamedItem($attributeName)->nodeValue =
-            str_replace($target, $replacement, $domNode->attributes->getNamedItem($attributeName)->nodeValue);
-    }
-
-    /**
-     * Replace the string $target with the string $replacement inside the
-     * value of the attribute named $attributeName, which is an attribute of each nodes
-     * from the DomNodeList $domNodes.
-     *
-     * @param \DOMNodeList $domNodes DomNodes having the attribute named $attributeName.
-     * @param string $attributeName The name of the attribute you want the value to be changed.
-     * @param string $target The string that will be replaced by $replacement.
-     * @param string $replacement The string that will replace $target.
-     */
-    public function domAttributesStrReplace(\DOMNodeList $domNodes, $attributeName, $target, $replacement)
-    {
-        for ($i = 0; $i < $domNodes->length; $i++) {
-            $this->domAttributeStrReplace($domNodes[$i], $attributeName, $target, $replacement);
-        }
-    }
-
-    /**
-     * Append the DomNode $child to the DomNode $parent.
-     * Nodes come from different DomDocuments.
-     *
-     * @param \DOMDocument $parentDomDocument The DomDocument of the $parent DomNode.
-     * @param \DOMNode $parent The DomNode to append the DomNode $child.
-     * @param \DOMNode $child The DomNode to be appended to the DomNode $parent.
-     */
-    public function appendForeignDomNodeTo(\DOMDocument $parentDomDocument, \DOMNode $parent, \DOMNode $child)
-    {
-        $parent->appendChild($parentDomDocument->importNode($child, true));
-    }
-
-    /**
-     * Append the DomNodeList $children to the DomNode $parent.
-     * Nodes come from different DomDocuments.
-     *
-     * @param \DOMDocument $parentDomDocument The DomDocument of the $parent DomNode.
-     * @param \DOMNode $parent The DomNode to append the DomNodes $children.
-     * @param \DOMNode[] $children The DomNodes to be appended to the DomNode $parent.
-     */
-    public function appendForeignDomNodesTo(\DOMDocument $parentDomDocument, \DOMNode $parent, array $children)
-    {
-        foreach ($children as $child) {
-            $this->appendForeignDomNodeTo($parentDomDocument, $parent, $child);
-        }
-    }
-
-    /**
-     * Return the strings in $strings ending with $suffix.
-     *
-     * @param string[] $strings The strings to filter.
-     * @param string $suffix The ending a string need to have to be in the returned array.
-     * @return string[] The strings in $strings ending with $suffix.
-     */
-    public function stringsWithSuffix(array $strings, $suffix)
-    {
-        $filteredStrings = [];
-        for ($i = 0; $i < count($strings); $i++) {
-            if (substr($strings[$i], -strlen($suffix)) == $suffix) {
-                $filteredStrings[] = $strings[$i];
+        $backupRootDir = $this->options['sourcePath'] . DIRECTORY_SEPARATOR . 'Backup';
+        if (!is_dir($backupRootDir)) {
+            if (!@mkdir($backupRootDir)
+                && !is_dir($backupRootDir)
+            ) {
+                throw new Exception('could not create Backup root dir ' . $backupRootDir);
             }
         }
-        return $filteredStrings;
+
+        $backupDir = $backupRootDir . DIRECTORY_SEPARATOR . strftime('%F_%H-%M-%S.') . uniqid();
+        if (!is_dir($backupDir)) {
+            if (!@mkdir($backupDir)
+                && !is_dir($backupDir)
+            ) {
+                throw new Exception('could not create Backup dir' . $backupDir);
+            }
+        }
+
+        if (false === FileUtils::recursiveCp($this->options['sourcePath'] . DIRECTORY_SEPARATOR . $path, $backupDir)) {
+            throw new Exception("could not copy $path to $backupDir");
+        }
+
+        return $backupDir;
     }
 
-    /**
-     * Return the string representation of each DomNode in the DomNodes $domNodes
-     * as an array.
-     *
-     * @param \DOMNode[] $domNodes The DomNodes to convert to strings.
-     * @return string[] The string representation of each DomNode in the DomNodes $domNodes.
-     */
-    public function domNodesToStrings(array $domNodes)
+    protected function cleanBackup($backupDir, Array $overwrittenFiles)
     {
-        $strings = [];
-        foreach ($domNodes as $node) {
-            $strings[] = $node->C14N();
+        if (0 === count($overwrittenFiles)) {
+            FileUtils::recursiveRm($backupDir, true);
+        } else {
+            $i = new \DirectoryIterator($backupDir);
+            foreach ($i as $file) {
+                $filename = $file->getFilename();
+                if ('.' !== $filename && '..' !== $filename && !in_array($filename, $overwrittenFiles)) {
+                    if ($file->isDir()) {
+                        rmdir($file->getPathname());
+                    } else {
+                        unlink($file->getPathname());
+                    }
+                }
+            }
         }
-        return $strings;
     }
 }

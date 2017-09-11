@@ -9,7 +9,8 @@ use Dcp\DevTools\Utils\ConfigFile;
 
 $getopt = new Getopt(array(
     (new Option('o', 'output', Getopt::REQUIRED_ARGUMENT))->setDescription('output dir (nedded)'),
-    (new Option('s', 'sourcePath', Getopt::REQUIRED_ARGUMENT))->setDescription('path of the source of the module (nedded)')
+    (new Option('s', 'sourcePath',
+        Getopt::REQUIRED_ARGUMENT))->setDescription('path of the source of the module (nedded)')
         ->setValidation(function ($inputDir) {
             if (!is_dir($inputDir)) {
                 print "The input dir must be a valid dir ($inputDir)";
@@ -77,14 +78,46 @@ try {
     $enclosure = $csvParam["enclosure"];
     $delimiter = $csvParam["delimiter"];
 
+    $structFilePattern = '#/(?P<familyName>[^/]+)__(?:STRUCT|PARAM|CONFIG|WORKFLOW).csv#';
+    $family = null;
+    $sortedFiles = [];
     if (isset($getopt['file'])) {
-        $files = [$getopt['file']];
-    } else {
-        $files = array_merge($globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__STRUCT.csv"), $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__WFL.csv"));
+        $matches = [];
+        if (preg_match($structFilePattern, $getopt['file'], $matches)) {
+            $family = $matches['familyName'];
+        } else {
+            $family = $getopt['file'];
+        }
     }
-    foreach ($files as $currentFile) {
+
+    $files = array_merge(
+        $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__STRUCT.csv"),
+        $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__PARAM.csv"),
+        $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__CONFIG.csv"),
+        $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__WORKFLOW.csv")
+    );
+
+    array_walk($files, function ($filePath) use ($structFilePattern, &$sortedFiles) {
+        $matches = [];
+        if (preg_match($structFilePattern, $filePath, $matches)) {
+            if(!isset($sortedFiles[$matches['familyName']])) {
+                $sortedFiles[$matches['familyName']] = [];
+            }
+            $sortedFiles[$matches['familyName']][] = $filePath;
+        } else {
+            $sortedFiles[$filePath] = $filePath;
+        }
+    });
+
+
+    if (!empty($family)) {
         $stub = new Stub($enclosure, $delimiter);
-        $stub->generate($currentFile, $getopt['output']);
+        $stub->generate($sortedFiles[$family], $getopt['output']);
+    } else {
+        foreach ($sortedFiles as $currentFilesList) {
+            $stub = new Stub($enclosure, $delimiter);
+            $stub->generate($currentFilesList, $getopt['output']);
+        }
     }
 } catch (UnexpectedValueException $e) {
     echo "Error: " . $e->getMessage() . "\n";

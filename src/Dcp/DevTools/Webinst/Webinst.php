@@ -21,15 +21,15 @@ class Webinst
 
         $this->templateEngine = new \Mustache_Engine();
 
-        $config = new ConfigFile($inputPath);
+        $this->configFile = new ConfigFile($inputPath);
 
-        $this->conf = $config->getConfig();
+        $this->conf = $this->configFile->getConfig();
 
         if (!isset($this->conf["moduleName"])) {
             throw new Exception(
                 sprintf(
                     "%s doesn't not contain the module name.",
-                    $config->getConfigFilePath()
+                    $this->configFile->getConfigFilePath()
                 )
             );
         }
@@ -37,7 +37,7 @@ class Webinst
             throw new Exception(
                 sprintf(
                     "%s does not contains the version.",
-                    $config->getConfigFilePath()
+                    $this->configFile->getConfigFilePath()
                 )
             );
         }
@@ -45,7 +45,7 @@ class Webinst
             throw new Exception(
                 sprintf(
                     "%s does not contains the release.",
-                    $config->getConfigFilePath()
+                    $this->configFile->getConfigFilePath()
                 )
             );
         }
@@ -69,21 +69,32 @@ class Webinst
 
     public function makeWebinst($outputPath)
     {
+        $webinstName = $this->getWebinstName();
+
+        if ((!isset($this->conf['force']) || !$this->conf['force'])
+            && file_exists($outputPath . DIRECTORY_SEPARATOR . $webinstName)
+        ) {
+            throw new Exception("output file already exists, use --force option");
+        }
+
+        $addedFiles = [];
+
         $contentTar = $this->inputPath . DIRECTORY_SEPARATOR . "temp_tar";
         $pharTar = new \PharData($contentTar . ".tar");
         $pharTar->startBuffering();
         if (isset($this->conf["application"]) && is_array($this->conf["application"])) {
             foreach ($this->conf["application"] as $applicationName) {
-                $this->addApplication($pharTar, $applicationName);
+                $addedFiles = array_merge($addedFiles, $this->addApplication($pharTar, $applicationName));
             }
         }
         if (isset($this->conf["includedPath"]) && is_array($this->conf["includedPath"])) {
             foreach ($this->conf["includedPath"] as $includedPath) {
                 $includedFullPath = $this->inputPath . DIRECTORY_SEPARATOR . $includedPath;
                 if (is_dir($includedFullPath)) {
-                    $this->addDirectory($pharTar, $includedFullPath);
+                    $addedFiles = array_merge($addedFiles, $this->addDirectory($pharTar, $includedFullPath));
                 } elseif (is_file($includedFullPath)) {
-                    $this->addFile($pharTar, $includedFullPath);
+                    $addedFile = $this->addFile($pharTar, $includedFullPath);
+                    $addedFiles[$addedFile[0]] = $addedFile[1];
                 } elseif (strpos($includedFullPath, "*") !== false) {
                     if (preg_match("/(.*)\/\*$/", $includedFullPath, $reg)) {
                         $dir = $reg[1];
@@ -94,9 +105,9 @@ class Webinst
                                     $fullEntry = $dir . DIRECTORY_SEPARATOR . $entry;
 
                                     if (is_file($fullEntry)) {
-                                        $this->addFile($pharTar, $fullEntry, $entry);
+                                        $addedFiles = array_merge($addedFiles, $this->addFile($pharTar, $fullEntry, $entry));
                                     } elseif (is_dir($fullEntry)) {
-                                        $this->addDirectory($pharTar, $fullEntry, basename($dir));
+                                        $addedFiles = array_merge($addedFiles, $this->addDirectory($pharTar, $fullEntry, basename($dir)));
                                     }
                                 }
                             }
@@ -105,6 +116,11 @@ class Webinst
                 }
             }
         }
+        if (0 === count($addedFiles)) {
+            throw new EmptyWebinstException("Unable to create an empty webinst. Please add files and check 'application' and 'includedPath' in "
+                . $this->configFile->getConfigFilePath());
+        }
+
         $pharTar->stopBuffering();
         $pharTar->compress(\Phar::GZ);
         unset($pharTar);
@@ -118,7 +134,6 @@ class Webinst
                 $infoXML = str_replace("@$k@", htmlspecialchars($value), $infoXML);
             }
         }
-
 
         $webinstName = $this->getWebinstName();
         $pharTar = new \PharData($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"] . ".tar");
@@ -134,12 +149,12 @@ class Webinst
             $outputPath = $this->inputPath;
         }
         rename($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"] . ".tar.gz",
-            $outputPath . DIRECTORY_SEPARATOR . $webinstName . ".webinst");
+            $outputPath . DIRECTORY_SEPARATOR . $webinstName);
         unlink($contentTar . ".tar.gz");
         unset($pharTar);
         unlink($this->inputPath . DIRECTORY_SEPARATOR . $this->conf["moduleName"] . ".tar");
 
-        return $outputPath . DIRECTORY_SEPARATOR . $webinstName . ".webinst";
+        return $outputPath . DIRECTORY_SEPARATOR . $webinstName;
     }
 
     /**
@@ -148,7 +163,7 @@ class Webinst
     public function getWebinstName()
     {
         return $this->templateEngine->render(
-            "{{moduleName}}-{{version}}-{{release}}", $this->conf
+            $this->conf["file-name"] ?? "{{moduleName}}-{{version}}-{{release}}.webinst", $this->conf
         );
     }
 
@@ -170,7 +185,8 @@ class Webinst
                 new \RecursiveDirectoryIterator(
                     $directory,
                     \FilesystemIterator::SKIP_DOTS
-                )),
+                )
+            ),
             $baseDirectory
         );
         $this->setFlags($pharTar, $addedFiles);

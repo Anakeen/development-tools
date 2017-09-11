@@ -8,6 +8,7 @@ class Template
     protected $templates = array();
     protected $logicalNameRegExp = '/^[A-Za-z][A-Za-z0-9_]*$/';
     protected $moduleNameRegExp = '/^[A-Za-z][A-Za-z0-9_-]*$/';
+    protected $namespaceRegExp = '/^[A-Za-z][A-Za-z0-9_\\\\-]*$/';
 
     public function __construct()
     {
@@ -61,5 +62,9 @@ class Template
     public function checkModuleName($name)
     {
         return preg_match($this->moduleNameRegExp, $name) === 1;
+    }
+    public function checkNamespace($name)
+    {
+        return preg_match($this->namespaceRegExp, $name) === 1;
     }
 }

@@ -17,18 +17,16 @@ class Analyze
         }
     }
 
-    public function extract($filesPath)
+    public function extract(\Iterator $filesPath)
     {
-        $filesPath = array_map(
-            function ($path) {
-                return escapeshellarg($path);
-            },
-            $filesPath
-        );
+        $filesPathArgument = "";
+        foreach($filesPath as $filePath) {
+            $filesPathArgument .= sprintf(" %s", escapeshellarg($filePath));
+        }
         if (!empty($filesPath)) {
             $options = $this->getTextOptions;
             $options .= " -o " . escapeshellarg($this->outputFile) . " ";
-            $options .= join(" ", $filesPath);
+            $options .= $filesPathArgument;
             $this->xgetextWrapper->xgettext($options);
         }
     }
