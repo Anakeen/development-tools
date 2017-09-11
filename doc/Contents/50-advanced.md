@@ -16,10 +16,13 @@ Durant les phases de développement, il est possible de lancer le developer tool
         createInfoXml
         createModule
         createWorkflow
+        csvToPo
         deploy
         extractPo
         generateStub
         generateWebinst
+        importFamily
+        poToCsv
 
 <!-- links -->
 [url_depot]: https://github.com/Anakeen/development-tools
