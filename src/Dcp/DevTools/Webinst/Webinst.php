@@ -163,7 +163,7 @@ class Webinst
     public function getWebinstName()
     {
         return $this->templateEngine->render(
-            $this->conf["file-name"] ?? "{{moduleName}}-{{version}}-{{release}}.webinst", $this->conf
+            isset($this->conf["file-name"])? $this->conf["file-name"]: "{{moduleName}}-{{version}}-{{release}}.webinst", $this->conf
         );
     }
 
@@ -265,7 +265,7 @@ class Webinst
                     }
                 } else {
                     if (is_executable($systemFilePath)) {
-                        echo "marking $pharFilePath as executable \n";
+                        // echo "marking $pharFilePath as executable \n";
                         $pharTar[$pharFilePath]->chmod(
                             $pharTar[$pharFilePath]->getPerms()
                             | $this->WEBINST_EXEC_MASK
