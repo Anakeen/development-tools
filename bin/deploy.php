@@ -65,7 +65,7 @@ try {
     }
     $unexpectedValueErrors = [];
 
-    if (!isset($getopt['sourcePath'])) {
+    if (!isset($getopt['sourcePath']) && !isset($getopt['webinst'])) {
         $unexpectedValueErrors['sourcePath']
             = "You need to set the sourcepath of the application with -s or --sourcePath";
     }

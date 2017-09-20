@@ -78,7 +78,7 @@ try {
     $enclosure = $csvParam["enclosure"];
     $delimiter = $csvParam["delimiter"];
 
-    $structFilePattern = '#/(?P<familyName>[^/]+)__(?:STRUCT|PARAM|CONFIG|WORKFLOW).csv#';
+    $structFilePattern = '#/(?P<familyName>[^/]+)[__|\.](?:STRUCT|PARAM|CONFIG|WORKFLOW).csv#i';
     $family = null;
     $sortedFiles = [];
     if (isset($getopt['file'])) {
@@ -94,7 +94,11 @@ try {
         $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__STRUCT.csv"),
         $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__PARAM.csv"),
         $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__CONFIG.csv"),
-        $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__WORKFLOW.csv")
+        $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*__WORKFLOW.csv"),
+        $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*.struct.csv"),
+        $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*.config.csv"),
+        $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*.workflow.csv"),
+        $globRecursive($inputDir . DIRECTORY_SEPARATOR . "*.param.csv")
     );
 
     array_walk($files, function ($filePath) use ($structFilePattern, &$sortedFiles) {
