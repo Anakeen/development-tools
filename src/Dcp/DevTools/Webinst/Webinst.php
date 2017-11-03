@@ -248,14 +248,19 @@ class Webinst
      */
     protected function setFlags(\PharData $pharTar, $addedFiles)
     {
+        $umask = 0;
+        if (isset($this->conf['umask'])) {
+            $umask  = intval($this->conf['umask'], 0);
+        }
         foreach ($addedFiles as $pharFilePath => $systemFilePath) {
             if (!is_dir($systemFilePath)) {
                 if (isset($this->conf['permission_masks'])) {
                     if (!empty($this->conf['permission_masks'][$pharFilePath])) {
-                        $mask = $this->conf['permission_masks'][$pharFilePath];
+                        $mask = intval($this->conf['permission_masks'][$pharFilePath], 0);
                         $oldPerms = $pharTar[$pharFilePath]->getPerms();
-                        $newPerms = $oldPerms | $mask;
-                        echo sprintf("applying mask %s to %s (%s => %s) \n",
+                        $newPerms = ($oldPerms & ~$umask) | $mask;
+                        echo sprintf("applying umask 0%o with mask 0%o to %s (%s => %s) \n",
+                            $umask,
                             $mask,
                             $pharFilePath,
                             substr(sprintf('%o', $oldPerms), -4),
