@@ -12,7 +12,7 @@ use Dcp\DevTools\Template\ApplicationParameter;
 use Dcp\DevTools\ExtractPo\ApplicationPo;
 use Dcp\DevTools\ExtractPo\JavascriptPo;
 use Dcp\DevTools\ExtractPo\FamilyPo;
-use Dcp\DevTools\ExtractPo\ModulePo;
+use Dcp\DevTools\ExtractPo\IncludePo;
 use Dcp\DevTools\Template\BuildConf;
 
 $getopt = new Getopt(array(
@@ -110,7 +110,7 @@ try {
     $template = new InfoXml();
     $template->render($renderOptions, $outputPath, $force);
 
-    $extractor = new ModulePo($outputPath);
+    $extractor = new IncludePo($outputPath);
     $extractor->extractPo();
 
     $extractor = new ApplicationPo($outputPath);

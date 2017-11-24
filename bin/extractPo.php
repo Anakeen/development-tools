@@ -5,10 +5,11 @@ require_once "initializeAutoloader.php";
 use Ulrichsg\Getopt\Getopt;
 use Ulrichsg\Getopt\Option;
 
-use Dcp\DevTools\ExtractPo\ModulePo;
+use Dcp\DevTools\ExtractPo\IncludePo;
 use Dcp\DevTools\ExtractPo\ApplicationPo;
 use Dcp\DevTools\ExtractPo\JavascriptPo;
 use Dcp\DevTools\ExtractPo\FamilyPo;
+use Dcp\DevTools\ExtractPo\ModulePo;
 
 $getopt = new Getopt(array(
     (new Option('s', 'sourcePath', Getopt::REQUIRED_ARGUMENT))->setDescription('path of the module (needed)')->setValidation(function ($path) {
@@ -18,6 +19,7 @@ $getopt = new Getopt(array(
         }
         return true;
     }),
+    (new Option('o', 'outputPath', Getopt::OPTIONAL_ARGUMENT))->setDescription('path of the locale output') ,
     (new Option('h', 'help', Getopt::NO_ARGUMENT))->setDescription('show the usage message'),
 ));
 
@@ -36,16 +38,19 @@ try {
         exit(42);
     }
 
-    $extractor = new ModulePo($getopt['sourcePath']);
+    $extractor = new ModulePo($getopt['sourcePath'], $getopt['outputPath']);
     $extractor->extractPo();
 
-    $extractor = new ApplicationPo($getopt['sourcePath']);
+    $extractor = new IncludePo($getopt['sourcePath'], $getopt['outputPath']);
     $extractor->extractPo();
 
-    $extractor = new JavascriptPo($getopt['sourcePath']);
+    $extractor = new ApplicationPo($getopt['sourcePath'], $getopt['outputPath']);
     $extractor->extractPo();
 
-    $extractor = new FamilyPo($getopt['sourcePath']);
+    $extractor = new JavascriptPo($getopt['sourcePath'], $getopt['outputPath']);
+    $extractor->extractPo();
+
+    $extractor = new FamilyPo($getopt['sourcePath'], $getopt['outputPath']);
     $extractor->extractPo();
 } catch (UnexpectedValueException $e) {
     echo "Error: " . $e->getMessage() . "\n";
