@@ -9,16 +9,20 @@ class PoGenerator
 {
     protected $conf = null;
     protected $inputPath = null;
+    protected $outputPath = null;
     protected $xgettextWrapper = null;
     protected $gettextpath = null;
 
-    public function __construct($inputPath)
+    public function __construct($inputPath, $outputPath=null)
     {
         if (!is_dir($inputPath)) {
             throw new Exception("The input path doesn't exist ($inputPath)");
         }
         $this->inputPath = $inputPath;
-
+        if (!$outputPath) {
+            $outputPath=$inputPath;
+        }
+        $this->outputPath = $outputPath;
         $config = new ConfigFile($inputPath);
 
         if (is_null($config->get('moduleName'))) {
@@ -29,6 +33,8 @@ class PoGenerator
                 )
             );
         }
+
+
 
         $this->conf = array_replace_recursive($config->getConfig(), [
             'toolsPath' => [
@@ -46,9 +52,9 @@ class PoGenerator
 
     public function updatePo($potFile, $name, $lang, $jsPo = false)
     {
-        $localePath = $this->inputPath . DIRECTORY_SEPARATOR . "locale";
+        $localePath = $this->outputPath . DIRECTORY_SEPARATOR . "locale";
         if (!is_dir($localePath)) {
-            mkdir($this->inputPath . DIRECTORY_SEPARATOR . "locale");
+            mkdir($this->outputPath . DIRECTORY_SEPARATOR . "locale");
         }
         $langPath = $localePath . DIRECTORY_SEPARATOR . $lang . DIRECTORY_SEPARATOR
             . "LC_MESSAGES" . DIRECTORY_SEPARATOR . "src";

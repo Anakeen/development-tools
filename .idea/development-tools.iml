@@ -7,12 +7,16 @@
     <orderEntry type="module-library">
       <library name="PHARS">
         <CLASSES>
+          <root url="phar://$MODULE_DIR$/build/dynacase-devtool.phar/" />
           <root url="phar://$MODULE_DIR$/box.phar/" />
           <root url="phar://$MODULE_DIR$/composer.phar/" />
+          <root url="phar://$MODULE_DIR$/dynacase-devtool.phar/" />
         </CLASSES>
         <SOURCES>
+          <root url="phar://$MODULE_DIR$/build/dynacase-devtool.phar/" />
           <root url="phar://$MODULE_DIR$/box.phar/" />
           <root url="phar://$MODULE_DIR$/composer.phar/" />
+          <root url="phar://$MODULE_DIR$/dynacase-devtool.phar/" />
         </SOURCES>
       </library>
     </orderEntry>
